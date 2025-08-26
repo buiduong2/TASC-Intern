@@ -156,6 +156,4 @@ System.out.println(b.equals(a));//true
 
 -   KHi khao báo các varaible ở cấp độ feild của tất cả các Object sẽ luôn là `null` VD `String, Integer, Double - Wrapper, int[], String[] - Array, Person - custome Object`
 
-## 2. String
 
--
