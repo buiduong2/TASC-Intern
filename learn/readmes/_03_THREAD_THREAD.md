@@ -15,20 +15,20 @@
 
 ## Thread là gì
 
-
 -   `Thread` luồng. là một `đơn vị nhỏ nhất của CPU` có thể được lên lịch để thực thi
 -   Trong một `process`. Có thể có nhiều `Thread` cùng chạy song song. Chia sẻ cùng một bộ nhớ và tài nguyên bên trong Process đó
 
 -   Trong Java
+
     -   Thread là 1 Luồng `thực thi độc lập` bên trong chương trình
     -   Khi một chương trình Java chạy nó sẽ tạo ra ít nhất 1 thread là 1 ThraedMain để thực thi phương thức `main`
     -   Ta có thể tạo thêm nhiều thread khác để thực hiện công việc song song (như xử lý dữ liệu, đọc file, giao tiếp mạng)
     -   là một tiến trình con `(sub-process)
 
-- So sánh với Process
-    - Các luồng chia sẻ không gian địa chỉ ô nhớ giống nhau
-    - Luồng là nhẹ
-    - Sự giao tiếp giữa các luồng có chi phí thấp
+-   So sánh với Process
+    -   Các luồng chia sẻ không gian địa chỉ ô nhớ giống nhau
+    -   Luồng là nhẹ
+    -   Sự giao tiếp giữa các luồng có chi phí thấp
 
 ```java
 public class MyThreadDemo {
@@ -72,23 +72,23 @@ public class MyThreadDemo {
 
 ## Có bao nhiêu cách để tạo 1 thread trong java
 
-- Có khoảng 2 cách. một là tạo 1 `class extends từ Thread`. hoặc `implement một interface Runnable`
+-   Có khoảng 2 cách. một là tạo 1 `class extends từ Thread`. hoặc `implement một interface Runnable`
 
-- **Tạo luồng bằng cách extends từ lớp Thread**
+-   **Tạo luồng bằng cách extends từ lớp Thread**
 
-- Khai báo một class extends Thread
-- Override lại method run: những gì trong method này sẽ được thực thi khi luồng bắt đầu chạy. Sau khi luồng chạy xong tất cả các câu lệnh trong method run thì luồng cũng tự hủy
-- Tạo 1 instance của class ta vừa khai báo
-- gọi method `start()` để bắt đầu thực thi luồng 
+-   Khai báo một class extends Thread
+-   Override lại method run: những gì trong method này sẽ được thực thi khi luồng bắt đầu chạy. Sau khi luồng chạy xong tất cả các câu lệnh trong method run thì luồng cũng tự hủy
+-   Tạo 1 instance của class ta vừa khai báo
+-   gọi method `start()` để bắt đầu thực thi luồng
 
 ```java
 package com.gpcoder.simple;
- 
+
 public class TheadSimple extends Thread {
     public void run() {
         System.out.println("thread is running...");
     }
- 
+
     public static void main(String args[]) {
         TheadSimple t1 = new TheadSimple();
         t1.start();
@@ -96,20 +96,20 @@ public class TheadSimple extends Thread {
 }
 ```
 
-- Method `start()` là một method đặc biệt trong java mà được xây dựng sẵn ở trong class `Thread`. Method này sẽ cáp phát tài nguyên cho thread mới rồi chạy method `run()` trong luồng mới đó
+-   Method `start()` là một method đặc biệt trong java mà được xây dựng sẵn ở trong class `Thread`. Method này sẽ cáp phát tài nguyên cho thread mới rồi chạy method `run()` trong luồng mới đó
 
-- **Tạo luồng bằng cách implement từ interface Runnable**
-- 1. Khai báo 1 lớp implement từ interface Runnable 
-- 2. implmenet method `run()`. Nhưng gì trong `run()` sẽ được thực thi ở một luồng mới độc lập. Chạy xong run() này thì luồng cũng tự hủy
-- Tạo 1 instance của class vừa khai báo 
-- Tạo một instance của Thread bằng constructor `Thread(Runnable target)`
+-   **Tạo luồng bằng cách implement từ interface Runnable**
+-   1. Khai báo 1 lớp implement từ interface Runnable
+-   2. implmenet method `run()`. Nhưng gì trong `run()` sẽ được thực thi ở một luồng mới độc lập. Chạy xong run() này thì luồng cũng tự hủy
+-   Tạo 1 instance của class vừa khai báo
+-   Tạo một instance của Thread bằng constructor `Thread(Runnable target)`
 
 ```java
 public class RunnableSimple implements Runnable {
     public void run() {
         System.out.println("thread is running...");
     }
- 
+
     public static void main(String args[]) {
         RunnableSimple runable = new RunnableSimple();
         Thread t1 = new Thread(runable);
@@ -118,27 +118,82 @@ public class RunnableSimple implements Runnable {
 }
 ```
 
-- **Cách hay được sử dụng nhất**
+-   **Cách hay được sử dụng nhất**
 
-- sử dụng `interface Runnable`. Bởi vì nó `ko yêu cầu extends từ lớp Thread`. Trong trường hợp ứng dụng thiết kế yêu cầu đa kế thừa. Chỉ có Interface mới giải quyết được vấn đề
+-   sử dụng `interface Runnable`. Bởi vì nó `ko yêu cầu extends từ lớp Thread`. Trong trường hợp ứng dụng thiết kế yêu cầu đa kế thừa. Chỉ có Interface mới giải quyết được vấn đề
 
-- **ThreadPool**
+-   **ThreadPool**
 
-##  - Thế nào là multi thread ? Sử dụng multi thread mang lại ưu nhược điểm gì ?
+-   **CompleteFuture**
 
-- **Định nghĩa**: 
-    - là một tiến trình (Process) thực hiện nhiều luồng đồng thời. Một ứng dụng Java ngoài luồng chính có thể có các luồng khác thực thi đồng thời làm ứng dụng chạy nhanh và hiệu quả hơn 
+## - Thế nào là multi thread ? Sử dụng multi thread mang lại ưu nhược điểm gì ?
 
-- **Ưu điểm**
-    - Nó không chặn người sử dụng vì các luồng là độc lập và ta có thể thực hiện nhiều công việc cùng lúc
-        - Như luồng giao diện, và gửi kết quả
-    - Mỗi luồng có thể dùng chung và chia sẻ nguồn tài nguyên trong quá trình chạy, nhưng có thể thực hiện một cách độc lập
-    - Exception có Throw thì ko ảnh hưởng đến Thread khác
+-   **Định nghĩa**:
 
-- **Nhược điểm**
-    - Càng nhiều luồng thì xử lý càng phức tạp
-    - Xử lý vấn đề tranh chấp bộ nhớ, đồng bộ dữ liệu phức tạp
-    - Cần tránh các luồng chết (deadlock) , luồng chạy mà không làm ji cả trong ứng dụng
+    -   là một tiến trình (Process) thực hiện nhiều luồng đồng thời. Một ứng dụng Java ngoài luồng chính có thể có các luồng khác thực thi đồng thời làm ứng dụng chạy nhanh và hiệu quả hơn
+
+-   **Ưu điểm**
+
+    -   Nó không chặn người sử dụng vì các luồng là độc lập và ta có thể thực hiện nhiều công việc cùng lúc
+        -   Như luồng giao diện, và gửi kết quả
+    -   Mỗi luồng có thể dùng chung và chia sẻ nguồn tài nguyên trong quá trình chạy, nhưng có thể thực hiện một cách độc lập
+    -   Exception có Throw thì ko ảnh hưởng đến Thread khác
+
+-   **Nhược điểm**
+    -   Càng nhiều luồng thì xử lý càng phức tạp
+    -   Xử lý vấn đề tranh chấp bộ nhớ, đồng bộ dữ liệu phức tạp
+    -   Cần tránh các luồng chết (deadlock) , luồng chạy mà không làm ji cả trong ứng dụng
+
+## - Làm thế nào để biết được 1 thread, multi thread đã hoàn thành hay chưa?
+
+-   **Với việc tạo Thread thông thường**
+-   `Thread t = new Thread(...);`
+-   Ta có thể sử dụng method `t.isAlive()`
+
+-   `join()`
+
+-   Ta có thể dùng `join()` (ưu tiên nhất)
+
+-   **Với ExecutorService (đa luồng theo Pool)**
+
+-   Chạy nhiều task với `ExecutorService`
+
+-   Sử dụng `Future`
+
+    -   `future.isDone()` giống với `Thread.isAlive()`
+    -   `future.get()` sẽ đợi đến khi thread chạy xong và return một giá trị
+
+-   Sử dụng `shutDown()`
+
+    -   Dừng hoạt đồng Thread pool khi không còn Thread nào alive
+
+-   **Sử dụng CompleteFuture (async kiểu mới)**
+
+-   Sử dụng `then...()` để có thể truyền vào một Lamba sẽ được chạy khi mà cái Future kia kết thúc
+-   Hoặc sử dụng `Join()` hoặc `get()` vì return là một kế thừa của `Future` giống của ObjectPool
+
+## - Có giới hạn việc tạo ra bao nhiêu thread trong 1 ứng dụng java hay không?
+
+-   Không . trong Java `Không giới hạn cứng chính xác về số lượng Thread` mà chúng ta có thể tạo ra trong một ứng dụng.
+-   Nhưng `vẫn tồn tại các giới hạn thực tế` phụ thuộc vào
+
+-   **Giới hạn từ hiệu điều hành và JVM**
+
+-   Mỗi `Thread` trong java thực chất là một `OSThread`
+-   Mỗi Thread cần một `ThreadStack` (ngăn xếp riêng), dung lượng mặc định thấp 512Kb - 1Mb. nếu chúng ta tạo quá nhiều Thread -> Tốn RAM -> có thể gặp lỗi `OutOfMemoryError: unnable to create new native Thread` (Ta có thể cấu hình lại tăng hoặc giảm -> Số lượng Thread sẽ khác)
+
+-   **Giới hạn từ tài nguyên máy**
+
+-   Tổng số Thread bị giới hạn bởi
+
+    -   Bộ nhớ RAM (stack của mỗi Thread)
+    -   Giới hạn OS (các hệ điều hành cũng giới hạn số lượng Thread tối đa)
+    -   CPU: quá nhiều thread -> giảm hiêu năng
+
+-   **Thực tế**
+-   Hiếm khi có ứng dụng nào tạo quá nhiều Thread (hàng chục ngìn)
+-   HỌ sẽ cố gắng tái sử dụng bằng `ThreadPool`
+
 ## câu hỏi
 
 -   Vậy Thread so với Java là tương đương với process so với hệ điều hành à

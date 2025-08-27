@@ -1,10 +1,17 @@
 package com.thread._02_thread;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class _01_CreateThread {
 
     public static void main(String[] args) {
-        // runExtendedThread();
-        runThreadWithRunnable();
+        // createThreadWithExtends();
+        // createThreadWithRunnable();
+        // createThreadWithThreadPool();
+        createThreadWithCompleteFuture();
     }
 
     public static void runTask(String threadName) {
@@ -46,7 +53,7 @@ public class _01_CreateThread {
     /**
      * Để create Thread từ 2 luồng khác nhau
      */
-    public static void runExtendedThread() {
+    public static void createThreadWithExtends() {
         Thread thread1 = new ThreadExample("Thread-1");
         Thread thread2 = new ThreadExample("Thread-2");
 
@@ -100,7 +107,7 @@ public class _01_CreateThread {
 
     }
 
-    public static void runThreadWithRunnable() {
+    public static void createThreadWithRunnable() {
         Thread t1 = new Thread(new ExampleThread("Thread-1"));// Tạo Thread bằng contrucstor gửi vào một Example THread
         Thread t2 = new Thread(new ExampleThread("Thread-2"));
 
@@ -128,4 +135,58 @@ public class _01_CreateThread {
         // Thread: Thread-1 , END
         // Thread: Thread-2 , END
     }
+
+    /*
+     * ThreadPool : Theo như tư tưởng sẽ tái sử dụng các Thread. để tránh mất công
+     * cấp phát tài nguyên và tạo mới
+     */
+    public static void createThreadWithThreadPool() {
+        // Một biến thể của ThreadPool với số lượng Thread được cố định
+        ExecutorService executor = Executors.newFixedThreadPool(2); // tối đa 2 Thread hoạt động 1 lúc ngoài Main
+
+        executor.execute(() -> runTask("A"));
+        executor.execute(() -> runTask("B"));
+        executor.execute(() -> runTask("C"));
+
+        // Cho đến khi tất cả các task đều hoàn thành thì sẽ tắt threadpool đi
+        executor.shutdown();
+
+    }
+
+    public static void createThreadWithCompleteFuture() {
+        // Sử dụng Async và lấy giá trị từ thread đó trả về
+        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+            runTask("RETURN");
+            return "Hello CompletableFuture";
+        });
+
+        // Sử dụng như một Thread với voic trả về
+        CompletableFuture<Void> futureVoid = CompletableFuture.runAsync(() -> runTask("VOID"));
+        String result = null;
+        
+        try {
+            result = future.get();
+            futureVoid.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Tất cả kết thúc KQ: " + result);
+
+        // Chúng chạy song song
+        // Thread: RETURN , 0
+        // Thread: VOID , 0
+        // Thread: VOID , 1
+        // Thread: RETURN , 1
+        // Thread: RETURN , 2
+        // Thread: VOID , 2
+        // Thread: VOID , 3
+        // Thread: RETURN , 3
+        // Thread: VOID , 4
+        // Thread: RETURN , 4
+        // Thread: RETURN , END
+        // Thread: VOID , END
+        // T?t c? k?t thúc KQ: Hello CompletableFuture
+    }
+
 }

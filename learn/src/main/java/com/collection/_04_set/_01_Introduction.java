@@ -7,6 +7,7 @@ public class _01_Introduction {
     public static void main(String[] args) {
         // setContainUnique();
         setUseEqualAndHashCode();
+        setCheckExistsQuick();
     }
 
     /**
@@ -40,9 +41,9 @@ public class _01_Introduction {
         Example example4 = new Example(2, 1); // Khác equal() == false
         set.add(example);
         set.add(example2);
-        
+
         System.out.println(set.contains(example3)); // true - Thực sự đã cho rằng example3 == example
-        
+
         set.add(example3);
         set.add(example4);
 
@@ -110,6 +111,20 @@ public class _01_Introduction {
         public String toString() {
             return "Example [v=" + value + ", i=" + index + "]";
         }
+
+    }
+
+    /**
+     * Set có thể kiểm tra sự tồn tại nhanh O(1)
+     */
+    public static void setCheckExistsQuick() {
+        Set<Integer> set = new HashSet<>();
+        set.add(100);
+        set.add(1);
+        set.add(2);
+
+        System.out.println(set.contains(100));// true
+        System.out.println(set.contains(-1));// false
 
     }
 

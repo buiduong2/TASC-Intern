@@ -12,6 +12,7 @@
 -   Key là duy nhất
 -   Value có thể trùng
 -   Không có các chỉ số (index)
+-   Map cũng giống set làm việc với equal và hashCode
 -   Thao tác cơ bản
 
     -   Thêm/ xóa/ cập nhất các cặp key-value

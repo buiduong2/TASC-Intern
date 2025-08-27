@@ -4,12 +4,6 @@ public class _01_ThrowAndThrows {
     public static void main(String[] args) {
 
         try {
-            
-        } catch (Exception e) {
-            // TODO: handle exception
-        }
-
-        try {
             // Ta Nơi gọi method có throws thì ta phải có nghĩa vụ try-catch nó. Hoặc throws
             // nó lên một method tiếp theo
             useThrowsCheckedException();

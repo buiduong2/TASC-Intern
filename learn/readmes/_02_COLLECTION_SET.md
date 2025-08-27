@@ -18,7 +18,7 @@
 
 -   Có thể duy trì thứ tự
     -   `HashSet` -> không duy trì thứ tự
-    -   `LinkedHashSet` di trì thứ tự giảm dần
+    -   `LinkedHashSet` di trì thứ tự thêm vào
     -   `TreeSet`-> duy trì thứ tự tự nhiên . hoặc theo `Comparator`
     -
 
