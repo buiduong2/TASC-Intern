@@ -1,0 +1,125 @@
+[2025-08-26 03:58:23] [WARN] [PaymentService] - Token expired, requesting refresh
+[2025-08-26 03:58:24] [INFO] [UserService] - Password reset requested
+[2025-08-26 03:58:25] [DEBUG] [PaymentService] - Database connection established
+[2025-08-26 03:58:26] [DEBUG] [AuthService] - Token expired, requesting refresh
+[2025-08-26 03:58:27] [DEBUG] [OrderService] - Token expired, requesting refresh
+[2025-08-26 03:58:28] [INFO] [PaymentService] - Session expired
+[2025-08-26 03:58:29] [INFO] [PaymentService] - Database connection established
+[2025-08-26 03:58:30] [INFO] [UserService] - Invalid credentials provided
+[2025-08-26 03:58:31] [DEBUG] [PaymentService] - Password reset requested
+[2025-08-26 03:58:32] [DEBUG] [AuthService] - JWT token validated
+[2025-08-26 03:58:33] [ERROR] [UserService] - Session expired
+[2025-08-26 03:58:34] [INFO] [AuthService] - Cache cleared successfully
+[2025-08-26 03:58:35] [WARN] [OrderService] - User registration completed
+[2025-08-26 03:58:36] [INFO] [UserService] - Session expired
+[2025-08-26 03:58:37] [WARN] [AuthService] - User logged in successfully
+[2025-08-26 03:58:38] [DEBUG] [OrderService] - Invalid credentials provided
+[2025-08-26 03:58:39] [DEBUG] [AuthService] - Password reset requested
+[2025-08-26 03:58:40] [WARN] [AuthService] - Order failed due to timeout
+[2025-08-26 03:58:41] [INFO] [OrderService] - Service started on port 8080
+[2025-08-26 03:58:42] [INFO] [AuthService] - Database connection established
+[2025-08-26 03:58:43] [ERROR] [UserService] - Session expired
+[2025-08-26 03:58:44] [INFO] [OrderService] - User logged in successfully
+[2025-08-26 03:58:45] [ERROR] [OrderService] - Cache cleared successfully
+[2025-08-26 03:58:46] [DEBUG] [AuthService] - User logged in successfully
+[2025-08-26 03:58:47] [WARN] [AuthService] - JWT token validated
+[2025-08-26 03:58:48] [DEBUG] [UserService] - Password reset requested
+[2025-08-26 03:58:49] [INFO] [OrderService] - Invalid credentials provided
+[2025-08-26 03:58:50] [DEBUG] [UserService] - Token expired, requesting refresh
+[2025-08-26 03:58:51] [INFO] [AuthService] - Service started on port 8080
+[2025-08-26 03:58:52] [ERROR] [AuthService] - JWT token validated
+[2025-08-26 03:58:53] [INFO] [UserService] - Invalid credentials provided
+[2025-08-26 03:58:54] [DEBUG] [PaymentService] - JWT token validated
+[2025-08-26 03:58:55] [DEBUG] [AuthService] - Session expired
+[2025-08-26 03:58:56] [ERROR] [OrderService] - Password reset requested
+[2025-08-26 03:58:57] [DEBUG] [UserService] - Token expired, requesting refresh
+[2025-08-26 03:58:58] [WARN] [UserService] - Invalid credentials provided
+[2025-08-26 03:58:59] [ERROR] [OrderService] - Order failed due to timeout
+[2025-08-26 03:59:00] [INFO] [UserService] - User logged in successfully
+[2025-08-26 03:59:01] [ERROR] [PaymentService] - JWT token validated
+[2025-08-26 03:59:02] [INFO] [OrderService] - Payment failed due to insufficient funds
+[2025-08-26 03:59:03] [INFO] [UserService] - Password reset requested
+[2025-08-26 03:59:04] [INFO] [OrderService] - User logged in successfully
+[2025-08-26 03:59:05] [INFO] [AuthService] - JWT token validated
+[2025-08-26 03:59:06] [DEBUG] [UserService] - Order failed due to timeout
+[2025-08-26 03:59:07] [DEBUG] [AuthService] - User profile updated
+[2025-08-26 03:59:08] [INFO] [OrderService] - Token expired, requesting refresh
+[2025-08-26 03:59:09] [ERROR] [AuthService] - User logged in successfully
+[2025-08-26 03:59:10] [DEBUG] [PaymentService] - Session expired
+[2025-08-26 03:59:11] [INFO] [PaymentService] - Order created successfully
+[2025-08-26 03:59:12] [DEBUG] [AuthService] - Payment failed due to insufficient funds
+[2025-08-26 03:59:13] [WARN] [OrderService] - Service started on port 8080
+[2025-08-26 03:59:14] [INFO] [AuthService] - User profile updated
+[2025-08-26 03:59:15] [INFO] [UserService] - Service started on port 8080
+[2025-08-26 03:59:16] [ERROR] [OrderService] - Token expired, requesting refresh
+[2025-08-26 03:59:17] [ERROR] [PaymentService] - Order created successfully
+[2025-08-26 03:59:18] [DEBUG] [AuthService] - JWT token validated
+[2025-08-26 03:59:19] [WARN] [PaymentService] - User profile updated
+[2025-08-26 03:59:20] [WARN] [UserService] - User registration completed
+[2025-08-26 03:59:21] [ERROR] [AuthService] - User logged in successfully
+[2025-08-26 03:59:22] [DEBUG] [UserService] - Invalid credentials provided
+[2025-08-26 03:59:23] [WARN] [UserService] - JWT token validated
+[2025-08-26 03:59:24] [WARN] [UserService] - User registration completed
+[2025-08-26 03:59:25] [INFO] [AuthService] - Payment failed due to insufficient funds
+[2025-08-26 03:59:26] [DEBUG] [AuthService] - JWT token validated
+[2025-08-26 03:59:27] [DEBUG] [AuthService] - JWT token validated
+[2025-08-26 03:59:28] [INFO] [UserService] - User logged in successfully
+[2025-08-26 03:59:29] [ERROR] [PaymentService] - Service started on port 8080
+[2025-08-26 03:59:30] [INFO] [PaymentService] - Token expired, requesting refresh
+[2025-08-26 03:59:31] [WARN] [PaymentService] - Token expired, requesting refresh
+[2025-08-26 03:59:32] [INFO] [OrderService] - Database connection established
+[2025-08-26 03:59:33] [INFO] [OrderService] - Password reset requested
+[2025-08-26 03:59:34] [ERROR] [OrderService] - Service started on port 8080
+[2025-08-26 03:59:35] [ERROR] [UserService] - Order failed due to timeout
+[2025-08-26 03:59:36] [WARN] [OrderService] - Invalid credentials provided
+[2025-08-26 03:59:37] [WARN] [OrderService] - Order failed due to timeout
+[2025-08-26 03:59:38] [INFO] [PaymentService] - Invalid credentials provided
+[2025-08-26 03:59:39] [INFO] [AuthService] - User logged in successfully
+[2025-08-26 03:59:40] [WARN] [UserService] - Token expired, requesting refresh
+[2025-08-26 03:59:41] [INFO] [OrderService] - Database connection established
+[2025-08-26 03:59:42] [DEBUG] [PaymentService] - Order failed due to timeout
+[2025-08-26 03:59:43] [INFO] [PaymentService] - Invalid credentials provided
+[2025-08-26 03:59:44] [ERROR] [AuthService] - User registration completed
+[2025-08-26 03:59:45] [INFO] [OrderService] - Password reset requested
+[2025-08-26 03:59:46] [INFO] [OrderService] - Service started on port 8080
+[2025-08-26 03:59:47] [ERROR] [AuthService] - User profile updated
+[2025-08-26 03:59:48] [ERROR] [AuthService] - User registration completed
+[2025-08-26 03:59:49] [INFO] [PaymentService] - Session expired
+[2025-08-26 03:59:50] [WARN] [PaymentService] - User logged in successfully
+[2025-08-26 03:59:51] [WARN] [PaymentService] - User profile updated
+[2025-08-26 03:59:52] [DEBUG] [OrderService] - User logged in successfully
+[2025-08-26 03:59:53] [ERROR] [AuthService] - Payment failed due to insufficient funds
+[2025-08-26 03:59:54] [INFO] [AuthService] - Order created successfully
+[2025-08-26 03:59:55] [DEBUG] [AuthService] - Order created successfully
+[2025-08-26 03:59:56] [WARN] [OrderService] - Database connection established
+[2025-08-26 03:59:57] [DEBUG] [AuthService] - User profile updated
+[2025-08-26 03:59:58] [DEBUG] [AuthService] - Order failed due to timeout
+[2025-08-26 03:59:59] [WARN] [PaymentService] - User logged in successfully
+[2025-08-26 04:00:00] [WARN] [UserService] - Order failed due to timeout
+[2025-08-26 04:00:01] [ERROR] [UserService] - Order failed due to timeout
+[2025-08-26 04:00:02] [INFO] [AuthService] - Invalid credentials provided
+[2025-08-26 04:00:03] [DEBUG] [OrderService] - Order created successfully
+[2025-08-26 04:00:04] [INFO] [UserService] - Token expired, requesting refresh
+[2025-08-26 04:00:05] [INFO] [UserService] - Password reset requested
+[2025-08-26 04:00:06] [WARN] [AuthService] - Invalid credentials provided
+[2025-08-26 04:00:07] [DEBUG] [PaymentService] - User profile updated
+[2025-08-26 04:00:08] [ERROR] [PaymentService] - Order failed due to timeout
+[2025-08-26 04:00:09] [WARN] [AuthService] - Cache cleared successfully
+[2025-08-26 04:00:10] [DEBUG] [OrderService] - User logged in successfully
+[2025-08-26 04:00:11] [ERROR] [PaymentService] - Cache cleared successfully
+[2025-08-26 04:00:12] [ERROR] [PaymentService] - Password reset requested
+[2025-08-26 04:00:13] [ERROR] [AuthService] - JWT token validated
+[2025-08-26 04:00:14] [INFO] [PaymentService] - User profile updated
+[2025-08-26 04:00:15] [WARN] [OrderService] - Order failed due to timeout
+[2025-08-26 04:00:16] [ERROR] [AuthService] - User profile updated
+[2025-08-26 04:00:17] [INFO] [UserService] - User registration completed
+[2025-08-26 04:00:18] [INFO] [OrderService] - User registration completed
+[2025-08-26 04:00:19] [INFO] [PaymentService] - User registration completed
+[2025-08-26 04:00:20] [DEBUG] [AuthService] - Database connection established
+[2025-08-26 04:00:21] [WARN] [OrderService] - Payment failed due to insufficient funds
+[2025-08-26 04:00:22] [ERROR] [PaymentService] - Token expired, requesting refresh
+[2025-08-26 04:00:23] [DEBUG] [PaymentService] - Database connection established
+[2025-08-26 04:00:24] [ERROR] [PaymentService] - Token expired, requesting refresh
+[2025-08-26 04:00:25] [DEBUG] [UserService] - Service started on port 8080
+[2025-08-26 04:00:26] [WARN] [OrderService] - Database connection established
+[2025-08-26 04:00:27] [ERROR] [AuthService] - Session expired
