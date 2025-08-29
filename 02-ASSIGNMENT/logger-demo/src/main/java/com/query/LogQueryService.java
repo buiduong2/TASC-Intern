@@ -37,9 +37,6 @@ public class LogQueryService {
         Predicate<String> messagePredicate = line -> isMessageMatch(line, lowerCaseKeyword);
 
         logFileReader.readAndWriteMatchTrunk(logMetaTrunks, messagePredicate, "_result");
-
-        
-
     }
 
     private boolean isMessageMatch(String line, Optional<String> keywordOpt) {
@@ -51,6 +48,9 @@ public class LogQueryService {
 
     private boolean isMessageMatch(String line, String keywordLowerCase) {
         String msg = LogParsers.parseMessage(line);
+        if (msg == null) {
+            return false;
+        }
         return msg.toLowerCase().contains(keywordLowerCase);
     }
 }

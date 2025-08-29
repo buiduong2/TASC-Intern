@@ -314,3 +314,33 @@ public class Test {
 -   `super.fieldName()` tham chiếu đến íntance của class cha (nếu bị shaddowed - có tên field giống nhau ở cả class cha và con)
 -   Truy cập đến thành phần của class cha
 -   Phải là lệnh đầu tiên nếu gọi `super()`
+
+## Shadowing
+
+-   Khi mà con và cha có cùng các thuộc tính thì có điều gì xảy ra
+
+-   Kiểu trả về phải là giobnsg nhau
+
+## tính trừu tượng là gì
+
+-   Logic bên trong triển khai
+
+## Abstract & Interface
+
+-   interface cho đa kế thừa
+
+-   Abstract class có các thuộc tính và phương thức chung
+
+-   Inteface: chỉ cần có những phương thức chung
+
+-   Abstract là một class Interface là interface
+
+-   Class có thuộc tính và phương thức.
+-   Interface phá vỡ tính chất đơn kế thừa
+-   Nếu 2 interface hoặc 1 abtract và một interface
+
+## Nếu cùng tên một function của abstract và interface
+
+- Nếu 2 tên hàm trùng nhau trùng số lượng và kiểu tham số.  => Thì chỉ càn extends 1 lần
+- Nếu trùng tên hàm cùng kiểu tham số => khác kiểu trả về
+- 

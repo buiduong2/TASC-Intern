@@ -85,3 +85,19 @@ public void readFile() {
 -   **Kế thừa từ Exception (Checked Exception)**
 
 -   **Kế thừa từ RuntimeException (Unchecked Exception)**
+
+## Try-with-resource 
+
+- File file là Synchornize
+- Một thời điểm chỉ có 1 người được accesss vào file.
+- Nên phải đống thì mới cho phép người khác mở vòa
+
+- Try-catch resource - > tự động quản lý 
+
+- Finally dù lỗi hay không lỗi đều đi qua exception
+
+- Làm việc với Connecntion
+
+- Phải đống theo thứ tự ngược lại với thứ tự mở ra
+
+- 

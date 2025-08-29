@@ -14,7 +14,7 @@ import com.reader.ResultMerger;
 public class Main {
     public static void main(String[] args) {
 
-        int trunkSize = 1;
+        int trunkSize = 5000;
         int nThreads = 30;
         String fileName = "log.txt";
 

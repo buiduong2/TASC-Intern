@@ -32,7 +32,6 @@ public class LogQuery {
         }
 
         if (condition.getService() != null) {
-            System.out.println("RETAIN");
             result.retainAll(cache.getByService(condition.getService()));
         }
 

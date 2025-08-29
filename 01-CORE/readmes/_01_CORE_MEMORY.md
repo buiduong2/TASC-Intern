@@ -14,6 +14,12 @@
 
 -   Giải phóng: Tự động khi ra khỏi scope hoặc khi chương trình kết thúc.
 
+-   tính toán chỗ cho bộ nhớ chứ chưa cấp phát
+
+-   Nhìn vào kiểu dữ liệu để cấp phát chẳng hạn, array
+
+-   Không thể thay đổi bộ nhớ nữa vì có tính toán rồi
+
 ```java
 void myMethod() {
     int x = 10; // Biến x được cấp phát trên stack

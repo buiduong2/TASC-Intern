@@ -59,14 +59,13 @@ public class LogIndexer {
 
         Helpers.promiseAll(futures);
         System.out.println("AFTER OFFSET");
-        System.out.println(trunkFiles.getLast());
-        return Helpers.normalizeTrunks(trunkFiles);
 
+        return Helpers.normalizeTrunks(trunkFiles);
     }
 
     public void index() {
-
         List<List<Long>> pageTrunks = getOffsets();
+
         System.out.println("BEGIN INDEX");
         List<Future<Integer>> futures = new ArrayList<>();
         List<List<LogMeta>> logMetas = new ArrayList<>();
