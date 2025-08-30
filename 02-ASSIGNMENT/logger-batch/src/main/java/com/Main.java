@@ -26,11 +26,11 @@ public class Main {
     public static void main(String[] args) throws IOException {
         long start = System.nanoTime();
         Query query = new Query();
-        // query.setService("PaymentService");
+        query.setService("PaymentService");
         query.setLevel("DEBUG");
         // query.setKeyword("expired");
-        // query.setAfter("2025-08-26 03:58:54");
-        // query.setBefore("2025-08-26 03:59:42");
+        query.setAfter("2025-08-26 03:58:25");
+        query.setBefore("2025-08-31 22:51:42");
 
         Stream<String> lines = readFromFile(fileName);
         Predicate<Log> lastPredicate = buildPredicate(query);
@@ -53,6 +53,8 @@ public class Main {
 
         long end = System.nanoTime();
         System.out.println("Executed in " + (end - start) / 1_000_000 + " ms");
+
+        // 500ms
 
     }
 

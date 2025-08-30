@@ -13,8 +13,8 @@ import com.reader.ResultMerger;
 
 public class Main {
     public static void main(String[] args) {
-
-        int trunkSize = 5000;
+        long start = System.nanoTime();
+        int trunkSize = 50;
         int nThreads = 30;
         String fileName = "log.txt";
 
@@ -33,10 +33,11 @@ public class Main {
 
         // Prepare
         QueryCondition condition = new QueryCondition();
+
         condition.setAfter("2025-08-26 03:58:25");
-        condition.setBefore("2025-08-26 03:58:26");
+        condition.setBefore("2025-08-31 22:51:42");
         condition.setLevel("DEBUG");
-        condition.setService("AuthService");
+        condition.setService("PaymentService");
         condition.setKeyword("expired");
 
         // Execute
@@ -44,5 +45,11 @@ public class Main {
 
         executorService.shutdown();
 
+        long end = System.nanoTime();
+        System.out.println("Executed in " + (end - start) / 1_000_000 + " ms");
+
+        /**
+         * Không hoạt động bị treo với file lớn
+         */
     }
 }
