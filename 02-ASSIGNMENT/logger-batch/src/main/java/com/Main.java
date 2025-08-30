@@ -26,11 +26,11 @@ public class Main {
     public static void main(String[] args) throws IOException {
         long start = System.nanoTime();
         Query query = new Query();
-        query.setService("PaymentService");
+        // query.setService("PaymentService");
         query.setLevel("DEBUG");
-        query.setKeyword("expired");
-        query.setAfter("2025-08-26 03:58:54");
-        query.setBefore("2025-08-26 03:59:42");
+        // query.setKeyword("expired");
+        // query.setAfter("2025-08-26 03:58:54");
+        // query.setBefore("2025-08-26 03:59:42");
 
         Stream<String> lines = readFromFile(fileName);
         Predicate<Log> lastPredicate = buildPredicate(query);
@@ -99,22 +99,13 @@ public class Main {
         Long afterLong = hasRange ? parseTimestampLong(query.getAfter()) : null;
         Long beforeLong = hasRange ? parseTimestampLong(query.getBefore()) : null;
 
-        Predicate<Log> servicePredicate = (log) -> {
-            return query.getService().equals(log.getService());
-        };
-
-        Predicate<Log> levelPredicate = (log) -> {
-            return query.getLevel().equals(log.getLevel());
-        };
-
-        Predicate<Log> timePredicate = (log) -> {
+        Predicate<Log> servicePredicate = log -> query.getService().equals(log.getService());
+        Predicate<Log> levelPredicate = log -> query.getLevel().equals(log.getLevel());
+        Predicate<Log> timePredicate = log -> {
             long currentTimeLong = parseTimestampLong(log.getTimestamp());
             return currentTimeLong >= afterLong && currentTimeLong <= beforeLong;
         };
-
-        Predicate<Log> keywordPredicate = (log) -> {
-            return log.getMessage().toLowerCase().contains(keyWordLowerCase);
-        };
+        Predicate<Log> keywordPredicate = log -> log.getMessage().toLowerCase().contains(keyWordLowerCase);
 
         Predicate<Log> combinePredicate = (objs) -> true;
 
