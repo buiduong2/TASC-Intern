@@ -1,8 +1,10 @@
 package com.collection._05_map;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -43,8 +45,10 @@ public class _03_Implementations {
         map.put('A', 1);
         map.put('D', 4);
 
-        System.out.println(map.firstEntry()); // B=2
-        System.out.println(map.lastEntry()); // D=4
+        List<Map.Entry<Character, Integer>> entries = new ArrayList<>(map.entrySet());
+
+        System.out.println(entries.get(0)); // B=2
+        System.out.println(entries.get(entries.size() - 1)); // D=4
 
         System.out.println(map.entrySet()); // [B=2, C=3, A=1, D=4]
 

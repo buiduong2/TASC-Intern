@@ -1,7 +1,9 @@
 package com.collection._04_set;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -46,14 +48,16 @@ public class _02_Implementations {
         set.add(2);
         set.add(-100);
 
+        List<Integer> nums = new ArrayList<>(set);
+
         System.out.println(set); // [3, 1, 2, -100]
         // Đã duy trì thứ tự thêm vào
 
         // Lấy ra phần tử đầu tiên
-        System.out.println(set.getFirst());
+        System.out.println(nums.get(0));
 
         // Lấy ra phần tử cuối cùng
-        System.out.println(set.getFirst());
+        System.out.println(nums.get(nums.size() - 1));
 
     }
 
