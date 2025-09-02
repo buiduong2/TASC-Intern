@@ -3,6 +3,7 @@ package com.backend.user.model;
 import java.util.List;
 
 import com.backend.common.model.Address;
+import com.backend.common.model.Audit;
 import com.backend.common.model.Profile;
 
 import jakarta.persistence.Embedded;
@@ -32,4 +33,6 @@ public class Customer {
     @OneToMany(mappedBy = "customer")
     private List<Address> addresses;
 
+    @Embedded
+    private Audit audit;
 }

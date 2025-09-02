@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.backend.common.model.Address;
 import com.backend.common.model.Audit;
+import com.backend.user.model.Customer;
 
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -31,6 +32,8 @@ public class Order {
     // Snapshot
     private double total;
 
+    private String message;
+
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
@@ -48,4 +51,7 @@ public class Order {
 
     @Embedded
     private Audit audit;
+
+    @ManyToOne
+    private Customer customer;
 }

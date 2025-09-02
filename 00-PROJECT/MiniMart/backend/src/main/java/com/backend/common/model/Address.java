@@ -30,6 +30,9 @@ public class Address {
 
     private boolean isDefault;
 
+    @Embedded
+    private Audit audit;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private Customer customer;
 }

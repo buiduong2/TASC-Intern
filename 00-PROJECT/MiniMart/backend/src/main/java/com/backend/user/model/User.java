@@ -2,10 +2,15 @@ package com.backend.user.model;
 
 import java.util.List;
 
+import com.backend.common.model.Audit;
+
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -30,9 +35,15 @@ public class User {
 
     private String email;
 
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
+
     @OneToOne(mappedBy = "user")
     private Customer customer;
 
-    @OneToMany
+    @ManyToMany
     private List<Role> roles;
+
+    @Embedded
+    private Audit audit;
 }
