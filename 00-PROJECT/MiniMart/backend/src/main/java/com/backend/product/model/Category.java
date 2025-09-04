@@ -11,11 +11,16 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
 
+@NamedEntityGraph(name = "Category.CategoryDTO", attributeNodes = {
+        @NamedAttributeNode(value = "image"),
+})
 @Entity
 @Getter
 @Setter

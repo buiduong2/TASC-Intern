@@ -8,6 +8,7 @@ import org.hibernate.proxy.HibernateProxy;
 import com.backend.common.model.Audit;
 import com.backend.inventory.model.Stock;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -17,9 +18,22 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
+
+@NamedEntityGraph(name = "Product.ProductDTO", attributeNodes = {
+        @NamedAttributeNode(value = "image"),
+        @NamedAttributeNode(value = "stock"),
+})
+
+@NamedEntityGraph(name = "Product.ProductDetailDTO", attributeNodes = {
+        @NamedAttributeNode(value = "image"),
+        @NamedAttributeNode(value = "stock"),
+        @NamedAttributeNode(value = "tags")
+})
 
 @Entity
 @Getter
@@ -32,6 +46,7 @@ public class Product {
 
     private String name;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     private Double salePrice;
@@ -44,7 +59,7 @@ public class Product {
     @Embedded
     private Audit audit;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     private Stock stock;
 
     @OneToOne(fetch = FetchType.LAZY)
