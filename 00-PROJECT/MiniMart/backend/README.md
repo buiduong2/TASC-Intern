@@ -1,20 +1,44 @@
 # Báo cáo dự án thực tập - Mini Mart
 
 ## 1. Giới thiệu
+
 Mini Mart là ứng dụng web E-commerce dạng demo, được xây dựng trong thời gian thực tập với mục tiêu áp dụng các kiến thức đã học về **Java, Spring Boot, JPA, Spring Security** và thiết kế cơ sở dữ liệu.
 
 ## 2. Đặc điểm hệ thống
-- **Category**: chỉ 1 cấp, không phân cấp phức tạp.  
-- **Product**: không có biến thể (size, màu sắc, tìm kiếm thuộc tính…  ), mỗi sản phẩm chỉ có **1 ảnh chính**.  
-- **Order**: gồm các thông tin cơ bản như danh sách sản phẩm, địa chỉ giao hàng, phương thức thanh toán và vận chuyển (mô phỏng, cố định).  
-- **User & Customer**: phân biệt thông tin đăng nhập và thông tin khách hàng.  
 
-## 3. Tính năng cốt lõi
-- Quản lý người dùng (đăng ký, đăng nhập, thông tin khách hàng).  
-- Quản lý sản phẩm và danh mục.  
-- Quản lý giỏ hàng.  
-- Đặt hàng với địa chỉ, thanh toán, vận chuyển.  
+-   Quản lý sản phẩm (Product, Category, Tag, Image).
+-   Quản lý đơn hàng (Order, OrderItem, Payment, Shipping).
+-   Quản lý nhập hàng (Purchase, PurchaseItem).
+-   Quản lý tồn kho (Stock 1–1 Product, snapshot quantity).
+-   FIFO xuất kho dựa vào PurchaseItem.remaining_quantity + created_at.
+-   Tính toán doanh thu – chi phí – lợi nhuận dựa vào OrderItem.sell_price và OrderItem.cost_price.
+-   Audit fields (created_at, updated_at, created_by_id, updated_by_id) cho hầu hết bảng chính.
 
-## 4. Ảnh sơ đồ Database
-![Mimimar EDG](./image/minimart.png)
+## 3. Đặc điểm thiết kế
 
+-   Bán hàng cho guest -> Order -> customer_id
+-   Product 1-1 Stock -> Chỉ có 1 Kho duy nhất
+-   OrderItem (sell_price, cost_price) => tính toán
+-   Product 1-1 Image -> Mỗi sản phẩm chỉ 1 ảnh
+-   Customer 1-N Address -> Mỗi user có thể có nhiều địa chỉ
+
+## Luồng nghiệp vụ
+
+-   1. Nhập hàng
+
+    -   Tạo `Purchase` + nhiều `PurchaseItem`
+        -> Update `Stock.quantity += total quantity` nhập
+
+-   2. Bán hàng (order)
+
+    -   `Order` + nhiều `OrderItem`
+    -   Kiểm tra tồn kho `Stock`
+    -   Trừ tồn kho FIFO `PurchaseItem`
+    -   ghi lại `sell_price` và `cost_price` tại thời điểm
+
+-   3. Báo cáo
+    -   Doanh thu = SUM(OrderItem.sell_price \* quantity)
+    -   Giá vốn = SUM(OrderItem.cost_price \* quantity)
+    -   Lợi nhuận = Doanh thu - Giá vốn
+
+## Các chức năng 
