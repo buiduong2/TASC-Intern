@@ -6,6 +6,7 @@ import java.util.Set;
 import org.hibernate.proxy.HibernateProxy;
 
 import com.backend.common.model.Audit;
+import com.backend.inventory.model.Stock;
 
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -35,17 +36,16 @@ public class Product {
 
     private Double salePrice;
 
-    private double originalPrice;
-
-    private int stock;
-
-    private double averageRating;
+    private double compareAtPrice;
 
     @Enumerated(EnumType.STRING)
     private Status status;
 
     @Embedded
     private Audit audit;
+
+    @OneToOne
+    private Stock stock;
 
     @OneToOne(fetch = FetchType.LAZY)
     private ProductImage image;

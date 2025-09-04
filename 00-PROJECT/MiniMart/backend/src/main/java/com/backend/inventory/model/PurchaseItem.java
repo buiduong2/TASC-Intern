@@ -1,4 +1,8 @@
-package com.backend.order.model;
+package com.backend.inventory.model;
+
+import java.time.LocalDateTime;
+
+import org.springframework.data.annotation.CreatedDate;
 
 import com.backend.product.model.Product;
 
@@ -6,30 +10,30 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
-public class OrderItem {
-
+public class PurchaseItem {
     @Id
     @GeneratedValue
     private Long id;
 
-    @ManyToOne
-    private Product product;
-
     private int quantity;
 
-    private double sellPrice;
+    private int remainingQuantity;
 
     private double costPrice;
 
-    @Transient
-    public double getTotalPrice() {
-        return quantity * sellPrice;
-    }
+    @ManyToOne
+    private Purchase purchase;
+
+    @ManyToOne
+    private Product product;
+
+    @CreatedDate
+    private LocalDateTime createdAt;
+
 }
