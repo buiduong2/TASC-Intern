@@ -62,8 +62,8 @@
 
 ### Việc đánh index dựa trên cơ sở nào ?
 
-- Clustered Index; 
-    - Chi phí UPDATE rất dắt vì phải dịch chuyển dữ liệu + cập nhật các non-clusterd INdex tương ứng
+-   Clustered Index
+    -   Chi phí UPDATE rất dắt vì phải dịch chuyển dữ liệu + cập nhật các non-clusterd INdex tương ứng
 
 -   Tạo INDEX:
 
@@ -76,7 +76,8 @@
     -   Các index ít được tận dụng
     -   Thay đổi mô hình truy vấn (truy vấn mới phát sinh, kiểu lọc/ sắp xếp khác)
 
-    - Nếu đã có một Composite index mà có column ở đầu thì không cần đánh đơn cột đó nữa
+    -   Nếu đã có một Composite index mà có column ở đầu thì không cần đánh đơn cột đó nữa
+
 ### Làm thế nào để biết 1 câu query đã sử dụng index hay chưa ?
 
 -Có thể `xem metadata/statistics của hệ quản trị` Thực tế nhất là dùng `EXPLAIN` hoặc `EXPLAIN ANALYZE`
