@@ -1,0 +1,18 @@
+package com.backend.inventory.service;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import com.backend.inventory.dto.req.CreatePurchaseReq;
+import com.backend.inventory.dto.res.PurchaseDTO;
+
+public interface PurchaseService {
+
+    /**
+     * Tạo 1 Purchase + N PurchaseItem.
+     * - Bắn sự kiện PurchaseCreatedEvent -> Stock listen
+     */
+    PurchaseDTO create(CreatePurchaseReq req);
+
+    Page<PurchaseDTO> findPage(Pageable pageable);
+}

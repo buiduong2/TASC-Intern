@@ -4,13 +4,16 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.hibernate.proxy.HibernateProxy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.backend.common.model.Audit;
+import com.backend.common.model.GetIdAble;
 import com.backend.inventory.model.Stock;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -38,7 +41,8 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class Product {
+@EntityListeners(AuditingEntityListener.class)
+public class Product implements GetIdAble<Long> {
 
     @Id
     @GeneratedValue

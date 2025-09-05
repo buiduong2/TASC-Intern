@@ -1,4 +1,4 @@
-package com.backend.mock;
+package com.backend.mock.product;
 
 import java.io.File;
 import java.io.IOException;

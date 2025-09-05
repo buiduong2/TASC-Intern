@@ -1,4 +1,4 @@
-package com.backend.mock;
+package com.backend.mock.product;
 
 import java.util.List;
 import java.util.Set;
@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import com.backend.mock.MockProductData.ProductDTO;
+import com.backend.mock.product.MockProductData.ProductDTO;
 import com.backend.product.model.Product;
 import com.backend.product.model.ProductImage;
 import com.backend.product.model.Tag;
