@@ -9,14 +9,14 @@ import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.backend.product.model.Product;
-import com.backend.product.model.Status;
+import com.backend.product.model.ProductStatus;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @EntityGraph(value = "Product.ProductDTO", type = EntityGraphType.LOAD)
-    Page<Product> findDTOByCategoryIdAndStatus(long categoryId, Status status, Pageable pageable);
+    Page<Product> findDTOByCategoryIdAndStatus(long categoryId, ProductStatus status, Pageable pageable);
 
     @EntityGraph(value = "Product.ProductDetailDTO", type = EntityGraphType.LOAD)
-    Optional<Product> findDetailDTOByIdAndStatus(long id, Status status);
+    Optional<Product> findDetailDTOByIdAndStatus(long id, ProductStatus status);
 
 }

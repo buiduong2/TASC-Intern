@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.backend.common.model.Address;
 import com.backend.common.model.Audit;
 import com.backend.user.model.Customer;
 
@@ -19,6 +18,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -44,10 +44,10 @@ public class Order {
     @ManyToOne
     private ShippingMethod shippingMethod;
 
-    @ManyToOne
-    private Address address;
+    @OneToOne
+    private OrderAddress address;
 
-    @OneToMany
+    @OneToMany(mappedBy = "order")
     private List<OrderItem> orderItems;
 
     @OneToOne
@@ -58,4 +58,7 @@ public class Order {
 
     @ManyToOne
     private Customer customer;
+
+    @Version
+    private long version;
 }

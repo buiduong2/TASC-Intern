@@ -8,14 +8,14 @@ import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.backend.product.model.Category;
-import com.backend.product.model.Status;
+import com.backend.product.model.ProductStatus;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     @EntityGraph(value = "Category.CategoryDTO", type = EntityGraphType.LOAD)
-    List<Category> findDTOByStatus(Status status);
+    List<Category> findDTOByStatus(ProductStatus status);
 
     @EntityGraph(value = "Category.CategoryDTO", type = EntityGraphType.LOAD)
-    Optional<Category> findDetailDTOByIdAndStatus(long id, Status status);
+    Optional<Category> findDetailDTOByIdAndStatus(long id, ProductStatus status);
 
 }

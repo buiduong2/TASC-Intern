@@ -2,7 +2,6 @@ package com.backend.user.model;
 
 import java.util.List;
 
-import com.backend.common.model.Address;
 import com.backend.common.model.Audit;
 import com.backend.common.model.Profile;
 
@@ -31,7 +30,7 @@ public class Customer {
     private User user;
 
     @OneToMany(mappedBy = "customer")
-    private List<Address> addresses;
+    private List<CustomerAddress> addresses;
 
     @Embedded
     private Audit audit;

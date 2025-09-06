@@ -1,20 +1,21 @@
 package com.backend.common.model;
 
-import com.backend.user.model.Customer;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity
+@MappedSuperclass
 @Getter
 @Setter
-public class Address implements GetIdAble<Long> {
+@EntityListeners(AuditingEntityListener.class)
+public class BaseAddress implements GetIdAble<Long> {
+
     @Id
     @GeneratedValue
     private Long id;
@@ -28,11 +29,7 @@ public class Address implements GetIdAble<Long> {
 
     private String area;
 
-    private boolean isDefault;
-
     @Embedded
     private Audit audit;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Customer customer;
 }

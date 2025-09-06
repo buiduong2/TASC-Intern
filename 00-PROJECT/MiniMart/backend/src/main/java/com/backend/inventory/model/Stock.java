@@ -1,9 +1,7 @@
 package com.backend.inventory.model;
 
-import com.backend.common.model.Audit;
 import com.backend.product.model.Product;
 
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -22,10 +20,7 @@ public class Stock {
 
     private int quantity;
 
-    @Embedded
-    private Audit audit;
-
-    @OneToOne(mappedBy = "stock")
+    @OneToOne()
     private Product product;
 
     @Override

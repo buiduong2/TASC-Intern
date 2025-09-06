@@ -39,7 +39,7 @@ public class Category {
     private String description;
 
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private ProductStatus status;
 
     @Embedded
     private Audit audit;

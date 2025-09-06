@@ -23,7 +23,7 @@ public class BaseImage {
     @GeneratedValue
     private Long id;
 
-    private String src;
+    private String url;
 
     private String alt;
 

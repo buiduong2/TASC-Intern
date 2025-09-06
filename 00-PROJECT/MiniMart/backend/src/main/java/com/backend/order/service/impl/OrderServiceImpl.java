@@ -4,7 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.backend.common.model.Address;
+import com.backend.common.model.BaseAddress;
 import com.backend.common.repository.AddressRepository;
 import com.backend.common.utils.EntityLookupHelper;
 import com.backend.order.dto.req.OrderCreateReq;
@@ -53,9 +53,9 @@ public class OrderServiceImpl implements OrderService {
         // ADdress
 
         if (req.getAddressId() != null) {
-            Address address = EntityLookupHelper.findById(addressRepository, req.getAddressId(), "Address");
+            BaseAddress address = EntityLookupHelper.findById(addressRepository, req.getAddressId(), "Address");
         } else {
-            Address address = new Address();
+            BaseAddress address = new BaseAddress();
             // address.setArea(req.getAre);
         }
 

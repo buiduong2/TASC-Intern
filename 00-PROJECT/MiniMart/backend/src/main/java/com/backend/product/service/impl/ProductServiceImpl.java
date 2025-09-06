@@ -8,7 +8,7 @@ import com.backend.common.exception.ResourceNotFoundException;
 import com.backend.product.dto.res.ProductDTO;
 import com.backend.product.dto.res.ProductDetailDTO;
 import com.backend.product.mapper.ProductMapper;
-import com.backend.product.model.Status;
+import com.backend.product.model.ProductStatus;
 import com.backend.product.repository.ProductRepository;
 import com.backend.product.service.ProductService;
 
@@ -24,13 +24,13 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<ProductDTO> findByCategoryId(long categoryId, Pageable pageable) {
-        return repository.findDTOByCategoryIdAndStatus(categoryId, Status.ACTIVE, pageable)
+        return repository.findDTOByCategoryIdAndStatus(categoryId, ProductStatus.ACTIVE, pageable)
                 .map(mapper::toDTO);
     }
 
     @Override
     public ProductDetailDTO findProductDetailById(long productId) {
-        return repository.findDetailDTOByIdAndStatus(productId, Status.ACTIVE)
+        return repository.findDetailDTOByIdAndStatus(productId, ProductStatus.ACTIVE)
                 .map(mapper::toDetailDTO)
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID = " + productId + " Not found"));
     }

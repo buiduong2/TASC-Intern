@@ -1,6 +1,6 @@
 package com.backend.product.model;
 
-public enum Status {
+public enum ProductStatus {
     ACTIVE,
     DRAFT,
     ARCHIVED,

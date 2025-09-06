@@ -58,12 +58,12 @@ public class Product implements GetIdAble<Long> {
     private double compareAtPrice;
 
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private ProductStatus status;
 
     @Embedded
     private Audit audit;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "product")
     private Stock stock;
 
     @OneToOne(fetch = FetchType.LAZY)

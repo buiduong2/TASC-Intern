@@ -10,10 +10,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.backend.common.dto.res.GenericErrorResponse;
-import com.backend.common.dto.res.ValidationErrorResponse;
-import com.backend.common.dto.res.ValidationErrorResponse.ErrorDetail;
+import com.backend.common.exception.GenericErrorResponse;
 import com.backend.common.exception.ResourceNotFoundException;
+import com.backend.common.exception.ValidationErrorResponse;
+import com.backend.common.exception.ValidationErrorResponse.ErrorDetail;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

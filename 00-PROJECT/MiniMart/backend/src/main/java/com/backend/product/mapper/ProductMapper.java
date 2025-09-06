@@ -12,10 +12,10 @@ import com.backend.product.model.Product;
 public interface ProductMapper {
 
     @Mapping(target = "stock", source = "stock.quantity")
-    @Mapping(target = "imageUrl", source = "image.src")
+    @Mapping(target = "imageUrl", source = "image.url")
     ProductDTO toDTO(Product product);
 
     @Mapping(target = "stock", source = "stock.quantity")
-    @Mapping(target = "imageUrl", source = "image.src")
+    @Mapping(target = "imageUrl", source = "image.url")
     ProductDetailDTO toDetailDTO(Product product);
 }

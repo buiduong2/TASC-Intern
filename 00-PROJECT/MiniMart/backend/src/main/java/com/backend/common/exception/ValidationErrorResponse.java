@@ -1,4 +1,4 @@
-package com.backend.common.dto.res;
+package com.backend.common.exception;
 
 import java.time.LocalDateTime;
 import java.util.List;

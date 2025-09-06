@@ -8,7 +8,7 @@ import com.backend.common.exception.ResourceNotFoundException;
 import com.backend.product.dto.res.CategoryDTO;
 import com.backend.product.dto.res.CategoryDetailDTO;
 import com.backend.product.mapper.CategoryMapper;
-import com.backend.product.model.Status;
+import com.backend.product.model.ProductStatus;
 import com.backend.product.repository.CategoryRepository;
 import com.backend.product.service.CategoryService;
 
@@ -24,7 +24,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDTO> findAll() {
-        return repository.findDTOByStatus(Status.ACTIVE)
+        return repository.findDTOByStatus(ProductStatus.ACTIVE)
                 .stream()
                 .map(mapper::toDTO)
                 .toList();
@@ -32,7 +32,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDetailDTO findById(long id) {
-        return repository.findDetailDTOByIdAndStatus(id, Status.ACTIVE)
+        return repository.findDetailDTOByIdAndStatus(id, ProductStatus.ACTIVE)
                 .map(mapper::toDetailDTO)
                 .orElseThrow(() -> new ResourceNotFoundException("Category Id = " + id + " Not Found"));
     }
