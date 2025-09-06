@@ -14,7 +14,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class Address {
+public class Address implements GetIdAble<Long> {
     @Id
     @GeneratedValue
     private Long id;

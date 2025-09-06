@@ -2,12 +2,15 @@ package com.backend.order.model;
 
 import java.util.List;
 
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import com.backend.common.model.Address;
 import com.backend.common.model.Audit;
 import com.backend.user.model.Customer;
 
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -23,6 +26,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(name = "orders")
+@EntityListeners(AuditingEntityListener.class)
 public class Order {
 
     @Id
@@ -50,7 +54,7 @@ public class Order {
     private Payment payment;
 
     @Embedded
-    private Audit audit;
+    private Audit audit = new Audit();
 
     @ManyToOne
     private Customer customer;

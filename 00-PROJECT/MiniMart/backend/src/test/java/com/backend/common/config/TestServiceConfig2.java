@@ -7,7 +7,7 @@ import com.backend.inventory.utils.PurchaseOrderConverter;
 
 @Configuration
 
-public class TestConfig2 {
+public class TestServiceConfig2 {
 
     @Bean
     PurchaseOrderConverter purchaseOrderConverter() {

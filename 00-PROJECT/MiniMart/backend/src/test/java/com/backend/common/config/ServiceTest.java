@@ -16,7 +16,7 @@ import org.springframework.test.context.TestPropertySource;
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DataJpaTest
 @TestPropertySource(locations = "classpath:application-test.properties")
-@Import({ TestConfig2.class, TestConfig.class })
+@Import({ TestServiceConfig2.class, TestServiceConfig.class })
 public @interface ServiceTest {
 
 }

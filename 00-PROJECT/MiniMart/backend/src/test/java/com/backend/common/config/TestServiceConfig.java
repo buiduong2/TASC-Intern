@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @RequiredArgsConstructor
 @EnableJpaAuditing
-public class TestConfig {
+public class TestServiceConfig {
     private final PurchaseRepository purchaseRepository;
     private final ProductRepository productRepository;
 

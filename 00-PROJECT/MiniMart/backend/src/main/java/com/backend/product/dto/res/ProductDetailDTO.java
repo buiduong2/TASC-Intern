@@ -2,8 +2,6 @@ package com.backend.product.dto.res;
 
 import java.util.List;
 
-import com.backend.product.model.Tag;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,7 +15,7 @@ public class ProductDetailDTO {
     private Double salePrice;
     private double compareAtPrice;
     private int stock;
-    private List<Tag> tags;
+    private List<TagDTO> tags;
 
     @Getter
     @Setter
