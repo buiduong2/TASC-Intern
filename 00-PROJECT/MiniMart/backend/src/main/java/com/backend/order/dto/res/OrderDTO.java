@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import com.backend.order.model.OrderStatus;
 import com.backend.order.model.PaymentMethod;
-import com.backend.order.model.ShippingMethod;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -22,9 +21,9 @@ public class OrderDTO {
 
     private OrderStatus status;
 
-    private ShippingMethod shippingMethod;
+    private String shippingMethod;
 
-    private double shippignCost;
+    private double shippingCost;
 
     private double total;
 }

@@ -1,5 +1,6 @@
 package com.backend.product.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -22,5 +23,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @EntityGraph(value = "Product.ProductDetailDTO", type = EntityGraphType.FETCH)
     Optional<Product> findDetailDTOByIdAndStatus(long id, ProductStatus status);
+
+    List<Product> findByIdInAndStatus(List<Long> productId, ProductStatus status);
 
 }

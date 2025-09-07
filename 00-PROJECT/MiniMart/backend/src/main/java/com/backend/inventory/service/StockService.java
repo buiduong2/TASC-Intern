@@ -7,7 +7,7 @@ public interface StockService {
     /**
      * Tăng các giá trị Quantity dựa vào số lượng hàng mới nhập
      */
-    void increaseQuantity(List<Long> productIds);
+    void syncQuantity(List<Long> productIds);
 
     void create(long productId);
 

@@ -18,6 +18,7 @@ import com.backend.order.model.Payment;
 import com.backend.order.model.PaymentMethod;
 import com.backend.order.model.PaymentStatus;
 import com.backend.order.model.ShippingMethod;
+import com.backend.order.repository.OrderRepository;
 import com.backend.order.repository.ShippingMethodRepository;
 import com.backend.order.service.OrderItemService;
 import com.backend.order.service.OrderService;
@@ -31,6 +32,8 @@ import lombok.RequiredArgsConstructor;
 public class OrderServiceImpl implements OrderService {
 
     private final ShippingMethodRepository shippingMethodRepository;
+
+    private final OrderRepository repository;
 
     private final CustomerRepository customerRepository;
 
@@ -57,13 +60,12 @@ public class OrderServiceImpl implements OrderService {
 
         order.setOrderItems(orderItemService.create(order, req.getOrderItems()));
 
-        // SnapShot
-        order.setTotal(order.getOrderItems().stream().map(OrderItem::getTotalPrice).reduce(0D, Double::sum));
+        order.setTotal(order.getOrderItems().stream().mapToDouble(OrderItem::getTotalPrice).sum());
 
         publisher.publishEvent(mapper.toCreatedEvent(order));
 
-        // TODO implement nốt
-        return null;
+        repository.save(order);
+        return mapper.toDTO(order);
     }
 
     private Order createRawOrder(OrderCreateReq req) {

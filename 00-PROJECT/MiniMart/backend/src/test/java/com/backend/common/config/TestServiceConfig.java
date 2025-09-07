@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
+import com.backend.common.utils.EntityLookupHelper;
 import com.backend.inventory.mapper.PurchaseItemMapper;
 import com.backend.inventory.mapper.PurchaseMapper;
 import com.backend.inventory.repository.PurchaseRepository;
@@ -26,7 +27,7 @@ public class TestServiceConfig {
     @Bean
     PurchaseService purchaseService() {
         return new PurchaseServiceImpl(purchaseRepository, productRepository, purchaseMapper(),
-                applicationEventPublisher());
+                applicationEventPublisher(), new EntityLookupHelper());
     }
 
     @Bean("mockPublisher")

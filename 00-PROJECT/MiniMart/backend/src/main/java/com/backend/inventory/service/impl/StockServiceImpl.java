@@ -22,7 +22,7 @@ public class StockServiceImpl implements StockService {
 
     @Override
     @Transactional
-    public void increaseQuantity(List<Long> productIds) {
+    public void syncQuantity(List<Long> productIds) {
 
         for (Long productId : productIds) {
             int result = repository.synckQuantity(productId);

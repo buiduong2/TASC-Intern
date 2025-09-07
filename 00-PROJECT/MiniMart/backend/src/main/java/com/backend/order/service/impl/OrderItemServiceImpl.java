@@ -25,6 +25,7 @@ import com.backend.order.model.OrderItem;
 import com.backend.order.repository.OrderItemRepository;
 import com.backend.order.service.OrderItemService;
 import com.backend.product.model.Product;
+import com.backend.product.model.ProductStatus;
 import com.backend.product.repository.ProductRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -60,7 +61,7 @@ public class OrderItemServiceImpl implements OrderItemService {
     }
 
     private List<OrderItem> create(Order order, Collection<OrderItemDTO> dtos, List<Long> productIds) {
-        List<Product> products = productRepository.findAllById(productIds);
+        List<Product> products = productRepository.findByIdInAndStatus(productIds, ProductStatus.ACTIVE);
         if (products.size() != productIds.size()) {
             throw new ResourceNotFoundException("Some of productId in " + productIds + " not found");
         }

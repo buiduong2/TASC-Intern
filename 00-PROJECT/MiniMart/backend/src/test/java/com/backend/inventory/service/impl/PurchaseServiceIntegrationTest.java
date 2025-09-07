@@ -28,7 +28,7 @@ import com.github.javafaker.Faker;
 import jakarta.persistence.EntityManager;
 
 @ServiceTest
-public class PurchaseServiceImplTest {
+public class PurchaseServiceIntegrationTest {
 
     @Autowired
     private PurchaseService service;
@@ -46,13 +46,43 @@ public class PurchaseServiceImplTest {
     @Qualifier("mockPublisher")
     private ApplicationEventPublisher publisher;
 
+    /**
+     * một event để cập nhật Stock nên được bắn ra
+     */
+    void createPurchase_shouldPublishPurchaseCreatedEvent() {
+
+    }
+
+    /**
+     * Khi mà Excepetion transaction Rollback. thì event ko được bắn ra
+     */
+    void createPurchase_whenSaveFails_shouldNotPublishEvent() {
+
+    }
+
+    /**
+     * Phải gọi được repository.save()
+     */
+    void createPurchase_withValidRequest_shouldCallRepositorySave() {
+
+    }
+
+    /**
+     * Sau khi save. DB phải có đủ Purchase và PurchaseItem
+     */
+    void createPurchase_withValidRequest_shouldPersistPurchaseAndItems() {
+
+    }
+
     @Test
     void testCreate() {
+        // Prepare Product
         List<Product> products = productRepository.findRandomProductsInMemory(3);
         Faker faker = new Faker();
         em.flush();
         em.clear();
 
+        // Prepare RequestDTO
         CreatePurchaseReq req = new CreatePurchaseReq();
         List<PurchaseItemReq> reqItems = new ArrayList<>();
 
@@ -67,6 +97,7 @@ public class PurchaseServiceImplTest {
             reqItems.add(itemReq);
         }
 
+        // PROCESS
         PurchaseDTO dto = service.create(req);
         em.flush();
         em.clear();
