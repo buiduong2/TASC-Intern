@@ -55,7 +55,7 @@ public class OrderCreateReq {
     @Setter
     public static class OrderItemDTO {
         @NotEmpty
-        private String productId;
+        private long productId;
 
         @Positive
         private int quantity;
@@ -64,7 +64,7 @@ public class OrderCreateReq {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((productId == null) ? 0 : productId.hashCode());
+            result = prime * result + (int) (productId ^ (productId >>> 32));
             return result;
         }
 
@@ -77,10 +77,7 @@ public class OrderCreateReq {
             if (getClass() != obj.getClass())
                 return false;
             OrderItemDTO other = (OrderItemDTO) obj;
-            if (productId == null) {
-                if (other.productId != null)
-                    return false;
-            } else if (!productId.equals(other.productId))
+            if (productId != other.productId)
                 return false;
             return true;
         }

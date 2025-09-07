@@ -95,8 +95,14 @@ public class Product implements GetIdAble<Long> {
 
     @Override
     public final int hashCode() {
-        return this instanceof HibernateProxy
-                ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode()
-                : getClass().hashCode();
+        if (this instanceof HibernateProxy) {
+            return ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode();
+        } else {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((id == null) ? 0 : id.hashCode());
+            return result;
+        }
     }
+
 }

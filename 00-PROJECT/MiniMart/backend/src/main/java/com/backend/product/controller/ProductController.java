@@ -2,6 +2,7 @@ package com.backend.product.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +27,8 @@ public class ProductController {
     }
 
     @GetMapping("/category/{categoryId}")
-    public Page<ProductDTO> findPageByCategoryId(@PathVariable long categoryId, Pageable pageable) {
+    public Page<ProductDTO> findPageByCategoryId(@PathVariable long categoryId,
+            @PageableDefault Pageable pageable) {
         return service.findByCategoryId(categoryId, pageable);
     }
 

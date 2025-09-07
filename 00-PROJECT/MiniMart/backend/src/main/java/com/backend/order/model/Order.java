@@ -7,6 +7,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.backend.common.model.Audit;
 import com.backend.user.model.Customer;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -41,16 +42,16 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private ShippingMethod shippingMethod;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private OrderAddress address;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private Payment payment;
 
     @Embedded
@@ -61,4 +62,5 @@ public class Order {
 
     @Version
     private long version;
+
 }

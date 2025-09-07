@@ -14,7 +14,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
-public class BaseAddress implements GetIdAble<Long> {
+public abstract class BaseAddress implements GetIdAble<Long> {
 
     @Id
     @GeneratedValue

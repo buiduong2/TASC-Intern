@@ -2,6 +2,7 @@ package com.backend.inventory.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +26,7 @@ public class PurchaseController {
     private final PurchaseService service;
 
     @GetMapping
-    public Page<PurchaseDTO> findByPage(Pageable pageable) {
+    public Page<PurchaseDTO> findByPage(@PageableDefault Pageable pageable) {
         return service.findPage(pageable);
     }
 

@@ -41,4 +41,14 @@ Mini Mart là ứng dụng web E-commerce dạng demo, được xây dựng tron
     -   Giá vốn = SUM(OrderItem.cost_price \* quantity)
     -   Lợi nhuận = Doanh thu - Giá vốn
 
-## Các chức năng 
+## Các chức năng
+
+## B1: Làm hiển thị Product
+
+-   Hiển thị Category
+
+-   Hiển thị Product
+
+## B2: Làm Inventory 
+
+- 

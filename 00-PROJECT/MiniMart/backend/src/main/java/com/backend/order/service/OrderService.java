@@ -10,6 +10,10 @@ public interface OrderService {
 
     Page<OrderDTO> findPage(Pageable pageable);
 
+    /**
+     * Tạo ra Order . Tính snapShot
+     * Cẩn thận tranh chấp luồng
+     */
     OrderDTO create(OrderCreateReq req, long userId);
 
 }

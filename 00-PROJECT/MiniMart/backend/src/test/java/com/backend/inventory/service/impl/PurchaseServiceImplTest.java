@@ -18,6 +18,7 @@ import com.backend.inventory.dto.req.CreatePurchaseReq;
 import com.backend.inventory.dto.req.PurchaseItemReq;
 import com.backend.inventory.dto.res.PurchaseDTO;
 import com.backend.inventory.model.Purchase;
+import com.backend.inventory.model.PurchaseItem;
 import com.backend.inventory.repository.PurchaseRepository;
 import com.backend.inventory.service.PurchaseService;
 import com.backend.product.model.Product;
@@ -93,7 +94,9 @@ public class PurchaseServiceImplTest {
                 .allMatch(item -> item.getRemainingQuantity() == item.getQuantity());
 
         Mockito.verify(publisher, Mockito.times(1))
-                .publishEvent(new PurchaseCreatedEvent(result.getId(), result.getSupplier(), req.getItems()));
+                .publishEvent(new PurchaseCreatedEvent(result.getId(),
+                        result.getPurchaseItems().stream()
+                                .map(PurchaseItem::getProduct).map(Product::getId).distinct().toList()));
     }
 
     @Test

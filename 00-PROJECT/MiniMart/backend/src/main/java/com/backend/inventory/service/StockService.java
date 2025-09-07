@@ -1,12 +1,14 @@
 package com.backend.inventory.service;
 
-import com.backend.inventory.dto.event.PurchaseCreatedEvent;
+import java.util.List;
 
 public interface StockService {
 
     /**
      * Tăng các giá trị Quantity dựa vào số lượng hàng mới nhập
      */
-    void updateOrCreateStock(PurchaseCreatedEvent event);
+    void increaseQuantity(List<Long> productIds);
+
+    void create(long productId);
 
 }

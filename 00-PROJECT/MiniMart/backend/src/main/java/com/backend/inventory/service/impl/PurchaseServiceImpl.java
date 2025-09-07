@@ -40,21 +40,17 @@ public class PurchaseServiceImpl implements PurchaseService {
     public PurchaseDTO create(CreatePurchaseReq req) {
         Purchase entity = mapper.toEntity(req);
 
-        if (entity.getPurchaseItems() != null && entity.getPurchaseItems().size() > 0) {
+        List<Long> productIds = entity.getPurchaseItems().stream().map(PurchaseItem::getProduct).map(Product::getId)
+                .toList();
+        Map<Long, Product> mapProductById = EntityLookupHelper.findMapByIdIn(productRepository, productIds,
+                "Product");
 
-            List<Long> productIds = entity.getPurchaseItems().stream().map(PurchaseItem::getProduct).map(Product::getId)
-                    .toList();
-            Map<Long, Product> mapProductById = EntityLookupHelper.findMapByIdIn(productRepository, productIds,
-                    "Product");
-
-            for (PurchaseItem item : entity.getPurchaseItems()) {
-                item.setProduct(mapProductById.get(item.getProduct().getId()));
-            }
-
+        for (PurchaseItem item : entity.getPurchaseItems()) {
+            item.setProduct(mapProductById.get(item.getProduct().getId()));
         }
-        repository.save(entity);
 
-        publisher.publishEvent(new PurchaseCreatedEvent(entity.getId(), entity.getSupplier(), req.getItems()));
+        repository.save(entity);
+        publisher.publishEvent(new PurchaseCreatedEvent(entity.getId(), productIds));
 
         return mapper.toDTO(entity);
     }
@@ -63,5 +59,7 @@ public class PurchaseServiceImpl implements PurchaseService {
     public Page<PurchaseDTO> findPage(Pageable pageable) {
         return repository.findAdminAll(pageable);
     }
+
+
 
 }

@@ -1,12 +1,22 @@
 package com.backend.inventory.repository;
 
-import java.util.List;
-
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 
 import com.backend.inventory.model.Stock;
 
 public interface StockRepository extends JpaRepository<Stock, Long> {
 
-    List<Stock> findByProductIdIn(List<Long> productIds);
+    @Modifying
+    @Query(value = """
+            UPDATE stock
+            SET quantity = (
+                SELECT COALESCE(SUM(remaining_quantity), 0)
+                FROM purchase_item
+                WHERE product_id = ?1
+            )
+            WHERE product_id = ?1
+                    """, nativeQuery = true)
+    int synckQuantity(long productId);
 }
