@@ -44,4 +44,16 @@ public class OrderItem {
     public double getTotalPrice() {
         return quantity * unitPrice;
     }
+
+    public void calculateAvgCost() {
+        double totalCost = 0;
+        int totalQty = 0;
+
+        for (StockAllocation allocation : allocations) {
+            totalCost += allocation.getPurchaseItem().getCostPrice() * allocation.getAllocatedQuantity();
+            totalQty += allocation.getAllocatedQuantity();
+        }
+
+        this.avgCostPrice = totalQty == 0 ? 0 : totalCost / totalQty;
+    }
 }
