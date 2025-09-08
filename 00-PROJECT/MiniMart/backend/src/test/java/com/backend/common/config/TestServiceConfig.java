@@ -2,9 +2,9 @@ package com.backend.common.config;
 
 import org.mapstruct.factory.Mappers;
 import org.mockito.Mockito;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import com.backend.common.utils.EntityLookupHelper;
@@ -17,7 +17,7 @@ import com.backend.product.repository.ProductRepository;
 
 import lombok.RequiredArgsConstructor;
 
-@Configuration
+@TestConfiguration
 @RequiredArgsConstructor
 @EnableJpaAuditing
 public class TestServiceConfig {

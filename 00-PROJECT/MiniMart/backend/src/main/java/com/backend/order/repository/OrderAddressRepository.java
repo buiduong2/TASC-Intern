@@ -2,6 +2,8 @@ package com.backend.order.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface OrderAddressRepository extends JpaRepository<OrderAddressRepository, Long> {
+import com.backend.order.model.OrderAddress;
+
+public interface OrderAddressRepository extends JpaRepository<OrderAddress, Long> {
 
 }

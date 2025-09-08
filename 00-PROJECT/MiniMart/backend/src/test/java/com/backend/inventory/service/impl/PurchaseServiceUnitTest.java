@@ -142,7 +142,7 @@ public class PurchaseServiceUnitTest {
     }
 
     /**
-     * Bắn event
+     * Bắn event khi Success
      */
     @Test
     void create_givenValidRequest_shouldPublishPurchaseCreatedEvent() {
@@ -162,4 +162,31 @@ public class PurchaseServiceUnitTest {
         assertThat(event.getPurchaseId()).isEqualTo(1L);
         assertThat(event.getProductIds()).isEqualTo(req.getItems().stream().map(i -> i.getProductId()).toList());
     }
+
+    @Test
+    void create_givenInValidRequest_shouldNotPublishPurchaseCreatedEvent() {
+        List<Long> productIds = req.getItems().stream().map(i -> i.getProductId()).toList();
+
+        when(productRepository.findAllById(productIds)).thenReturn(Collections.emptyList());
+
+        assertThatThrownBy(() -> purchaseService.create(req))
+                .isInstanceOf(ResourceNotFoundException.class);
+
+        verify(publisher, times(0)).publishEvent(any());
+
+    }
+
+    /**
+     * Phải gọi được repository.save()
+     */
+    @Test
+    void createPurchase_withValidRequest_shouldCallRepositorySave() {
+        doReturn(Collections.emptyMap())
+                .when(entityLookupHelper).findMapByIdIn(any(), any(), any());
+
+        purchaseService.create(req);
+        verify(repository, times(1)).save(any());
+
+    }
+
 }
