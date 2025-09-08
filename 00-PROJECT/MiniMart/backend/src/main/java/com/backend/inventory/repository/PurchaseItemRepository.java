@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import com.backend.inventory.model.PurchaseItem;
@@ -19,4 +20,12 @@ public interface PurchaseItemRepository extends JpaRepository<PurchaseItem, Long
             ORDER BY pi.createdAt,pi.id ASC
             """)
     List<PurchaseItem> findAvaiableByProductIdInForUpdate(List<Long> productIds);
+
+    @Modifying
+    @Query("""
+            UPDATE PurchaseItem AS pi 
+            SET pi.remainingQuantity = pi.remainingQuantity + ?2
+            WHERE pi.id =?1 
+            """)
+    int increaseRemainingQuantity(long purchaseItemId, int delta);
 }

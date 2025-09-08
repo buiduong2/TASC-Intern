@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.backend.common.exception.ResourceNotFoundException;
+import com.backend.order.dto.req.OrderAddressReq;
 import com.backend.order.dto.req.OrderCreateReq;
 import com.backend.order.dto.res.OrderDTO;
 import com.backend.order.mapper.OrderMapper;
@@ -53,14 +54,13 @@ public class OrderServiceImpl implements OrderService {
     public OrderDTO create(OrderCreateReq req, long userId) {
 
         Order order = createRawOrder(req);
-        order.setShippingMethod(getShippingMethod(req.getShippingMethodId()));
         order.setAddress(createOrderAddress(req.getAddress()));
-        order.setPayment(createPayment(req.getPaymentMethod()));
         order.setCustomer(getCustomer(userId));
 
         order.setOrderItems(orderItemService.create(order, req.getOrderItems()));
-
-        order.setTotal(order.getOrderItems().stream().mapToDouble(OrderItem::getTotalPrice).sum());
+        order.setShippingMethod(getShippingMethod(req.getShippingMethodId()));
+        order.setPayment(createPayment(order, req.getPaymentMethod()));
+        order.setTotal(order.getPayment().getAmountDue());
 
         publisher.publishEvent(mapper.toCreatedEvent(order));
 
@@ -79,20 +79,39 @@ public class OrderServiceImpl implements OrderService {
         return shippingMethodRepository.getReferenceById(ShippingMethodId);
     }
 
-    private OrderAddress createOrderAddress(OrderCreateReq.AddressDTO dto) {
+    private OrderAddress createOrderAddress(OrderAddressReq dto) {
         return mapper.toAddress(dto);
     }
 
-    private Payment createPayment(PaymentMethod paymentMethod) {
+    private Payment createPayment(Order order, PaymentMethod paymentMethod) {
         Payment payment = new Payment();
         payment.setName(paymentMethod);
         payment.setStatus(PaymentStatus.PENDING);
+        payment.setAmountPaid(0);
+        double shippingCost = order.getShippingMethod().getCost();
+        double subTotal = order.getOrderItems().stream().mapToDouble(OrderItem::getTotalPrice).sum();
+        payment.setAmountDue(shippingCost + subTotal);
         return payment;
     }
 
     private Customer getCustomer(long userId) {
         return customerRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer for UserId = " + userId + " not found"));
+    }
+
+    @Transactional
+    @Override
+    public void cancel(Long orderId) {
+        Order order = repository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order id = " + orderId + " is not found"));
+        updateStatus(order);
+        orderItemService.releaseStockAllocation(order);
+        repository.save(order);
+
+    }
+
+    private void updateStatus(Order order) {
+        order.setStatus(OrderStatus.CANCELED);
     }
 
 }

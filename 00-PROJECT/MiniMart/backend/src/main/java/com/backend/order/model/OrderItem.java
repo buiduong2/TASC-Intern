@@ -30,7 +30,7 @@ public class OrderItem {
 
     private int quantity;
 
-    private double sellPrice;
+    private double unitPrice;
 
     private double avgCostPrice;
 
@@ -42,6 +42,6 @@ public class OrderItem {
 
     @Transient
     public double getTotalPrice() {
-        return quantity * sellPrice;
+        return quantity * unitPrice;
     }
 }

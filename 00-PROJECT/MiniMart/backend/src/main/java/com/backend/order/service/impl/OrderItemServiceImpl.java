@@ -16,9 +16,10 @@ import com.backend.common.exception.ResourceNotFoundException;
 import com.backend.common.utils.Utils;
 import com.backend.inventory.model.PurchaseItem;
 import com.backend.inventory.model.StockAllocation;
+import com.backend.inventory.model.StockAllocationStatus;
 import com.backend.inventory.repository.PurchaseItemRepository;
 import com.backend.inventory.repository.StockAllocationRepository;
-import com.backend.order.dto.req.OrderCreateReq.OrderItemDTO;
+import com.backend.order.dto.req.OrderItemReq;
 import com.backend.order.exception.NotEnoughStockException;
 import com.backend.order.model.Order;
 import com.backend.order.model.OrderItem;
@@ -44,10 +45,10 @@ public class OrderItemServiceImpl implements OrderItemService {
 
     @Transactional(propagation = Propagation.MANDATORY)
     @Override
-    public List<OrderItem> create(Order order, Collection<OrderItemDTO> dtos) {
+    public List<OrderItem> create(Order order, Collection<OrderItemReq> dtos) {
         List<Long> productIds = dtos
                 .stream()
-                .map(OrderItemDTO::getProductId)
+                .map(OrderItemReq::getProductId)
                 .toList();
 
         List<OrderItem> items = create(order, dtos, productIds);
@@ -60,7 +61,7 @@ public class OrderItemServiceImpl implements OrderItemService {
         return items;
     }
 
-    private List<OrderItem> create(Order order, Collection<OrderItemDTO> dtos, List<Long> productIds) {
+    private List<OrderItem> create(Order order, Collection<OrderItemReq> dtos, List<Long> productIds) {
         List<Product> products = productRepository.findByIdInAndStatus(productIds, ProductStatus.ACTIVE);
         if (products.size() != productIds.size()) {
             throw new ResourceNotFoundException("Some of productId in " + productIds + " not found");
@@ -71,7 +72,7 @@ public class OrderItemServiceImpl implements OrderItemService {
 
         List<OrderItem> orderItems = new ArrayList<>();
 
-        for (OrderItemDTO dto : dtos) {
+        for (OrderItemReq dto : dtos) {
             Product product = mapProductById.get(dto.getProductId());
 
             OrderItem orderItem = new OrderItem();
@@ -79,7 +80,7 @@ public class OrderItemServiceImpl implements OrderItemService {
 
             orderItem.setProduct(product);
             orderItem.setQuantity(dto.getQuantity());
-            orderItem.setSellPrice(Utils.coalesce(product.getSalePrice(), product.getCompareAtPrice()));
+            orderItem.setUnitPrice(Utils.coalesce(product.getSalePrice(), product.getCompareAtPrice()));
 
             orderItem.setOrder(order);
 
@@ -179,4 +180,21 @@ public class OrderItemServiceImpl implements OrderItemService {
         }
     }
 
+    @Transactional(propagation = Propagation.MANDATORY)
+    @Override
+    public void releaseStockAllocation(Order order) {
+        List<StockAllocation> stockAllocations = stockAllocationRepository
+                .findByOrderId(order.getId(), StockAllocationStatus.ACTIVE);
+
+        for (StockAllocation allocation : stockAllocations) {
+            int delta = allocation.getAllocatedQuantity();
+            long purchaseItemId = allocation.getPurchaseItem().getId();
+            int i = purchaseItemRepository.increaseRemainingQuantity(purchaseItemId, delta);
+            allocation.setStatus(StockAllocationStatus.RELEASED);
+
+            if (i != 1) {
+                throw new RuntimeException("Something When Wrong, " + "missing PurchaseItem");
+            }
+        }
+    }
 }

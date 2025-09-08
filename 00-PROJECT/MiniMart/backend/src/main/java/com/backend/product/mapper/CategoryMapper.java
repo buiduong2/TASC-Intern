@@ -11,9 +11,9 @@ import com.backend.product.model.Category;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface CategoryMapper {
 
-    @Mapping(target = "imageUrl", source = "image.src")
+    @Mapping(target = "imageUrl", source = "image.url")
     CategoryDTO toDTO(Category category);
 
-    @Mapping(target = "imageUrl", source = "image.src")
+    @Mapping(target = "imageUrl", source = "image.url")
     CategoryDetailDTO toDetailDTO(Category category);
 }

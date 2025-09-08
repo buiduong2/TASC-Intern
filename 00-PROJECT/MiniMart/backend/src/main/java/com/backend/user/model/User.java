@@ -1,6 +1,9 @@
 package com.backend.user.model;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.backend.common.model.Audit;
 
@@ -46,4 +49,10 @@ public class User {
 
     @Embedded
     private Audit audit;
+
+    public boolean hasAnyRole(RoleName... roles) {
+        Set<RoleName> roleNames = new HashSet<>(Arrays.asList(roles));
+        return this.roles.stream().anyMatch(r -> roleNames.contains(r.getName()));
+    }
+
 }

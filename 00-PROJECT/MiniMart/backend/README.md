@@ -95,3 +95,18 @@ Mini Mart là ứng dụng web E-commerce dạng demo, được xây dựng tron
     - 
 
 - Như vậy tránh được oversell. Nhung lại có thể dính Order ảo . Ma quái phá hoại
+
+### Luồng CANCLED order  user
+
+- Của user 
+    - Quyền sở hữu phải thuộc về User
+    - Status === PENDING mới cho hủy 
+    - CARD + amounPaid > 0 . Không được hủy
+    - CASH chưa thành toán cho phép hủy 
+
+- Service: 
+    - findBy Id
+    - Kiểm tra trạng thái
+
+    - Update trạng thái
+    - Release Stock Allocation

@@ -27,4 +27,8 @@ public class Payment {
 
     private LocalDateTime payAt;
 
+    private double amountPaid;
+    
+    private double amountDue;
+
 }

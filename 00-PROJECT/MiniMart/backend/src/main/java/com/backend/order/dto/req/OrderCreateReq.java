@@ -7,7 +7,6 @@ import com.backend.order.model.PaymentMethod;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,7 +14,7 @@ import lombok.Setter;
 @Setter
 public class OrderCreateReq {
 
-    private Long addressId;
+    private String message;
 
     @NotNull
     private Long shippingMethodId;
@@ -23,65 +22,11 @@ public class OrderCreateReq {
     @NotNull
     private PaymentMethod paymentMethod;
 
-    private AddressDTO address;
-
-    private String message;
+    @Valid
+    private OrderAddressReq address;
 
     @NotEmpty
-    @NotNull
     @Valid
-    private LinkedHashSet<OrderItemDTO> orderItems;
-
-    @Getter
-    @Setter
-    public static class AddressDTO {
-        private String firstName;
-
-        private String lastName;
-
-        private String email;
-
-        private String phone;
-
-        private String details;
-
-        private String city;
-
-        private String area;
-
-    }
-
-    @Getter
-    @Setter
-    public static class OrderItemDTO {
-        @NotEmpty
-        private long productId;
-
-        @Positive
-        private int quantity;
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + (int) (productId ^ (productId >>> 32));
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            OrderItemDTO other = (OrderItemDTO) obj;
-            if (productId != other.productId)
-                return false;
-            return true;
-        }
-
-    }
+    private LinkedHashSet<OrderItemReq> orderItems;
 
 }
