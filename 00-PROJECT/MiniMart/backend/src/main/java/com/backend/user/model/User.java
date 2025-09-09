@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.backend.common.model.Audit;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,14 +17,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
-@Table(name = "users", uniqueConstraints = { @UniqueConstraint(columnNames = "email") })
+@Table(name = "users")
 public class User {
 
     @Id
@@ -32,10 +32,13 @@ public class User {
 
     private String fullName;
 
+    @Column(updatable = false, unique = true)
     private String username;
 
+    @Column(nullable = false)
     private String password;
 
+    @Column(updatable = false, unique = true)
     private String email;
 
     @Enumerated(EnumType.STRING)
@@ -46,6 +49,10 @@ public class User {
 
     @ManyToMany
     private List<Role> roles;
+
+    private boolean active = true;
+
+    private long tokenVersion;
 
     @Embedded
     private Audit audit;

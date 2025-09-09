@@ -1,14 +1,32 @@
-{
-    "properties": [
-        {
-            "name": "custom.client.origins",
-            "type": "java.lang.String",
-            "description": "A description for 'custom.client.origins'"
-        },
-        {
-            "name": "custom.security.enabled",
-            "type": "java.lang.String",
-            "description": "A description for 'custom.security.enabled'"
-        }
-    ]
-}
+{"properties": [
+  {
+    "name": "custom.client.origins",
+    "type": "java.lang.String",
+    "description": "A description for 'custom.client.origins'"
+  },
+  {
+    "name": "custom.security.enabled",
+    "type": "java.lang.String",
+    "description": "A description for 'custom.security.enabled'"
+  },
+  {
+    "name": "custom.security.jwt.secret",
+    "type": "java.lang.String",
+    "description": "A description for 'custom.security.jwt.secret'"
+  },
+  {
+    "name": "custom.security.jwt.access-ttl",
+    "type": "java.lang.String",
+    "description": "A description for 'custom.security.jwt.access-ttl'"
+  },
+  {
+    "name": "custom.security.jwt.refresh-ttl",
+    "type": "java.lang.String",
+    "description": "A description for 'custom.security.jwt.refresh-ttl'"
+  },
+  {
+    "name": "custom.security.jwt.allowed-skew-seconds",
+    "type": "java.lang.String",
+    "description": "A description for 'custom.security.jwt.allowed-skew-seconds'"
+  }
+]}
