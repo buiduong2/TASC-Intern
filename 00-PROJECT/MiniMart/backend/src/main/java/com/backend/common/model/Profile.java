@@ -8,12 +8,10 @@ import lombok.Setter;
 @Setter
 @Embeddable
 public class Profile {
-    
+
     private String firstName;
 
     private String lastName;
-
-    private String email;
 
     private String phone;
 }

@@ -1,9 +1,7 @@
 package com.backend.common.config;
 
-import java.security.Key;
 import java.time.LocalDateTime;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -20,11 +18,8 @@ import com.backend.common.exception.GenericErrorResponse;
 import com.backend.user.security.JwtAuthenticationEntryPoint;
 import com.backend.user.security.JwtAuthenticationFilter;
 import com.backend.user.service.impl.CustomUserDetailService;
-import com.backend.user.utils.JwtCodec;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
@@ -32,23 +27,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WebSecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
     private final CustomUserDetailService customUserDetailService;
 
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
     private final JwtAuthenticationEntryPoint authenticationEntryPoint;
-
-    @Value("${custom.security.jwt.secret}")
-    private String secret;
-
-    @Value("${custom.security.jwt.allowed-skew-seconds}")
-    private long allowedSkewSeconds;
-
-    @Bean
-    JwtCodec jwtCodec() {
-        Key key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
-        return new JwtCodec(key, allowedSkewSeconds); // 30s clock skew
-    }
 
     @Bean
     AccessDeniedHandler accessDeniedHandler() {
@@ -82,7 +65,8 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
-                        authorize -> authorize.requestMatchers("/api/auth/login").permitAll()
+                        authorize -> authorize
+                                .requestMatchers("/api/auth/**").permitAll()
                                 .anyRequest().authenticated()
 
                 );

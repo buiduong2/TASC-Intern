@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.backend.common.model.Audit;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -44,13 +45,11 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = { CascadeType.PERSIST })
     private Customer customer;
 
     @ManyToMany
     private List<Role> roles;
-
-    private boolean active = true;
 
     private long tokenVersion;
 

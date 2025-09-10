@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.backend.user.dto.req.LoginReq;
+import com.backend.user.dto.req.RefreshTokenReq;
 import com.backend.user.dto.req.RegisterReq;
 import com.backend.user.dto.res.AuthRes;
 import com.backend.user.service.AuthService;
@@ -22,14 +23,19 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping
+    @PostMapping("login")
     public AuthRes login(@Valid @RequestBody LoginReq loginReq) {
         return authService.login(loginReq);
     }
 
-    @PostMapping
+    @PostMapping("register")
     public AuthRes register(@Valid @RequestBody RegisterReq registerReq) {
         return authService.register(registerReq);
+    }
+
+    @PostMapping("refresh")
+    public AuthRes refresh(@Valid @RequestBody RefreshTokenReq req) {
+        return authService.refreshToken(req);
     }
 
 }

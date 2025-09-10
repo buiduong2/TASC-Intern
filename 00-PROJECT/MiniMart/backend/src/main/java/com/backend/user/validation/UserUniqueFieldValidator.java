@@ -17,19 +17,20 @@ public class UserUniqueFieldValidator implements ConstraintValidator<UserUniqueF
     private Column column;
 
     @Override
+    public void initialize(UserUniqueField constraintAnnotation) {
+        this.column = constraintAnnotation.column();
+    }
+
+    @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        if (value == null) {
+        if (value == null || value.isBlank()) {
             return true;
         }
 
-        switch (this.column) {
-            case EMAIL:
-                return !repository.existsByEmail(value);
-            case USERNAME:
-                return !repository.existsByUsername(value);
-            default:
-                throw new IllegalArgumentException("Column type not implemented Yet");
-        }
+        return switch (this.column) {
+            case EMAIL -> !repository.existsByEmail(value);
+            case USERNAME -> !repository.existsByUsername(value);
+        };
 
     }
 

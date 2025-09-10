@@ -7,18 +7,28 @@ import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import lombok.RequiredArgsConstructor;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 
-@RequiredArgsConstructor
+@Component
 public class JwtCodec {
 
     private final Key key;
 
     private final long allowedSkewSeconds;
+
+    public JwtCodec(@Value("${custom.security.jwt.secret}") String secret,
+            @Value("${custom.security.jwt.allowed-skew-seconds}") long allowedSkewSeconds) {
+        this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
+        this.allowedSkewSeconds = allowedSkewSeconds;
+    }
 
     public String createJti() {
         return UUID.randomUUID().toString();

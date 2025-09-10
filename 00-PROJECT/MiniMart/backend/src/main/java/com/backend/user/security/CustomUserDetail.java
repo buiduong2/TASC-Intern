@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.backend.user.model.Role;
 import com.backend.user.model.RoleName;
 import com.backend.user.model.User;
+import com.backend.user.model.UserStatus;
 
 import lombok.Getter;
 
@@ -39,7 +40,7 @@ public class CustomUserDetail implements UserDetails {
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toSet());
 
-        this.active = user.isActive();
+        this.active = user.getStatus().equals(UserStatus.ACTIVE);
         this.tokenVersion = user.getTokenVersion();
 
     }
