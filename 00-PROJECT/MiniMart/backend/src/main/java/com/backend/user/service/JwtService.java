@@ -2,6 +2,7 @@ package com.backend.user.service;
 
 import java.util.function.Function;
 
+import com.backend.user.dto.req.RevokeJwtReq;
 import com.backend.user.model.User;
 import com.backend.user.security.CustomUserDetail;
 
@@ -17,6 +18,6 @@ public interface JwtService {
 
     CustomUserDetail parseAndValidateAccess(String token, Function<Long, Long> getUserVersion);
 
-    void invalidateToken(Claims claims);
+    void invalidateToken(RevokeJwtReq req, User user);
 
 }

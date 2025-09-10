@@ -13,10 +13,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.backend.user.dto.req.RevokeJwtReq;
 import com.backend.user.exception.TokenBlacklistedException;
 import com.backend.user.exception.TokenVersionMismatchException;
 import com.backend.user.model.JwtBlacklist;
 import com.backend.user.model.Role;
+import com.backend.user.model.TokenType;
 import com.backend.user.model.User;
 import com.backend.user.repository.JwtBlackListRepository;
 import com.backend.user.security.CustomUserDetail;
@@ -32,8 +34,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class JwtServiceImpl implements JwtService {
 
-    public static final String ACCESS = "access";
-    public static final String REFRESH = "refresh";
+    public static final String ACCESS = "ACCESS";
+    public static final String REFRESH = "REFRESH";
 
     @Value("${custom.security.jwt.access-ttl}")
     private Duration accessTtl;
@@ -80,7 +82,8 @@ public class JwtServiceImpl implements JwtService {
 
         Long userId = c.get(JwtClaims.UID, Long.class);
         Long version = c.get(JwtClaims.VERSION, Long.class);
-        if (userId == null || version == null) {
+        String jti = c.get(Claims.ID, String.class);
+        if (userId == null || version == null || jti == null) {
             throw new JwtException("Invalid token payload");
         }
 
@@ -89,7 +92,6 @@ public class JwtServiceImpl implements JwtService {
             throw new TokenVersionMismatchException("Token version mismatch");
         }
 
-        String jti = c.get(Claims.ID, String.class);
         if (jti != null && jwtBlackListRepository.existsById(jti)) {
             throw new TokenBlacklistedException("Token is blacklisted");
         }
@@ -117,16 +119,30 @@ public class JwtServiceImpl implements JwtService {
 
     @Transactional
     @Override
-    public void invalidateToken(Claims claims) {
+    public void invalidateToken(RevokeJwtReq req, User user) {
+
+        Claims accessClaims = validateToken(req.getAccessToken(), ACCESS, i -> user.getTokenVersion());
+        Claims refreshClaims = validateToken(req.getRefreshToken(), REFRESH, i -> user.getTokenVersion());
+
+        invalidateToken(accessClaims);
+        invalidateToken(refreshClaims);
+
+        jwtBlackListRepository.deleteAllExpired(LocalDateTime.now(ZoneId.of("UTC")));
+    }
+
+    private void invalidateToken(Claims claims) {
+
         JwtBlacklist jwtBlacklist = new JwtBlacklist();
         Date expired = claims.getExpiration();
         Date issuedAt = claims.getIssuedAt();
-        jwtBlacklist.setCreatedAt(LocalDateTime.ofInstant(issuedAt.toInstant(), ZoneId.of("UTC")));
-        jwtBlacklist.setExpiredAt(LocalDateTime.ofInstant(expired.toInstant(), ZoneId.of("UTC")));
+        jwtBlacklist.setCreatedAt(LocalDateTime.ofInstant(issuedAt.toInstant(),
+                ZoneId.of("UTC")));
+        jwtBlacklist.setExpiredAt(LocalDateTime.ofInstant(expired.toInstant(),
+                ZoneId.of("UTC")));
         jwtBlacklist.setId(claims.getId());
-        jwtBlackListRepository.save(jwtBlacklist);
+        jwtBlacklist.setType(TokenType.valueOf(claims.get(JwtClaims.TYPE, String.class)));
 
-        jwtBlackListRepository.deleteAllExpired(LocalDateTime.now(ZoneId.of("UTC")));
+        jwtBlackListRepository.save(jwtBlacklist);
     }
 
 }

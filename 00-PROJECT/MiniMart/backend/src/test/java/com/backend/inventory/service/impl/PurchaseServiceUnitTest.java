@@ -11,7 +11,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.backend.common.exception.ResourceNotFoundException;
 import com.backend.common.utils.EntityLookupHelper;
@@ -75,15 +75,9 @@ public class PurchaseServiceUnitTest {
 
     @BeforeAll
     static void setupBean() throws Exception {
-        // hack
         itemMapper = Mappers.getMapper(PurchaseItemMapper.class);
-
         PurchaseMapperImpl impl = (PurchaseMapperImpl) Mappers.getMapper(PurchaseMapper.class);
-
-        Field field = PurchaseMapperImpl.class.getDeclaredField("purchaseItemMapper");
-        field.setAccessible(true);
-        field.set(impl, itemMapper);
-
+        ReflectionTestUtils.setField(impl, "purchaseItemMapper", itemMapper);
         mapper = spy(impl);
     }
 
