@@ -20,7 +20,7 @@ public class PasswordMatchesValidator implements ConstraintValidator<PasswordMat
                 .addPropertyNode("confirmPassword")
                 .addConstraintViolation();
 
-        return false;
+        return password.equals(confirmPassword);
     }
 
 }

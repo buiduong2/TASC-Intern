@@ -2,6 +2,8 @@ package com.backend.user.repository;
 
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -9,6 +11,7 @@ import com.backend.user.model.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
+    @EntityGraph(value = "User.Auth", type = EntityGraphType.FETCH)
     Optional<User> findByUsername(String username);
 
     boolean existsByUsername(String username);

@@ -9,6 +9,7 @@ import org.mapstruct.MappingConstants;
 import com.backend.common.utils.ToEntity;
 import com.backend.user.dto.req.RegisterReq;
 import com.backend.user.dto.res.AuthRes;
+import com.backend.user.model.Customer;
 import com.backend.user.model.Role;
 import com.backend.user.model.User;
 
@@ -16,13 +17,19 @@ import com.backend.user.model.User;
 public interface UserMapper {
 
     @ToEntity
-    @Mapping(target = "customer.profile", source = ".")
+
     @Mapping(target = "roles", ignore = true)
     @Mapping(target = "fullName", expression = "java( req.getLastName() + \" \"  + req.getFirstName()  )")
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "password", ignore = true)
     @Mapping(target = "tokenVersion", ignore = true)
     User toEntity(RegisterReq req);
+
+    @ToEntity
+    @Mapping(target = "profile", source = ".")
+    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "addresses", ignore = true)
+    Customer toCustomerEntity(RegisterReq req);
 
     AuthRes.UserDTO toDTO(User user);
 

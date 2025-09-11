@@ -1,5 +1,6 @@
 package com.backend.product.model;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -10,6 +11,7 @@ import com.backend.common.model.Audit;
 import com.backend.common.model.GetIdAble;
 import com.backend.inventory.model.Stock;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -61,19 +63,27 @@ public class Product implements GetIdAble<Long> {
     private ProductStatus status;
 
     @Embedded
-    private Audit audit;
+    private Audit audit = new Audit();
 
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "product")
     private Stock stock;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private ProductImage image;
 
     @ManyToMany
-    private Set<Tag> tags;
+    private Set<Tag> tags = new HashSet<>();;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Category category;
+
+    public void addTag(Tag tag) {
+        this.tags.add(tag);
+    }
+
+    public void removeTag(Tag tag) {
+        this.tags.remove(tag);
+    }
 
     @Override
     public final boolean equals(Object o) {

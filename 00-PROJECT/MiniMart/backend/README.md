@@ -1,5 +1,9 @@
 # Báo cáo dự án thực tập - Mini Mart
 
+## Câu hỏi
+
+- Tại khi đăng nhập vào facebook tại sao 1 năm sau nó vẫn lưu đăng nhập
+
 ## 1. Giới thiệu
 
 Mini Mart là ứng dụng web E-commerce dạng demo, được xây dựng trong thời gian thực tập với mục tiêu áp dụng các kiến thức đã học về **Java, Spring Boot, JPA, Spring Security** và thiết kế cơ sở dữ liệu.

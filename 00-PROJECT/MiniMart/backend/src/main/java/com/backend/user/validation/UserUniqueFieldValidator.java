@@ -26,9 +26,9 @@ public class UserUniqueFieldValidator implements ConstraintValidator<UserUniqueF
         if (value == null || value.isBlank()) {
             return true;
         }
-
         return switch (this.column) {
             case EMAIL -> !repository.existsByEmail(value);
+
             case USERNAME -> !repository.existsByUsername(value);
         };
 

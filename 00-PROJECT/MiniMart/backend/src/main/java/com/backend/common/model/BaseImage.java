@@ -5,6 +5,7 @@ import java.util.Objects;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
@@ -27,6 +28,7 @@ public class BaseImage {
 
     private String alt;
 
+    @Column(nullable = false)
     private String publicId;
 
     @Embedded

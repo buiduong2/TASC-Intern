@@ -17,11 +17,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.backend.common.config.JpaConfig;
@@ -29,10 +30,12 @@ import com.backend.inventory.dto.req.CreatePurchaseReq;
 import com.backend.inventory.dto.req.PurchaseItemReq;
 import com.backend.inventory.dto.res.PurchaseDTO;
 import com.backend.inventory.service.PurchaseService;
+import com.backend.user.security.JwtAuthenticationFilter;
+import com.backend.user.service.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = PurchaseController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = JpaConfig.class))
-@SuppressWarnings("removal")
+@AutoConfigureMockMvc(addFilters = false)
 public class PurchaseControllerTest {
 
     private static final String API_PURCHASES = "/api/purchases";
@@ -40,8 +43,14 @@ public class PurchaseControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @MockitoBean
     private PurchaseService purchaseService;
+
+    @MockitoBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @MockitoBean
+    private JwtService jwtService;
 
     private CreatePurchaseReq req;
 

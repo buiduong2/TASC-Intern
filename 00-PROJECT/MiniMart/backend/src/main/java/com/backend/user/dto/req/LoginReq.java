@@ -11,7 +11,7 @@ import lombok.Setter;
 public class LoginReq {
 
     @NotEmpty
-    @Length(min = 5, max = 100)
+    @Length(min = 4, max = 100)
     private String username;
 
     @NotEmpty

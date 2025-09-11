@@ -21,6 +21,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
              """)
     Page<Product> findDTOByCategoryIdAndStatus(long categoryId, ProductStatus status, Pageable pageable);
 
+    @EntityGraph(value = "Product.ProductDTO", type = EntityGraphType.FETCH)
+    Page<Product> findAdminDTOBy(Pageable pageable);
+
     @EntityGraph(value = "Product.ProductDetailDTO", type = EntityGraphType.FETCH)
     Optional<Product> findDetailDTOByIdAndStatus(long id, ProductStatus status);
 

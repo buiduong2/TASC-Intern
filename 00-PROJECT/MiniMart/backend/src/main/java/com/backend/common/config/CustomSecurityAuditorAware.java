@@ -17,18 +17,19 @@ public class CustomSecurityAuditorAware implements AuditorAware<User> {
     @SuppressWarnings("null")
     @Override
     public Optional<User> getCurrentAuditor() {
+
         return Optional.ofNullable(SecurityContextHolder.getContext())
                 .map(SecurityContext::getAuthentication)
                 .filter(Authentication::isAuthenticated)
                 .map(auth -> {
-                    if (auth instanceof CustomUserDetail customUserDetail) {
+                    if (auth.getPrincipal() instanceof CustomUserDetail customUserDetail) {
                         long userId = customUserDetail.getUserId();
                         User user = new User();
                         user.setId(userId);
                         return user;
                     }
 
-                    throw new RuntimeException("Soime thing wrong with Authenticaiton aware");
+                    return null;
 
                 });
     }

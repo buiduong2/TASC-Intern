@@ -3,6 +3,7 @@ package com.backend.user.security;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -24,6 +25,9 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
+    @Autowired
+    private ObjectMapper om;
+
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException authException) throws IOException, ServletException {
@@ -36,8 +40,6 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
                 .status(HttpServletResponse.SC_UNAUTHORIZED)
                 .error("Unauthorized")
                 .build();
-
-        ObjectMapper om = new ObjectMapper();
 
         Throwable cause = authException.getCause();
         if (cause instanceof ExpiredJwtException) {
