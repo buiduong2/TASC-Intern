@@ -14,9 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.common.validation.Image;
+import com.backend.product.dto.req.CategoryFilter;
 import com.backend.product.dto.req.CategoryUpdateReq;
+import com.backend.product.dto.res.CategoryAdminDTO;
 import com.backend.product.dto.res.CategoryAdminDetailDTO;
-import com.backend.product.dto.res.CategoryDTO;
 import com.backend.product.service.CategoryService;
 
 import jakarta.validation.Valid;
@@ -30,8 +31,8 @@ public class AdminCategoryController {
     private final CategoryService service;
 
     @GetMapping
-    public Page<CategoryDTO> findPage(@PageableDefault(size = 10) Pageable pageable) {
-        return service.findAllAdmin(pageable);
+    public Page<CategoryAdminDTO> findPage(CategoryFilter filter, @PageableDefault(size = 10) Pageable pageable) {
+        return service.findAllAdmin(filter, pageable);
     }
 
     @GetMapping("{id}")

@@ -82,53 +82,63 @@ public class JdbcTagRepositoryTest {
     }
 
     @Test
-    void testSave() {
-
-        // Test Create
+    void testCreateTag() {
+        // GIven
         Tag tag = new Tag();
         tag.setDescription("test");
         tag.setName("test");
 
+        // When:
         tag = jdbcTagRepository.save(tag);
-
         entityManager.flush();
         entityManager.clear();
 
+        // then
         Tag actual = tagRepository.findById(tag.getId()).orElseThrow();
 
-        assertThat(actual.getDescription()).isEqualTo("test");
-        assertThat(actual.getName()).isEqualTo("test");
         assertThat(actual.getId()).isNotNull();
+        assertThat(actual.getName()).isEqualTo("test");
+        assertThat(actual.getDescription()).isEqualTo("test");
+
         Audit audit = actual.getAudit();
         assertThat(audit).isNotNull();
         assertThat(audit.getCreatedAt()).isNotNull();
         assertThat(audit.getUpdatedAt()).isNull();
+    }
 
+    @Test
+    void testUpdateTag() {
+        // Given
+        Tag tag = new Tag();
+        tag.setDescription("test");
+        tag.setName("test");
+        tag = tagRepository.save(tag);
         entityManager.flush();
         entityManager.clear();
 
-        // Test Update
-        long currentCount = tagRepository.count();
-        long currentId = tag.getId();
+        long countBefore = tagRepository.count();
+        long tagId = tag.getId();
+
+        // WHen
         tag.setName("test-test");
         tag.setDescription("test-test");
-
         jdbcTagRepository.save(tag);
         entityManager.flush();
         entityManager.clear();
 
-        actual = tagRepository.findById(tag.getId()).orElseThrow();
+        // Then
+        Tag actual = tagRepository.findById(tagId).orElseThrow();
 
-        assertThat(currentCount).isEqualTo(tagRepository.count());
-        assertThat(tag.getId()).isEqualTo(currentId);
-        assertThat(actual.getDescription()).isEqualTo("test-test");
+        assertThat(tagRepository.count()).isEqualTo(countBefore);
+        assertThat(actual.getId()).isEqualTo(tagId);
         assertThat(actual.getName()).isEqualTo("test-test");
-        assertThat(actual.getId()).isNotNull();
-        audit = actual.getAudit();
+        assertThat(actual.getDescription()).isEqualTo("test-test");
+
+        Audit audit = actual.getAudit();
         assertThat(audit).isNotNull();
         assertThat(audit.getCreatedAt()).isNotNull();
         assertThat(audit.getUpdatedAt()).isNotNull();
-        assertThat(actual.getAudit().getUpdatedAt()).isAfter(actual.getAudit().getCreatedAt());
-
+        assertThat(audit.getUpdatedAt()).isAfter(audit.getCreatedAt());
     }
+
 }

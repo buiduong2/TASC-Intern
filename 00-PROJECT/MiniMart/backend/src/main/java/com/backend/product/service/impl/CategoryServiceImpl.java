@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.backend.common.exception.ResourceNotFoundException;
+import com.backend.product.dto.req.CategoryFilter;
 import com.backend.product.dto.req.CategoryUpdateReq;
+import com.backend.product.dto.res.CategoryAdminDTO;
 import com.backend.product.dto.res.CategoryAdminDetailDTO;
 import com.backend.product.dto.res.CategoryDTO;
 import com.backend.product.dto.res.CategoryDetailDTO;
@@ -16,6 +18,7 @@ import com.backend.product.mapper.CategoryMapper;
 import com.backend.product.model.Category;
 import com.backend.product.model.ProductStatus;
 import com.backend.product.repository.CategoryRepository;
+import com.backend.product.repository.JdbcCategoryRepository;
 import com.backend.product.service.CategoryService;
 
 import lombok.RequiredArgsConstructor;
@@ -25,6 +28,8 @@ import lombok.RequiredArgsConstructor;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository repository;
+
+    private final JdbcCategoryRepository jdbcRepository;
 
     private final CategoryMapper mapper;
 
@@ -44,26 +49,25 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Page<CategoryDTO> findAllAdmin(Pageable pageable) {
-        return repository.findAll(pageable)
-                .map(mapper::toDTO);
+    public Page<CategoryAdminDTO> findAllAdmin(CategoryFilter filter, Pageable pageable) {
+        return jdbcRepository.findAllAdmin(filter, pageable);
     }
 
     @Transactional
     @Override
     public CategoryAdminDetailDTO create(CategoryUpdateReq dto) {
         Category category = mapper.toEntity(dto);
-        repository.save(category);
+        jdbcRepository.save(category);
         return mapper.toAdminDetailDTO(category);
     }
 
     @Transactional
     @Override
     public CategoryAdminDetailDTO update(Long id, CategoryUpdateReq dto) {
-        Category existed = repository.findById(id)
+        Category existed = jdbcRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category id = " + id + " is not exists"));
         mapper.updateEntity(existed, dto);
-        repository.save(existed);
+        jdbcRepository.save(existed);
         return mapper.toAdminDetailDTO(existed);
     }
 

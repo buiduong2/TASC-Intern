@@ -22,6 +22,7 @@ public class JpaConfig {
         return new JdbcTemplate(dataSource);
     }
 
+    @Bean
     NamedParameterJdbcTemplate namedParameterJdbcTemplate(DataSource dataSource) {
         return new NamedParameterJdbcTemplate(dataSource);
     }

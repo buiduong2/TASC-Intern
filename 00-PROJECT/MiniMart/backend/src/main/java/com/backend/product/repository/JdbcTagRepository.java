@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -19,13 +20,13 @@ import org.springframework.util.StringUtils;
 
 import com.backend.common.exception.ResourceNotFoundException;
 import com.backend.common.model.Audit;
-import com.backend.common.utils.Utils;
 import com.backend.product.dto.req.TagFilter;
 import com.backend.product.dto.res.TagAdminDTO;
 import com.backend.product.model.Tag;
 import com.backend.user.model.User;
 import com.backend.user.security.CustomUserDetail;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Repository
@@ -37,7 +38,7 @@ public class JdbcTagRepository {
     public Optional<Tag> findById(long id) {
         String sql = "SELECT * FROM tag WHERE id= ?";
         List<Tag> tags = jdbcTemplate.query(sql, (rs, i) -> toTag(rs), id);
-        return tags.isEmpty() ? Optional.empty() : Optional.of(tags.get(0));
+        return tags.stream().findFirst();
     }
 
     public int deleteById(long id) {
@@ -47,60 +48,49 @@ public class JdbcTagRepository {
         return jdbcTemplate.update(sql, id);
     }
 
+    @Transactional
     public Tag save(Tag entity) {
+        if (entity.getAudit() == null) {
+            entity.setAudit(new Audit());
+        }
+
         return entity.getId() == null ? create(entity) : update(entity);
     }
 
     private Tag create(Tag entity) {
-        if (entity.getAudit() == null) {
-            entity.setAudit(new Audit());
-        }
-        LocalDateTime now = LocalDateTime.now();
-        entity.getAudit().setCreatedAt(now);
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Long createdById = null;
-        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetail userDetail) {
-            createdById = userDetail.getUserId();
-            User user = new User();
-            user.setId(createdById);
+        LocalDateTime now = LocalDateTime.now();
+        Long id = jdbcTemplate.queryForObject("select nextval('tag_seq')", Long.class);
+        User user = buildAuthUser();
+        if (user != null) {
             entity.getAudit().setCreatedBy(user);
         }
-        Long id = jdbcTemplate.queryForObject("select nextval('tag_seq')", Long.class);
-        if (id == null) {
-            throw new IllegalStateException("Cannot generate id from tag_seq");
-        }
+
+        entity.getAudit().setCreatedAt(now);
         entity.setId(id);
 
         String sql = "INSERT INTO tag(id, name, description, created_at, created_by_id) VALUES (?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql, id, entity.getName(), entity.getDescription(),
-                Timestamp.valueOf(entity.getAudit().getCreatedAt()), createdById);
+                entity.getAudit().getCreatedAt(), user == null ? null : user.getId());
 
         return entity;
     }
 
     private Tag update(Tag entity) {
-        if (entity.getAudit() == null) {
-            entity.setAudit(new Audit());
-        }
-        entity.getAudit().setUpdatedAt(LocalDateTime.now());
 
-        Long updatedById = null;
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetail userDetail) {
-            updatedById = userDetail.getUserId();
-            User user = new User();
-            user.setId(updatedById);
+        User user = buildAuthUser();
+        if (user != null) {
             entity.getAudit().setUpdatedBy(user);
         }
 
+        entity.getAudit().setUpdatedAt(LocalDateTime.now());
         String sql = "UPDATE tag SET name = ?, description = ?, updated_at = ?, updated_by_id = ? WHERE id = ?";
 
         int rowAffected = jdbcTemplate.update(sql,
                 entity.getName(),
                 entity.getDescription(),
-                Timestamp.valueOf(entity.getAudit().getUpdatedAt()),
-                updatedById,
+                entity.getAudit().getUpdatedAt(),
+                user == null ? null : user.getId(),
                 entity.getId());
 
         if (rowAffected != 1) {
@@ -109,36 +99,43 @@ public class JdbcTagRepository {
         return entity;
     }
 
+    private final Map<String, String> orderColMap = Map.of(
+            "id", "t.id",
+            "name", "t.name",
+            "productCount", "product_count",
+            "createdAt", "t.created_at",
+            "updatedAt", "t.updated_at");
+
     public Page<TagAdminDTO> findAllAdmin(TagFilter filter, Pageable pageable) {
 
         List<Object> params = new ArrayList<>();
 
-        String whereClauses = buildAdminWhereClause(filter, params);
-        String havingClauses = buildAdminHavingClause(filter, params);
-        String orderClauses = buildOrderClause(pageable);
+        String where = buildAdminWhereClause(filter, params);
+        String having = buildAdminHavingClause(filter, params);
+        String order = buildOrderClause(pageable);
 
         StringBuilder mainQuery = new StringBuilder(
-                "SELECT t.id, t.name, t.created_at, t.updated_at, COALESCE(COUNT(p.id), 0) AS product_count "
+                "SELECT t.id, t.name, t.created_at, t.updated_at, COUNT(p.id) AS product_count "
                         + "FROM tag AS t "
                         + "LEFT JOIN product_tags AS p ON t.id = p.tags_id ");
-        if (!whereClauses.isEmpty()) {
-            mainQuery.append("WHERE ").append(whereClauses).append(" ");
+        if (StringUtils.hasText(where)) {
+            mainQuery.append("WHERE ").append(where).append(" ");
         }
 
         mainQuery.append("GROUP BY t.id, t.name, t.created_at, t.updated_at ");
-        if (!havingClauses.isEmpty()) {
-            mainQuery.append("HAVING ").append(havingClauses).append(" ");
+        if (StringUtils.hasText(having)) {
+            mainQuery.append("HAVING ").append(having).append(" ");
         }
-        if (!orderClauses.isEmpty()) {
-            mainQuery.append("ORDER BY ").append(orderClauses).append(" ");
+        if (StringUtils.hasText(order)) {
+            mainQuery.append("ORDER BY ").append(order).append(" ");
         }
         mainQuery.append("LIMIT ? OFFSET ? ");
+
+        List<Object> countParams = new ArrayList<>(params);
         params.add(pageable.getPageSize());
         params.add(pageable.getOffset());
 
-        List<Object> countParams = new ArrayList<>(params.subList(0, params.size() - 2));
-
-        String countQuery = buildAdminCountQuery(whereClauses, havingClauses);
+        String countQuery = buildAdminCountQuery(where, having);
 
         Long count = jdbcTemplate.queryForObject(countQuery, Long.class, countParams.toArray());
 
@@ -149,68 +146,82 @@ public class JdbcTagRepository {
     }
 
     private String buildAdminCountQuery(String whereClauses, String havingClauses) {
-        StringBuilder countQuery = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         if (havingClauses.isEmpty()) {
-            countQuery.append("SELECT COUNT(*) FROM tag t ");
+            sb.append("SELECT COUNT(*) FROM tag t ");
             if (!whereClauses.isEmpty()) {
-                countQuery.append("WHERE ").append(whereClauses);
+                sb.append("WHERE ").append(whereClauses);
             }
         } else {
-            countQuery.append("WITH main_query AS ( ");
-            countQuery.append("SELECT t.id  FROM tag t LEFT JOIN product_tags p ON p.tags_id = t.id ");
+            sb.append("WITH main_query AS ( ");
+            sb.append("SELECT t.id  FROM tag t LEFT JOIN product_tags p ON p.tags_id = t.id ");
             if (!whereClauses.isEmpty()) {
-                countQuery.append("WHERE ").append(whereClauses).append(" ");
+                sb.append("WHERE ").append(whereClauses).append(" ");
             }
-            countQuery.append("GROUP BY t.id ");
-            countQuery.append("HAVING ").append(havingClauses).append(" ");
-            countQuery.append(") SELECT COUNT(*) FROM main_query");
+            sb.append("GROUP BY t.id ");
+            sb.append("HAVING ").append(havingClauses).append(" ");
+            sb.append(") SELECT COUNT(*) FROM main_query");
         }
-        return countQuery.toString();
+        return sb.toString();
     }
 
     private String buildOrderClause(Pageable pageable) {
-        List<String> orderClauses = new ArrayList<>();
-        pageable.getSort().forEach(
-                order -> orderClauses.add(Utils.camelToSnake(order.getProperty()) + " " + order.getDirection().name()));
-        return String.join(", ", orderClauses);
+        List<String> clauses = new ArrayList<>();
+        pageable.getSort().forEach(order -> {
+            String col = order.getProperty();
+            if (orderColMap.containsKey(col)) {
+                clauses.add(orderColMap.get(col) + " " + order.getDirection().name());
+            }
+        });
+        return String.join(", ", clauses);
     }
 
     private String buildAdminHavingClause(TagFilter filter, List<Object> params) {
-        List<String> havingClauses = new ArrayList<>();
+        List<String> clauses = new ArrayList<>();
         if (filter.getMinProductCount() != null) {
-            havingClauses.add("COUNT(p.id) >= ?");
+            clauses.add("COUNT(p.id) >= ?");
             params.add(filter.getMinProductCount());
         }
         if (filter.getMaxProductCount() != null) {
-            havingClauses.add("COUNT(p.id) <= ?");
+            clauses.add("COUNT(p.id) <= ?");
             params.add(filter.getMaxProductCount());
         }
-        return String.join(" AND ", havingClauses);
+        return String.join(" AND ", clauses);
     }
 
     private String buildAdminWhereClause(TagFilter filter, List<Object> params) {
-        List<String> whereClauses = new ArrayList<>();
+        List<String> clauses = new ArrayList<>();
         if (filter.getCreatedFrom() != null) {
-            whereClauses.add("t.created_at >= ?");
+            clauses.add("t.created_at >= ?");
             params.add(filter.getCreatedFrom());
         }
         if (filter.getUpdatedFrom() != null) {
-            whereClauses.add("t.updated_at >= ?");
+            clauses.add("t.updated_at >= ?");
             params.add(filter.getUpdatedFrom());
         }
         if (StringUtils.hasText(filter.getName())) {
-            whereClauses.add("t.name LIKE ?");
+            clauses.add("t.name LIKE ?");
             params.add("%" + filter.getName() + "%");
         }
-        return String.join(" AND ", whereClauses);
+        return String.join(" AND ", clauses);
+    }
+
+    private User buildAuthUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetail userDetail) {
+            User user = new User();
+            user.setId(userDetail.getUserId());
+            return user;
+        }
+        return null;
     }
 
     private TagAdminDTO toTagAdminDTO(ResultSet rs) throws SQLException {
-        long id = rs.getLong(1);
-        String name = rs.getString(2);
-        Timestamp createdAtTs = rs.getTimestamp(3);
-        Timestamp updatedAtTs = rs.getTimestamp(4);
-        long productCount = rs.getLong(5);
+        long id = rs.getLong("id");
+        String name = rs.getString("name");
+        Timestamp createdAtTs = rs.getTimestamp("created_at");
+        Timestamp updatedAtTs = rs.getTimestamp("updated_at");
+        long productCount = rs.getLong("product_count");
 
         LocalDateTime createdAt = createdAtTs == null ? null : createdAtTs.toLocalDateTime();
         LocalDateTime updatedAt = updatedAtTs == null ? null : updatedAtTs.toLocalDateTime();

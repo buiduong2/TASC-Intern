@@ -42,7 +42,7 @@ public class Category {
     private ProductStatus status;
 
     @Embedded
-    private Audit audit;
+    private Audit audit = new Audit();
 
     @OneToOne(fetch = FetchType.LAZY)
     private CategoryImage image;
