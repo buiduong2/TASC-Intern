@@ -24,6 +24,7 @@ import lombok.Setter;
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "purchase_id", "product_id" }) })
 @EntityListeners(AuditingEntityListener.class)
 public class PurchaseItem {
+
     @Id
     @GeneratedValue
     private Long id;

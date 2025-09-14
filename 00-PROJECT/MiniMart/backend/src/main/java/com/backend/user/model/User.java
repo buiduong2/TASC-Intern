@@ -1,10 +1,8 @@
 package com.backend.user.model;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -63,9 +61,11 @@ public class User {
     @Embedded
     private Audit audit = new Audit();
 
-    public boolean hasAnyRole(RoleName... roles) {
-        Set<RoleName> roleNames = new HashSet<>(Arrays.asList(roles));
-        return this.roles.stream().anyMatch(r -> roleNames.contains(r.getName()));
+    public void addRole(Role role) {
+        if (this.roles == null) {
+            this.roles = new ArrayList<>();
+        }
+        this.roles.add(role);
     }
 
     @Override

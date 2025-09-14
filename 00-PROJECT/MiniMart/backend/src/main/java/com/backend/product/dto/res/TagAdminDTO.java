@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class TagAdminDTO {
-    
+
     private Long id;
     private String name;
     private LocalDateTime createdAt;

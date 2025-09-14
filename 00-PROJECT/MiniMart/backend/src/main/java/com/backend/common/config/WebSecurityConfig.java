@@ -15,6 +15,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.backend.common.exception.GenericErrorResponse;
+import com.backend.user.model.RoleName;
 import com.backend.user.security.JwtAuthenticationEntryPoint;
 import com.backend.user.security.JwtAuthenticationFilter;
 import com.backend.user.service.impl.CustomUserDetailService;
@@ -55,7 +56,8 @@ public class WebSecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
+        final String STAFF = RoleName.STAFF.toString();
+        final String ADMIN = RoleName.ADMIN.toString();
         http
                 .exceptionHandling(ex -> ex
                         .accessDeniedHandler(accessDeniedHandler())
@@ -66,8 +68,14 @@ public class WebSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         authorize -> authorize
+                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                                .requestMatchers("/api/orders/**").authenticated()
+                                .requestMatchers("/api/admin/**").hasAnyAuthority(STAFF, ADMIN)
+                                .requestMatchers("/api/admin/users").hasAuthority(ADMIN)
                                 .requestMatchers("/api/auth/change-password").authenticated()
                                 .requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/api/products").permitAll()
+                                .requestMatchers("/api/categories").permitAll()
                                 .anyRequest().authenticated()
 
                 );

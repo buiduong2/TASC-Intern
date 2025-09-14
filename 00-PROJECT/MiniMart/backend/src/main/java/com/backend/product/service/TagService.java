@@ -3,13 +3,14 @@ package com.backend.product.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.backend.product.dto.req.TagFilter;
 import com.backend.product.dto.req.TagUpdateReq;
 import com.backend.product.dto.res.TagAdminDTO;
 import com.backend.product.dto.res.TagAdminDetailDTO;
 
 public interface TagService {
 
-    Page<TagAdminDTO> findAdminAll(Pageable pageable);
+    Page<TagAdminDTO> findAdminAll(TagFilter filter, Pageable pageable);
 
     TagAdminDetailDTO findAdminDetailById(long id);
 

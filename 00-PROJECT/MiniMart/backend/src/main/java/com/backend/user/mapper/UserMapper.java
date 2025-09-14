@@ -1,14 +1,18 @@
 package com.backend.user.mapper;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
+import org.mapstruct.MappingTarget;
 
 import com.backend.common.utils.ToEntity;
 import com.backend.user.dto.req.RegisterReq;
+import com.backend.user.dto.req.UpdateUserAdminReq;
 import com.backend.user.dto.res.AuthRes;
+import com.backend.user.dto.res.UserAdminDTO;
 import com.backend.user.model.Customer;
 import com.backend.user.model.Role;
 import com.backend.user.model.User;
@@ -33,7 +37,18 @@ public interface UserMapper {
 
     AuthRes.UserDTO toDTO(User user);
 
-    default List<String> toRoles(List<Role> roles) {
+    default List<String> toRoles(Collection<Role> roles) {
         return roles.stream().map(Role::getName).map(String::valueOf).toList();
     }
+
+    @Mapping(target = "createdAt", source = "audit.createdAt")
+    UserAdminDTO toAdminDTO(User user);
+
+    @ToEntity
+    @Mapping(target = "roles", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "username", ignore = true)
+    @Mapping(target = "tokenVersion", ignore = true)
+    void update(@MappingTarget User user, UpdateUserAdminReq req);
+
 }

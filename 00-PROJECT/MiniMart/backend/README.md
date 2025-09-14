@@ -50,6 +50,13 @@ Mini Mart là ứng dụng web E-commerce dạng demo, được xây dựng tron
 -   Quản lý phân quyền role . User- role
 -   ADdress: qunar lý địa chỉ của khách có nhiều address
 
+## 2.1. Ứng dụng Query theo nhiều cách
+
+- projection
+    - Sử dụng với User
+
+- JdbcTemplate Dùng cho
+
 ## 3. Luồng nghiệp vụ chính
 
 ### nhập hàng vào kho
@@ -126,14 +133,54 @@ Mini Mart là ứng dụng web E-commerce dạng demo, được xây dựng tron
 
 ## AUth
 
--   Đăng kí đăng nhập
+-   Đăng kí đăng nhập   
+    - Cung cấp Token để request các lần tiếp theo
 
 -   Đổi mật khẩu
+    - Ép buộc tất cả các phiên đăng nhập trước đều vo hiêu họa
 
--   Quên mật khẩu
-
--   RefreshToken
+-   RefreshToken    
+    - Làm mới accessToken, Giữ nguyên refreshToken
 
 -   logout 
+    - Vô hiệu hóa Token trong phiên hiện tại
 
--   
+
+## Luồng  Update Purchase Item
+
+- **Kịch bản cần update**
+
+- Nhập liệu sai
+    - UPDATE quantity || remaining_quantity || cost_price
+
+- Khi cần điều chỉnh kho so với thực tế
+    - UPDATE remianing_quantity
+
+- Điều chỉnh chi phí
+    - UPDATE cost_price
+
+- Hoàn trả bớt hàng cho supplier
+    - UPDATE quantity + remaining_quantity
+
+- **Kịch bản delete**
+- Nhập liệu saio
+    - Nhập nhầm product_Id hoặc purchase_id . ép buộc xóa đi tạo cái khác
+- Hủy ko nhận một mặt hàng đơn lẻ
+
+- **Khó khăn**
+
+- Không thể cập nhật cứng remaining_quantity: bởi vì trên client UI ko phản ánh chính xác số lượng thực tế. Mà nó chỉ phản ánh thời điểm load lên mà thôi không thể xử lý một cách `absolute` được 
+
+- **Hướng giải quyết**
+
+- Tạo ra 3 API: API 1 cho nhập liệu sai: `PUT /api/purchase-items/{id}`
+    - newQuantity (absolute), newCostPrice
+    - Số lượng Quantity nhập vào ko đứng thực tế -> remaining + quantity
+- Điều chỉnh kho so với thực tế: 
+    - `POST /api/purchase-items/{id}/adjustments`
+    - adjustmentDelta (delta) , UPDATE remainingQuantity
+    - Mặt hàng remaining bị thất thoát -> Điều chỉnh remaning -> quantity(đã nhập) giữ nguyên
+    
+- return 
+    - returnQuantity: (delta)
+    - Trả hàng lại cho nhà sản xuất, hoặc lấy thêm đơn hàng -> Giảm remaining + quantity

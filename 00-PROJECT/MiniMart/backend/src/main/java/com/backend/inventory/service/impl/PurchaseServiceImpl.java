@@ -9,9 +9,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.backend.common.exception.ResourceNotFoundException;
 import com.backend.common.utils.EntityLookupHelper;
 import com.backend.inventory.dto.event.PurchaseCreatedEvent;
 import com.backend.inventory.dto.req.CreatePurchaseReq;
+import com.backend.inventory.dto.req.UpdatePurchaseReq;
 import com.backend.inventory.dto.res.PurchaseDTO;
 import com.backend.inventory.mapper.PurchaseMapper;
 import com.backend.inventory.model.Purchase;
@@ -64,6 +66,26 @@ public class PurchaseServiceImpl implements PurchaseService {
     @Override
     public Page<PurchaseDTO> findPage(Pageable pageable) {
         return repository.findAdminAll(pageable);
+    }
+
+    @Override
+    public PurchaseDTO update(long id, UpdatePurchaseReq req) {
+        Purchase purchase = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Purchase id = " + id + " is not found"));
+
+        purchase.setSupplier(req.getSupplier());
+        repository.save(purchase);
+
+        int totalQuantity = 0;
+        double totalCostPrice = 0;
+
+        for (PurchaseItem purchaseItem : purchase.getPurchaseItems()) {
+            totalQuantity += purchaseItem.getQuantity();
+            totalCostPrice += purchaseItem.getCostPrice();
+        }
+
+        return new PurchaseDTO(id, purchase.getAudit().getCreatedAt(), purchase.getSupplier(), totalQuantity,
+                totalCostPrice);
     }
 
 }

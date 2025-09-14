@@ -22,7 +22,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @NamedEntityGraph(name = "Category.CategoryDTO", attributeNodes = {
-        @NamedAttributeNode(value = "image"),
+        @NamedAttributeNode(value = Category_.IMAGE),
 })
 @Entity
 @Getter

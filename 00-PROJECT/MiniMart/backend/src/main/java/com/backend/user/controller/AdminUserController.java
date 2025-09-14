@@ -11,22 +11,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.backend.user.dto.req.UpdateUserAdminReq;
+import com.backend.user.dto.req.UserFilter;
 import com.backend.user.dto.res.UserAdminDTO;
 import com.backend.user.service.UserService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/admin/users")
-
 @RequiredArgsConstructor
 public class AdminUserController {
 
     private final UserService service;
 
     @GetMapping
-    public Page<UserAdminDTO> findPage(@PageableDefault(size = 10) Pageable pageable) {
-        return service.findAdminDTOsBy(pageable);
+    public Page<UserAdminDTO> findPage(@Valid UserFilter filter, @PageableDefault(size = 10) Pageable pageable) {
+        return service.findAdminDTOsBy(filter, pageable);
     }
 
     @GetMapping("{id}")

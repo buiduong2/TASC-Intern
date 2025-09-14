@@ -1,9 +1,8 @@
 package com.backend.user.controller;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -13,8 +12,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
-import java.util.Optional;
 
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,32 +21,27 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.backend.common.config.JpaConfig;
 import com.backend.user.dto.req.LoginReq;
 import com.backend.user.dto.res.AuthRes;
-import com.backend.user.mapper.UserMapper;
+import com.backend.user.exception.UserInactiveException;
 import com.backend.user.model.Role;
 import com.backend.user.model.RoleName;
 import com.backend.user.model.User;
 import com.backend.user.model.UserStatus;
-import com.backend.user.repository.CustomerRepository;
-import com.backend.user.repository.RoleRepository;
-import com.backend.user.repository.UserRepository;
+import com.backend.user.security.JwtAuthenticationFilter;
+import com.backend.user.service.AuthService;
 import com.backend.user.service.JwtService;
-import com.backend.user.service.impl.AuthServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = AuthController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = JpaConfig.class))
 @AutoConfigureMockMvc(addFilters = false)
-@Import({ AuthServiceImpl.class })
 public class AuthControllerMvcTest {
 
     private static final String API_AUTH_LOGIN = "/api/auth/login";
@@ -55,26 +49,14 @@ public class AuthControllerMvcTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockitoSpyBean
-    private AuthServiceImpl authService;
+    @MockitoBean
+    private AuthService authService;
 
     @MockitoBean
     private JwtService jwtService;
 
     @MockitoBean
-    private UserRepository userRepository;
-
-    @MockitoBean
-    private PasswordEncoder passwordEncoder;
-
-    @MockitoBean
-    private UserMapper userMapper;
-
-    @MockitoBean
-    private RoleRepository repository;
-
-    @MockitoBean
-    private CustomerRepository customerRepository;
+    private JwtAuthenticationFilter filter;
 
     private LoginReq req;
 
@@ -84,6 +66,7 @@ public class AuthControllerMvcTest {
 
     @BeforeEach
     void setup() {
+
         req = new LoginReq();
         req.setPassword("12345678");
         req.setUsername("root");
@@ -121,9 +104,9 @@ public class AuthControllerMvcTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.refreshToken").isString())
-                .andExpect(jsonPath("$.accessToken").isString())
-                .andExpect(jsonPath("$.user").isMap());
+                .andExpect(jsonPath("$.refreshToken").value(authRes.getRefreshToken()))
+                .andExpect(jsonPath("$.accessToken").value(authRes.getAccessToken()))
+                .andExpect(jsonPath("$.user").value(authRes.getUser()));
 
         verify(authService, times(1)).login(any());
 
@@ -133,60 +116,79 @@ public class AuthControllerMvcTest {
     void login_givenWrongPassword_shouldReturn401() throws Exception {
         ObjectMapper om = new ObjectMapper();
         String json = om.writeValueAsString(req);
-        doReturn(Optional.of(user)).when(userRepository).findByUsername(req.getUsername());
-        doReturn(false).when(passwordEncoder).matches(anyString(), anyString());
+        doThrow(new BadCredentialsException("random  message. messages were fixed")).when(authService).login(any());
 
         mvc.perform(
                 post(API_AUTH_LOGIN)
                         .content(json)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized());
-        ;
-
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(HttpStatus.SC_UNAUTHORIZED))
+                .andExpect(jsonPath("$.error").value("AUTH_INVALID"))
+                .andExpect(jsonPath("$.message").value("Invalid username or password"))
+                .andExpect(jsonPath("$.timestamp").isString());
         verify(authService, times(1)).login(any());
-        verify(userRepository, times(1)).findByUsername(req.getUsername());
-        verify(passwordEncoder, times(1)).matches(eq(req.getPassword()), anyString());
+
     };
 
     @Test
     void login_givenNonExistingUsername_shouldReturn401() throws Exception {
         ObjectMapper om = new ObjectMapper();
         String json = om.writeValueAsString(req);
-        doReturn(Optional.empty()).when(userRepository).findByUsername(req.getUsername());
+        doThrow(new BadCredentialsException("random  message. messages were fixed")).when(authService).login(any());
+
         mvc.perform(
                 post(API_AUTH_LOGIN)
                         .content(json)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized());
-
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(HttpStatus.SC_UNAUTHORIZED))
+                .andExpect(jsonPath("$.error").value("AUTH_INVALID"))
+                .andExpect(jsonPath("$.message").value("Invalid username or password"))
+                .andExpect(jsonPath("$.timestamp").isString());
         verify(authService, times(1)).login(any());
-        verify(userRepository, times(1)).findByUsername(req.getUsername());
-        verify(passwordEncoder, never()).matches(eq(req.getPassword()), anyString());
+
     };
 
     @Test
     void login_givenInactiveUser_shouldReturn403() throws Exception {
-        user.setStatus(UserStatus.INACTIVE);
-
         ObjectMapper om = new ObjectMapper();
         String json = om.writeValueAsString(req);
-        doReturn(Optional.of(user)).when(userRepository).findByUsername(req.getUsername());
-        doReturn(true).when(passwordEncoder).matches(req.getPassword(), user.getPassword());
+        doThrow(new UserInactiveException("Mesage dynamic userinactive")).when(authService).login(any());
         mvc.perform(
                 post(API_AUTH_LOGIN)
                         .content(json)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
-
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.status").value(HttpStatus.SC_FORBIDDEN))
+                .andExpect(jsonPath("$.error").value("USER_INACTIVE"))
+                .andExpect(jsonPath("$.message").value("Mesage dynamic userinactive"))
+                .andExpect(jsonPath("$.timestamp").isString());
         verify(authService, times(1)).login(any());
-        verify(userRepository, times(1)).findByUsername(req.getUsername());
-        verify(passwordEncoder, times(1)).matches(eq(req.getPassword()), anyString());
-    };
+    }
+
+    @Test
+    void login_givenInvalidRequestBody_shouldReturn400() throws Exception {
+        String json = """
+                    {}
+                """;
+        mvc.perform(
+                post(API_AUTH_LOGIN)
+                        .content(json)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(HttpStatus.SC_BAD_REQUEST))
+                .andExpect(jsonPath("$.error").value("Validation Error"))
+                .andExpect(jsonPath("$.message").value("Input validation Failed"))
+                .andExpect(jsonPath("$.timestamp").isString())
+                .andExpect(jsonPath("$.errors").isArray());
+        verify(authService, never()).login(any());
+    }
 
     // Register
     @Test
     void register_givenValidRequest_shouldReturn201AndTokens() {
-        
+
     }
 
     @Test

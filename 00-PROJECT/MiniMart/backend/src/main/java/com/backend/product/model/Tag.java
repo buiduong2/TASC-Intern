@@ -32,7 +32,7 @@ public class Tag {
     private String description;
 
     @Embedded
-    private Audit audit;
+    private Audit audit = new Audit();
 
     @ManyToMany(mappedBy = "tags")
     private Set<Product> products;

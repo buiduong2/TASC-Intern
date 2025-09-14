@@ -12,10 +12,12 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.backend.common.exception.ConflictException;
 import com.backend.common.exception.GenericErrorResponse;
 import com.backend.common.exception.ResourceNotFoundException;
 import com.backend.common.exception.ValidationErrorResponse;
 import com.backend.common.exception.ValidationErrorResponse.ErrorDetail;
+import com.backend.common.exception.ValidationException;
 import com.backend.user.exception.TokenBlacklistedException;
 import com.backend.user.exception.TokenVersionMismatchException;
 import com.backend.user.exception.UserInactiveException;
@@ -47,6 +49,30 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<GenericErrorResponse> handleConflictException(ConflictException ex) {
+        GenericErrorResponse error = GenericErrorResponse.builder()
+                .status(HttpStatus.CONFLICT.value())
+                .error("Conflict data")
+                .message("Cannot delete because it's already used")
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ValidationErrorResponse> handleValidationException(
+            ValidationException ex) {
+        ValidationErrorResponse errorResponse = new ValidationErrorResponse();
+        ErrorDetail errorDetail = new ErrorDetail();
+        errorDetail.setField(ex.getFiled());
+        errorDetail.setMessage(ex.getMessage());
+        errorResponse.setErrors(List.of(errorDetail));
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -1,6 +1,7 @@
 package com.backend.inventory.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -21,11 +22,18 @@ public interface PurchaseItemRepository extends JpaRepository<PurchaseItem, Long
             """)
     List<PurchaseItem> findAvaiableByProductIdInForUpdate(List<Long> productIds);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            FROM PurchaseItem AS pi
+            WHERE pi.id = ?1
+            """)
+    Optional<PurchaseItem> findByIdForUpdate(long id);
+
     @Modifying
     @Query("""
-            UPDATE PurchaseItem AS pi 
+            UPDATE PurchaseItem AS pi
             SET pi.remainingQuantity = pi.remainingQuantity + ?2
-            WHERE pi.id =?1 
+            WHERE pi.id =?1
             """)
     int increaseRemainingQuantity(long purchaseItemId, int delta);
 }
