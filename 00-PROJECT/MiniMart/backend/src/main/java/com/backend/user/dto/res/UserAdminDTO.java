@@ -16,5 +16,4 @@ public class UserAdminDTO {
     private String email;
     private UserStatus status;
     private LocalDateTime createdAt;
-
 }

@@ -42,8 +42,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<ProductDTO> findByCategoryId(long categoryId, Pageable pageable) {
-        return repository.findDTOByCategoryIdAndStatus(categoryId, ProductStatus.ACTIVE, pageable)
-                .map(mapper::toDTO);
+        return repository.findDTOByCategoryIdAndStatus(categoryId, ProductStatus.ACTIVE, pageable);
     }
 
     @Override

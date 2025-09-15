@@ -10,16 +10,28 @@ import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import com.backend.product.dto.res.ProductDTO;
 import com.backend.product.model.Product;
 import com.backend.product.model.ProductStatus;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    @EntityGraph(value = Product.NamedGraph_DTO, type = EntityGraphType.FETCH)
     @Query(value = """
-            FROM Product AS p WHERE p.category.id = ?1 AND p.status = ?2
+            SELECT
+            new com.backend.product.dto.res.ProductDTO(
+                p.id AS id,
+                p.name AS name,
+                i.url AS imageUrl,
+                p.salePrice AS salePrice,
+                p.compareAtPrice AS compareAtPrice,
+                s.quantity AS stock
+                )
+            FROM Product AS p
+            LEFT JOIN p.image i
+            LEFT JOIN p.stock s
+            WHERE p.category.id = ?1 AND p.status = ?2
              """)
-    Page<Product> findDTOByCategoryIdAndStatus(long categoryId, ProductStatus status, Pageable pageable);
+    Page<ProductDTO> findDTOByCategoryIdAndStatus(long categoryId, ProductStatus status, Pageable pageable);
 
     @EntityGraph(value = Product.NamedGraph_DTO, type = EntityGraphType.FETCH)
     Page<Product> findAdminDTOBy(Pageable pageable);
