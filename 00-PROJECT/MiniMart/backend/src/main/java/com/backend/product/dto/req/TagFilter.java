@@ -2,8 +2,8 @@ package com.backend.product.dto.req;
 
 import java.time.LocalDateTime;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,9 +19,9 @@ public class TagFilter {
     @Past
     private LocalDateTime updatedFrom;
 
-    @Min(0)
+    @Positive
     private Long minProductCount;
 
-    @Min(0)
+    @Positive
     private Long maxProductCount;
 }

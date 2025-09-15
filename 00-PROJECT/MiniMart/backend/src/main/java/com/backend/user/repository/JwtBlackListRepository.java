@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import com.backend.user.model.JwtBlacklist;
 
 public interface JwtBlackListRepository extends JpaRepository<JwtBlacklist, String> {
+
     @Modifying
     @Query("DELETE FROM JwtBlacklist b WHERE b.expiredAt < :now")
     void deleteAllExpired(@Param("now") LocalDateTime now);

@@ -1,13 +1,17 @@
 package com.backend.order.model;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.backend.common.model.Audit;
+import com.backend.order.dto.res.OrderAdminDTO;
 import com.backend.user.model.Customer;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.ColumnResult;
+import jakarta.persistence.ConstructorResult;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -18,8 +22,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedStoredProcedureQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.ParameterMode;
+import jakarta.persistence.SqlResultSetMapping;
+import jakarta.persistence.StoredProcedureParameter;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import lombok.Getter;
@@ -29,12 +37,51 @@ import lombok.Setter;
         @NamedAttributeNode(value = "customer"),
 })
 
+@SqlResultSetMapping(name = "OrderAdminMapping", //
+        classes = @ConstructorResult(targetClass = OrderAdminDTO.class, columns = {
+                @ColumnResult(name = "id", type = Long.class),
+                @ColumnResult(name = "status", type = String.class),
+                @ColumnResult(name = "payment_method", type = String.class),
+                @ColumnResult(name = "shipping_method", type = String.class),
+                @ColumnResult(name = "total_price", type = BigDecimal.class),
+                @ColumnResult(name = "total_cost", type = BigDecimal.class),
+                @ColumnResult(name = "revenue", type = BigDecimal.class),
+                @ColumnResult(name = "customer_id", type = Long.class),
+                @ColumnResult(name = "created_at", type = java.sql.Timestamp.class),
+                @ColumnResult(name = "updated_at", type = java.sql.Timestamp.class)
+        }))
+@NamedStoredProcedureQuery(name = Order.NamedProcedure_PAGE_ADMIN, //
+        procedureName = "get_admin_orders_page", //
+        resultSetMappings = "OrderAdminMapping", //
+        parameters = {
+                @StoredProcedureParameter(mode = ParameterMode.REF_CURSOR, name = "ref_orders", type = void.class),
+                @StoredProcedureParameter(mode = ParameterMode.OUT, name = "page_total", type = Long.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_order_id", type = Long.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_status", type = String.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_payment_method_name", type = String.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_shipping_method_id", type = Long.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_customer_id", type = Long.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_created_from", type = java.sql.Timestamp.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_created_to", type = java.sql.Timestamp.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_min_total_price", type = BigDecimal.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_max_total_price", type = BigDecimal.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_min_total_cost", type = BigDecimal.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_max_total_cost", type = BigDecimal.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_sorts", type = String.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_page_size", type = Integer.class),
+                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_page_offset", type = Integer.class)
+        }
+
+)
+
 @Entity
 @Getter
 @Setter
 @Table(name = "orders")
 @EntityListeners(AuditingEntityListener.class)
 public class Order {
+
+    public static final String NamedProcedure_PAGE_ADMIN = "get_admin_orders_page";
 
     @Id
     @GeneratedValue

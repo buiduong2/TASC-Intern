@@ -11,7 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.backend.common.exception.ResourceNotFoundException;
 import com.backend.order.dto.event.OrderCanceledEvent;
 import com.backend.order.dto.req.OrderCreateReq;
+import com.backend.order.dto.res.OrderAdminDTO;
 import com.backend.order.dto.res.OrderDTO;
+import com.backend.order.dto.res.OrderFilter;
 import com.backend.order.mapper.OrderMapper;
 import com.backend.order.model.Order;
 import com.backend.order.model.OrderItem;
@@ -81,6 +83,11 @@ public class OrderServiceImpl implements OrderService {
         repository.save(order);
         publisher.publishEvent(new OrderCanceledEvent(order.getId()));
 
+    }
+
+    @Override
+    public Page<OrderAdminDTO> findAdminAll(OrderFilter filter, Pageable pageable) {
+        return repository.findAdminAll(filter, pageable);
     }
 
 }

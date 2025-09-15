@@ -5,8 +5,8 @@ import java.time.LocalDateTime;
 import com.backend.common.validation.EnumValue;
 import com.backend.product.model.ProductStatus;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,10 +24,10 @@ public class CategoryFilter {
 
     @Past
     private LocalDateTime updatedFrom;
-
-    @Min(1)
+    
+    @Positive
     private Long minProductCount;
 
-    @Min(1)
+    @Positive
     private Long maxProductCount;
 }

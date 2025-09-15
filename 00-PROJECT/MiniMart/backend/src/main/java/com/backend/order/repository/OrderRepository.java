@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import com.backend.order.model.Order;
 
-public interface OrderRepository extends JpaRepository<Order, Long> {
+public interface OrderRepository extends JpaRepository<Order, Long>, CustomOrderRepository {
 
     @Query("FROM Order WHERE id = ?1")
     Optional<Order> findByIdForUpdate(long orderId);
