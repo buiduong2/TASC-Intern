@@ -115,7 +115,7 @@ public class JdbcTagRepository {
         String order = buildOrderClause(pageable);
 
         StringBuilder mainQuery = new StringBuilder(
-                "SELECT t.id, t.name, t.created_at, t.updated_at, COUNT(p.id) AS product_count "
+                "SELECT t.id, t.name, t.created_at, t.updated_at, COUNT(p.products_id) AS product_count "
                         + "FROM tag AS t "
                         + "LEFT JOIN product_tags AS p ON t.id = p.tags_id ");
         if (StringUtils.hasText(where)) {
@@ -179,11 +179,11 @@ public class JdbcTagRepository {
     private String buildAdminHavingClause(TagFilter filter, List<Object> params) {
         List<String> clauses = new ArrayList<>();
         if (filter.getMinProductCount() != null) {
-            clauses.add("COUNT(p.id) >= ?");
+            clauses.add("COUNT(p.products_id) >= ?");
             params.add(filter.getMinProductCount());
         }
         if (filter.getMaxProductCount() != null) {
-            clauses.add("COUNT(p.id) <= ?");
+            clauses.add("COUNT(p.products_id) <= ?");
             params.add(filter.getMaxProductCount());
         }
         return String.join(" AND ", clauses);

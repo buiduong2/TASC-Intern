@@ -28,7 +28,7 @@ public class BaseImage {
 
     private String alt;
 
-    @Column(nullable = false)
+    @Column(unique = true)
     private String publicId;
 
     @Embedded

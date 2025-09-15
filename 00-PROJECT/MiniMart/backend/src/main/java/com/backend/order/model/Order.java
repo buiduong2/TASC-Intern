@@ -1,6 +1,7 @@
 package com.backend.order.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -41,14 +42,14 @@ import lombok.Setter;
         classes = @ConstructorResult(targetClass = OrderAdminDTO.class, columns = {
                 @ColumnResult(name = "id", type = Long.class),
                 @ColumnResult(name = "status", type = String.class),
-                @ColumnResult(name = "payment_method", type = String.class),
-                @ColumnResult(name = "shipping_method", type = String.class),
-                @ColumnResult(name = "total_price", type = BigDecimal.class),
-                @ColumnResult(name = "total_cost", type = BigDecimal.class),
-                @ColumnResult(name = "revenue", type = BigDecimal.class),
-                @ColumnResult(name = "customer_id", type = Long.class),
-                @ColumnResult(name = "created_at", type = java.sql.Timestamp.class),
-                @ColumnResult(name = "updated_at", type = java.sql.Timestamp.class)
+                @ColumnResult(name = "paymentMethod", type = String.class),
+                @ColumnResult(name = "shippingMethod", type = String.class),
+                @ColumnResult(name = "totalPrice", type = Double.class),
+                @ColumnResult(name = "totalCost", type = Double.class),
+                @ColumnResult(name = "profit", type = Double.class),
+                @ColumnResult(name = "customerId", type = Long.class),
+                @ColumnResult(name = "createdAt", type = LocalDateTime.class),
+                @ColumnResult(name = "updatedAt", type = LocalDateTime.class)
         }))
 @NamedStoredProcedureQuery(name = Order.NamedProcedure_PAGE_ADMIN, //
         procedureName = "get_admin_orders_page", //

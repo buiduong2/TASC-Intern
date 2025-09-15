@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import com.backend.order.dto.res.OrderAdminDTO;
 import com.backend.order.dto.res.OrderFilter;
 import com.backend.order.model.Order;
+import com.cloudinary.utils.StringUtils;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.StoredProcedureQuery;
@@ -25,11 +26,12 @@ public class CustomOrderRepositoryImpl implements CustomOrderRepository {
     private final EntityManager em;
 
     private final Map<String, String> sortCol = Map.of(
+            "id", "o.id",
             "status", "o.status",
-            "paymentMethod", "payment_method",
-            "shippingMethod", "shipping_method",
-            "totalPrice", "total_price",
-            "totalCost", "total_cost",
+            "paymentMethod", "paymentMethod",
+            "shippingMethod", "shippingMethod",
+            "totalPrice", "totalPrice",
+            "totalCost", "totalCost",
             "revenue", "revenue",
             "customerId", "o.customer_id",
             "createdAt", "o.created_at",
@@ -66,7 +68,8 @@ public class CustomOrderRepositoryImpl implements CustomOrderRepository {
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.joining(", "));
-        query.setParameter("p_sorts", sortClause);
+
+        query.setParameter("p_sorts", StringUtils.isBlank(sortClause) ? null : sortClause);
         @SuppressWarnings("unchecked")
         List<OrderAdminDTO> resultList = query.getResultList();
         Long total = (Long) query.getOutputParameterValue("page_total");

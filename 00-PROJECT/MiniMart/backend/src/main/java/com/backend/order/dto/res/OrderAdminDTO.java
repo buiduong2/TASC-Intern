@@ -10,6 +10,7 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 public class OrderAdminDTO {
+
     private Long id;
 
     private String status;
@@ -22,7 +23,7 @@ public class OrderAdminDTO {
 
     private Double totalCost;
 
-    private Double revenue;
+    private Double profit;
 
     private Long customerId;
 

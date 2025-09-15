@@ -2,8 +2,14 @@ package com.backend.common.utils;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.metamodel.Attribute;
 import jakarta.persistence.metamodel.ListAttribute;
@@ -30,6 +36,12 @@ public class CriteriaApiUtils {
                 .stream()
                 .filter(j -> j.getAttribute().getName().equals(attr.getName()) && j.getJoinType().equals(type))
                 .findFirst();
+    }
+
+    public static Order buildOrder(Sort.Order order, Expression<?> exp, CriteriaBuilder builder) {
+        return order.getDirection() == Direction.ASC
+                ? builder.asc(exp)
+                : builder.desc(exp);
     }
 
 }

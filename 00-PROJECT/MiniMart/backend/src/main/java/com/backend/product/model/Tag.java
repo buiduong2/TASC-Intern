@@ -67,4 +67,9 @@ public class Tag {
         }
     }
 
+    @Override
+    public String toString() {
+        return "Tag [id=" + id + ", name=" + name + ", description=" + description + ", audit=" + audit + "]";
+    }
+
 }
