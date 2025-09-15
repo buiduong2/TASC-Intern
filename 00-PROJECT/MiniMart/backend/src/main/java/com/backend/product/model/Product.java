@@ -29,12 +29,12 @@ import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
 
-@NamedEntityGraph(name = "Product.ProductDTO", attributeNodes = {
+@NamedEntityGraph(name = Product.NamedGraph_DTO, attributeNodes = {
         @NamedAttributeNode(value = "image"),
         @NamedAttributeNode(value = "stock"),
 })
 
-@NamedEntityGraph(name = "Product.ProductDetailDTO", attributeNodes = {
+@NamedEntityGraph(name = Product.NamedGraph_DetailDTO, attributeNodes = {
         @NamedAttributeNode(value = "image"),
         @NamedAttributeNode(value = "stock"),
         @NamedAttributeNode(value = "tags")
@@ -45,6 +45,9 @@ import lombok.Setter;
 @Setter
 @EntityListeners(AuditingEntityListener.class)
 public class Product implements GetIdAble<Long> {
+
+    public static final String NamedGraph_DTO = "Product.ProductDTO";
+    public static final String NamedGraph_DetailDTO = "Product.ProductDetailDTO";
 
     @Id
     @GeneratedValue

@@ -12,10 +12,10 @@ import com.backend.product.model.ProductStatus;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    @EntityGraph(value = "Category.CategoryDTO", type = EntityGraphType.LOAD)
+    @EntityGraph(value = Category.NamedGraph_CategoryDTO, type = EntityGraphType.LOAD)
     List<Category> findDTOByStatus(ProductStatus status);
 
-    @EntityGraph(value = "Category.CategoryDTO", type = EntityGraphType.LOAD)
+    @EntityGraph(value = Category.NamedGraph_CategoryDTO, type = EntityGraphType.LOAD)
     Optional<Category> findDetailDTOByIdAndStatus(long id, ProductStatus status);
 
 }

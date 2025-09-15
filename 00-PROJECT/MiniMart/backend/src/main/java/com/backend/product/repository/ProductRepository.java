@@ -15,16 +15,16 @@ import com.backend.product.model.ProductStatus;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    @EntityGraph(value = "Product.ProductDTO", type = EntityGraphType.FETCH)
+    @EntityGraph(value = Product.NamedGraph_DTO, type = EntityGraphType.FETCH)
     @Query(value = """
             FROM Product AS p WHERE p.category.id = ?1 AND p.status = ?2
              """)
     Page<Product> findDTOByCategoryIdAndStatus(long categoryId, ProductStatus status, Pageable pageable);
 
-    @EntityGraph(value = "Product.ProductDTO", type = EntityGraphType.FETCH)
+    @EntityGraph(value = Product.NamedGraph_DTO, type = EntityGraphType.FETCH)
     Page<Product> findAdminDTOBy(Pageable pageable);
 
-    @EntityGraph(value = "Product.ProductDetailDTO", type = EntityGraphType.FETCH)
+    @EntityGraph(value = Product.NamedGraph_DetailDTO, type = EntityGraphType.FETCH)
     Optional<Product> findDetailDTOByIdAndStatus(long id, ProductStatus status);
 
     List<Product> findByIdInAndStatus(List<Long> productId, ProductStatus status);

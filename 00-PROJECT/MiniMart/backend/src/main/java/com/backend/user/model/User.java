@@ -24,7 +24,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-@NamedEntityGraph(name = "User.Auth", attributeNodes = {
+@NamedEntityGraph(name = User.NamedGraph_Auth, attributeNodes = {
         @NamedAttributeNode(value = "roles"),
 })
 
@@ -34,6 +34,8 @@ import lombok.Setter;
 @Table(name = "users")
 @EntityListeners(AuditingEntityListener.class)
 public class User {
+
+    public static final String NamedGraph_Auth = "User.Auth";
 
     @Id
     @GeneratedValue

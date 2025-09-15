@@ -12,7 +12,7 @@ import com.backend.user.model.User;
 
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
 
-    @EntityGraph(value = "User.Auth", type = EntityGraphType.FETCH)
+    @EntityGraph(value = User.NamedGraph_Auth, type = EntityGraphType.FETCH)
     Optional<User> findByUsername(String username);
 
     boolean existsByUsername(String username);

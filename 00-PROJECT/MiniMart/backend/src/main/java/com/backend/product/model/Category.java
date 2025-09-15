@@ -21,7 +21,7 @@ import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
 
-@NamedEntityGraph(name = "Category.CategoryDTO", attributeNodes = {
+@NamedEntityGraph(name = Category.NamedGraph_CategoryDTO, attributeNodes = {
         @NamedAttributeNode(value = Category_.IMAGE),
 })
 @Entity
@@ -29,6 +29,8 @@ import lombok.Setter;
 @Setter
 @EntityListeners(AuditingEntityListener.class)
 public class Category {
+
+    public static final String NamedGraph_CategoryDTO = "Category.CategoryDTO";
 
     @Id
     @GeneratedValue
