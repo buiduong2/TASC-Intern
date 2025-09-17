@@ -15,6 +15,15 @@ public interface StockAllocationRepository extends JpaRepository<StockAllocation
                 WHERE sa.orderItem.order.id = ?1 AND sa.status = ?2
 
             """)
-    List<StockAllocation> findByOrderId(Long orderId,StockAllocationStatus status);
+    List<StockAllocation> findByOrderId(Long orderId, StockAllocationStatus status);
+
+    boolean existsByPurchaseItemId(long id);
+
+    @Query("""
+            SELECT DISTINCT sa.purchaseItem.id
+            FROM StockAllocation sa
+            WHERE sa.purchaseItem.purchase.id = :purchaseId
+            """)
+    List<Long> findAllocatedPurchaseItemIdsByPurchaseId(Long purchaseId);
 
 }

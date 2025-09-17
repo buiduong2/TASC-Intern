@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.backend.common.exception.ConflictException;
 import com.backend.common.exception.ResourceNotFoundException;
 import com.backend.common.exception.ValidationException;
+import com.backend.common.utils.ErrorCode;
 import com.backend.inventory.dto.event.PurchaseItemUpdateEvent;
 import com.backend.inventory.dto.req.AdjustmentPurchaseItemReq;
 import com.backend.inventory.dto.req.ReturnedPurchaseItemReq;
@@ -15,6 +16,7 @@ import com.backend.inventory.dto.res.PurchaseItemDTO;
 import com.backend.inventory.mapper.PurchaseItemMapper;
 import com.backend.inventory.model.PurchaseItem;
 import com.backend.inventory.repository.PurchaseItemRepository;
+import com.backend.inventory.repository.StockAllocationRepository;
 import com.backend.inventory.service.PurchaseItemService;
 
 import lombok.RequiredArgsConstructor;
@@ -29,24 +31,13 @@ public class PurchaseItemServiceImpl implements PurchaseItemService {
 
     private final PurchaseItemMapper mapper;
 
-    @Transactional
-    @Override
-    public void delete(long id) {
-        PurchaseItem purchaseItem = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Purchase item id = " + id + " is not found"));
-
-        if (purchaseItem.getQuantity() != purchaseItem.getRemainingQuantity()) {
-            throw new ConflictException("This purchase item cannot be deleted because stock has already been consumed");
-        }
-        repository.delete(purchaseItem);
-        publisher.publishEvent(new PurchaseItemUpdateEvent(purchaseItem.getProduct().getId()));
-    }
+    private final StockAllocationRepository stockAllocationRepository;
 
     @Transactional
     @Override
     public PurchaseItemDTO update(long id, UpdatePurchaseItemReq req) {
         PurchaseItem purchaseItem = repository.findByIdForUpdate(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Purchase item id = " + id + " is not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.PURCHASE_ITEM_NOT_FOUND.format(id)));
         Double newCostPrice = req.getCostPrice();
         Integer newQuantity = req.getQuantity();
 
@@ -118,6 +109,24 @@ public class PurchaseItemServiceImpl implements PurchaseItemService {
         publisher.publishEvent(new PurchaseItemUpdateEvent(purchaseItem.getProduct().getId()));
 
         return mapper.toDTO(purchaseItem);
+    }
+
+    @Transactional
+    @Override
+    public void delete(long id) {
+        PurchaseItem purchaseItem = repository.findByIdForUpdate(id)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.PURCHASE_ITEM_NOT_FOUND.format(id)));
+
+        if (stockAllocationRepository.existsByPurchaseItemId(id)) {
+            throw new ConflictException(ErrorCode.PURCHASE_ITEM_DELETE_HAS_ALLOCATIONS.format(id));
+        }
+
+        if (purchaseItem.getQuantity() != purchaseItem.getRemainingQuantity()) {
+            throw new ConflictException(ErrorCode.PURCHASE_ITEM_DELETE_CONFLICT.format(id));
+        }
+
+        repository.delete(purchaseItem);
+        publisher.publishEvent(new PurchaseItemUpdateEvent(purchaseItem.getProduct().getId()));
     }
 
 }

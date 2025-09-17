@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,6 +42,24 @@ public class PurchaseController {
 
     @PutMapping("{id}")
     public PurchaseDTO update(@PathVariable long id, @Valid @RequestBody UpdatePurchaseReq req) {
-        return service.update(id,req);
+        return service.update(id, req);
+    }
+
+    /**
+     * CHo phpes delete khi remaining_quantity == quantity
+     * 
+     * - Khi xóa xóa tất cả cả purchaseItem và purchase 
+     * 
+     * - Kịch bản : 
+     *  - Nhập sai
+     * - Hủy kèo với nhà cung cấp (trả hàng)
+     * - Nhập nhầm
+     * - 
+     * 
+     */
+    @DeleteMapping("{id}")
+    public void delete(@PathVariable Long id) {
+        service.deleteById(id);
+        return;
     }
 }

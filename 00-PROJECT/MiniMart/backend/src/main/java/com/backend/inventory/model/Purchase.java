@@ -32,7 +32,7 @@ public class Purchase {
 
     private String supplier;
 
-    @OneToMany(mappedBy = "purchase", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL)
     private List<PurchaseItem> purchaseItems;
 
     public void addPurchaseItem(PurchaseItem purchaseItem) {

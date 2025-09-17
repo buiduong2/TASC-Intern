@@ -2,7 +2,7 @@
 
 ## Câu hỏi
 
-- Tại khi đăng nhập vào facebook tại sao 1 năm sau nó vẫn lưu đăng nhập
+-   Tại khi đăng nhập vào facebook tại sao 1 năm sau nó vẫn lưu đăng nhập
 
 ## 1. Giới thiệu
 
@@ -52,10 +52,11 @@ Mini Mart là ứng dụng web E-commerce dạng demo, được xây dựng tron
 
 ## 2.1. Ứng dụng Query theo nhiều cách
 
-- projection
-    - Sử dụng với User
+-   projection
 
-- JdbcTemplate Dùng cho
+    -   Sử dụng với User
+
+-   JdbcTemplate Dùng cho
 
 ## 3. Luồng nghiệp vụ chính
 
@@ -133,54 +134,82 @@ Mini Mart là ứng dụng web E-commerce dạng demo, được xây dựng tron
 
 ## AUth
 
--   Đăng kí đăng nhập   
-    - Cung cấp Token để request các lần tiếp theo
+-   Đăng kí đăng nhập
+
+    -   Cung cấp Token để request các lần tiếp theo
 
 -   Đổi mật khẩu
-    - Ép buộc tất cả các phiên đăng nhập trước đều vo hiêu họa
 
--   RefreshToken    
-    - Làm mới accessToken, Giữ nguyên refreshToken
+    -   Ép buộc tất cả các phiên đăng nhập trước đều vo hiêu họa
 
--   logout 
-    - Vô hiệu hóa Token trong phiên hiện tại
+-   RefreshToken
 
+    -   Làm mới accessToken, Giữ nguyên refreshToken
 
-## Luồng  Update Purchase Item
+-   logout
+    -   Vô hiệu hóa Token trong phiên hiện tại
 
-- **Kịch bản cần update**
+## Luồng Update Purchase Item
 
-- Nhập liệu sai
-    - UPDATE quantity || remaining_quantity || cost_price
+-   **Kịch bản cần update**
 
-- Khi cần điều chỉnh kho so với thực tế
-    - UPDATE remianing_quantity
+-   Nhập liệu sai
 
-- Điều chỉnh chi phí
-    - UPDATE cost_price
+    -   UPDATE quantity || remaining_quantity || cost_price
 
-- Hoàn trả bớt hàng cho supplier
-    - UPDATE quantity + remaining_quantity
+-   Khi cần điều chỉnh kho so với thực tế
 
-- **Kịch bản delete**
-- Nhập liệu saio
-    - Nhập nhầm product_Id hoặc purchase_id . ép buộc xóa đi tạo cái khác
-- Hủy ko nhận một mặt hàng đơn lẻ
+    -   UPDATE remianing_quantity
 
-- **Khó khăn**
+-   Điều chỉnh chi phí
 
-- Không thể cập nhật cứng remaining_quantity: bởi vì trên client UI ko phản ánh chính xác số lượng thực tế. Mà nó chỉ phản ánh thời điểm load lên mà thôi không thể xử lý một cách `absolute` được 
+    -   UPDATE cost_price
 
-- **Hướng giải quyết**
+-   Hoàn trả bớt hàng cho supplier
 
-- Tạo ra 3 API: API 1 cho nhập liệu sai: `PUT /api/purchase-items/{id}`
-    - newQuantity (absolute), newCostPrice
-    - Số lượng Quantity nhập vào ko đứng thực tế -> remaining + quantity
-- Điều chỉnh kho so với thực tế: 
-    - `POST /api/purchase-items/{id}/adjustments`
-    - adjustmentDelta (delta) , UPDATE remainingQuantity
-    - Mặt hàng remaining bị thất thoát -> Điều chỉnh remaning -> quantity(đã nhập) giữ nguyên
-    
-- return 
-    - returnQuantity: (delta)
-    - Trả hàng lại cho nhà sản xuất, hoặc lấy thêm đơn hàng -> Giảm remaining + quantity
+    -   UPDATE quantity + remaining_quantity
+
+-   **Kịch bản delete**
+-   Nhập liệu saio
+    -   Nhập nhầm product_Id hoặc purchase_id . ép buộc xóa đi tạo cái khác
+-   Hủy ko nhận một mặt hàng đơn lẻ
+
+-   **Khó khăn**
+
+-   Không thể cập nhật cứng remaining_quantity: bởi vì trên client UI ko phản ánh chính xác số lượng thực tế. Mà nó chỉ phản ánh thời điểm load lên mà thôi không thể xử lý một cách `absolute` được
+
+-   **Hướng giải quyết**
+
+-   Tạo ra 3 API: API 1 cho nhập liệu sai: `PUT /api/purchase-items/{id}`
+    -   newQuantity (absolute), newCostPrice
+    -   Số lượng Quantity nhập vào ko đứng thực tế -> remaining + quantity
+-   Điều chỉnh kho so với thực tế:
+    -   `POST /api/purchase-items/{id}/adjustments`
+    -   adjustmentDelta (delta) , UPDATE remainingQuantity
+    -   Mặt hàng remaining bị thất thoát -> Điều chỉnh remaning -> quantity(đã nhập) giữ nguyên
+-   return
+    -   returnQuantity: (delta)
+    -   Trả hàng lại cho nhà sản xuất, hoặc lấy thêm đơn hàng -> Giảm remaining + quantity
+
+## Luồng về xóa PurchaseItem
+
+-   `DELETE PurchaseItem`
+-   Trường hợp có thể xóa
+
+    -   Chưa có StockAllocation nào liên kết → tức là chưa từng được xuất cho đơn hàng nào.
+    -   remainingQuantity == quantity (chưa bị dùng một phần nào).
+
+-   Không được xuất nếu
+
+    -   Đã có StockAllocation (vì đã có xuất kho, liên quan đến lịch sử bán hàng).
+    -   remainingQuantity < quantity (tức là đã có hàng được sử dụng, không toàn vẹn dữ liệu nếu xóa).
+
+    -   Trong trường hợp cần thì có thể Update PurchaseItem để remaining nó về 0
+
+-   `DELETE Purchase`
+-   Được xóa:
+    -   Tất cả các `PurchaseItem` thuộc nó đều chưa được sử dụng
+    -   không có StockALlocation nào tham chiếu gián tiếp qua `PurchaseItem`
+-   Không được xóa nếu:
+    -   `PurchaseItem` đã được sử dụng 1 phần (remainingQuantity < quantity).
+    -   Có `StockAllocation` tồn tại.

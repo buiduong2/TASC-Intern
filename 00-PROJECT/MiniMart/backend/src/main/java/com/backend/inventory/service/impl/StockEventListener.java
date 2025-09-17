@@ -8,6 +8,7 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import com.backend.inventory.dto.event.PurchaseCreatedEvent;
+import com.backend.inventory.dto.event.PurchaseDeleteEvent;
 import com.backend.inventory.dto.event.PurchaseItemUpdateEvent;
 import com.backend.inventory.service.StockService;
 import com.backend.order.dto.event.OrderCreatedEvent;
@@ -44,4 +45,11 @@ public class StockEventListener {
     public void sendNotificationOnPurchaseItemUpdate(PurchaseItemUpdateEvent event) {
         service.syncQuantity(List.of(event.getProductId()));
     }
+
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void sendNotificatioNOnPurchaseDelete(PurchaseDeleteEvent event) {
+        service.syncQuantity(event.getProductIds());
+    }
+
 }

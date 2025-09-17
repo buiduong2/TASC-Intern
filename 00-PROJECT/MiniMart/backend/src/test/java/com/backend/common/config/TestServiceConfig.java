@@ -11,6 +11,7 @@ import com.backend.common.utils.EntityLookupHelper;
 import com.backend.inventory.mapper.PurchaseItemMapper;
 import com.backend.inventory.mapper.PurchaseMapper;
 import com.backend.inventory.repository.PurchaseRepository;
+import com.backend.inventory.repository.StockAllocationRepository;
 import com.backend.inventory.service.PurchaseService;
 import com.backend.inventory.service.impl.PurchaseServiceImpl;
 import com.backend.product.repository.ProductRepository;
@@ -23,11 +24,12 @@ import lombok.RequiredArgsConstructor;
 public class TestServiceConfig {
     private final PurchaseRepository purchaseRepository;
     private final ProductRepository productRepository;
+    private final StockAllocationRepository stockAllocationRepository;
 
     @Bean
     PurchaseService purchaseService() {
         return new PurchaseServiceImpl(purchaseRepository, productRepository, purchaseMapper(),
-                applicationEventPublisher(), new EntityLookupHelper());
+                applicationEventPublisher(), stockAllocationRepository, new EntityLookupHelper());
     }
 
     @Bean("mockPublisher")

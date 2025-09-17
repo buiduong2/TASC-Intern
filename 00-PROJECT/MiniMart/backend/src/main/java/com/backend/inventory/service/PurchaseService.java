@@ -18,4 +18,6 @@ public interface PurchaseService {
     Page<PurchaseDTO> findPage(Pageable pageable);
 
     PurchaseDTO update(long id, UpdatePurchaseReq req);
+
+    void deleteById(Long id);
 }

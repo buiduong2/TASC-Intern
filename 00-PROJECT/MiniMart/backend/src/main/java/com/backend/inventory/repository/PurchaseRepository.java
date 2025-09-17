@@ -1,17 +1,20 @@
 package com.backend.inventory.repository;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import com.backend.inventory.dto.res.PurchaseDTO;
 import com.backend.inventory.model.Purchase;
 
 public interface PurchaseRepository extends JpaRepository<Purchase, Long>, CustomPurchaseRepository {
 
-    @Query(value = """
+    @Query("""
+            SELECT DISTINCT p
+            FROM Purchase AS p
+            FETCH JOIN p.purchaseItems
+            WHERE id = ?1
+            """)
+    Optional<Purchase> findByIdForDelete(long id);
 
-            """, nativeQuery = true, countQuery = "")
-    Page<PurchaseDTO> findDTOBy(Pageable pageable);
 }

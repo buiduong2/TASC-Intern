@@ -49,7 +49,7 @@ public class PurchaseItemController {
     }
 
     /*
-     * - Nhập liệu sai purchase và product
+     * - Chưa được xuất kho (tức remaining_quantity == quantity) → có thể xóa.
      * - Hủy phiếu nhập đơn lẻ
      */
     @DeleteMapping("{id}")
