@@ -1,5 +1,8 @@
 package com.backend.inventory.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.backend.inventory.dto.req.AdjustmentPurchaseItemReq;
 import com.backend.inventory.dto.req.ReturnedPurchaseItemReq;
 import com.backend.inventory.dto.req.UpdatePurchaseItemReq;
@@ -14,6 +17,8 @@ public interface PurchaseItemService {
     PurchaseItemDTO adjustment(long id, AdjustmentPurchaseItemReq req);
 
     PurchaseItemDTO returns(long id, ReturnedPurchaseItemReq req);
+
+    Page<PurchaseItemDTO> findByPurchaseId(long id, Pageable pageable);
     
     
 }

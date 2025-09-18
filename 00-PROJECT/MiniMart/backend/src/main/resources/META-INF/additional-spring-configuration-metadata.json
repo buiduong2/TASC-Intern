@@ -33,5 +33,25 @@
     "name": "custom.cloudinary.url",
     "type": "java.lang.String",
     "description": "A description for 'custom.cloudinary.url'"
+  },
+  {
+    "name": "custom.vnpay.pay-url",
+    "type": "java.lang.String",
+    "description": "A description for 'custom.vnpay.pay-url'"
+  },
+  {
+    "name": "custom.vnpay.return-url",
+    "type": "java.lang.String",
+    "description": "A description for 'custom.vnpay.return-url'"
+  },
+  {
+    "name": "custom.vnpay.tmn-code",
+    "type": "java.lang.String",
+    "description": "A description for 'custom.vnpay.tmn-code'"
+  },
+  {
+    "name": "custom.vnpay.hash-secret",
+    "type": "java.lang.String",
+    "description": "A description for 'custom.vnpay.hash-secret'"
   }
 ]}

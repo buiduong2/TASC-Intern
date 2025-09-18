@@ -68,17 +68,18 @@ public class WebSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         authorize -> authorize
-                                // .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                                // .requestMatchers("/api/orders/**").authenticated()
-                                // .requestMatchers("/api/admin/**").hasAnyAuthority(STAFF, ADMIN)
-                                // .requestMatchers("/api/admin/users").hasAuthority(ADMIN)
-                                // .requestMatchers("/api/auth/change-password").authenticated()
-                                // .requestMatchers("/api/auth/**").permitAll()
-                                // .requestMatchers("/api/products").permitAll()
-                                // .requestMatchers("/api/categories").permitAll()
-                                // .anyRequest().authenticated()
-                                .anyRequest().permitAll()
-
+                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**",
+                                        "/swagger-ui.html")
+                                .permitAll()
+                                .requestMatchers("/api/orders/**").authenticated()
+                                .requestMatchers("/api/admin/**").hasAnyAuthority(STAFF, ADMIN)
+                                .requestMatchers("/api/admin/users").hasAuthority(ADMIN)
+                                .requestMatchers("/api/auth/change-password").authenticated()
+                                .requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/api/products").permitAll()
+                                .requestMatchers("/api/categories").permitAll()
+                                .anyRequest().authenticated()
+                // .anyRequest().permitAll());
                 );
 
         return http.build();

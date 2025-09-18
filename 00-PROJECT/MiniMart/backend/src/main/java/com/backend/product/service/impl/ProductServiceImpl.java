@@ -10,8 +10,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.backend.common.exception.ConflictException;
 import com.backend.common.exception.ResourceNotFoundException;
+import com.backend.common.utils.ErrorCode;
+import com.backend.inventory.repository.PurchaseItemRepository;
+import com.backend.order.repository.OrderItemRepository;
 import com.backend.product.dto.event.ProductCreatedEvent;
+import com.backend.product.dto.event.ProductDeleteEvent;
 import com.backend.product.dto.req.ProductUpdateReq;
 import com.backend.product.dto.res.ProductDTO;
 import com.backend.product.dto.res.ProductDetailDTO;
@@ -36,6 +41,10 @@ public class ProductServiceImpl implements ProductService {
 
     private final TagRepository tagRepository;
 
+    private final OrderItemRepository orderItemRepository;
+
+    private final PurchaseItemRepository purchaseItemRepository;
+
     private final ProductMapper mapper;
 
     private final ApplicationEventPublisher eventPublisher;
@@ -49,7 +58,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductDetailDTO findProductDetailById(long productId) {
         return repository.findDetailDTOByIdAndStatus(productId, ProductStatus.ACTIVE)
                 .map(mapper::toDetailDTO)
-                .orElseThrow(() -> new ResourceNotFoundException("Product ID = " + productId + " Not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.PRODUCT_NOT_FOUND.format(productId)));
     }
 
     @Override
@@ -58,13 +67,21 @@ public class ProductServiceImpl implements ProductService {
                 .map(mapper::toDTO);
     }
 
+    @Override
+    public ProductDetailDTO findAdminDetailById(long productId) {
+        return repository.findAdminDetailById(productId)
+                .map(mapper::toDetailDTO)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.PRODUCT_NOT_FOUND.format(productId)));
+    }
+
     @Transactional
     @Override
     public ProductDTO create(ProductUpdateReq dto) {
         Product product = mapper.toEntity(dto);
         List<Tag> tags = tagRepository.findAllById(dto.getTagIds());
         if (tags.size() != dto.getTagIds().size()) {
-            throw new ResourceNotFoundException("Some of tagIds is missing ");
+            throw new ResourceNotFoundException(
+                    ErrorCode.TAGS_NOT_FOUND.format(tags.stream().map(Tag::getId).toList()));
         }
 
         product.setCategory(categoryRepository.getReferenceById(dto.getCategoryId()));
@@ -79,7 +96,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductDTO update(long productId, ProductUpdateReq dto) {
         Product product = repository.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("Product id = " + productId + " is not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.PRODUCT_NOT_FOUND.format(productId)));
 
         mapper.updateEntity(product, dto);
 
@@ -88,7 +105,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         Set<Long> newTagIds = new HashSet<>(dto.getTagIds());
-        Set<Tag> oldTags = product.getTags();
+        Set<Tag> oldTags = new HashSet<>(product.getTags());
         Set<Long> requiredTagIds = dto.getTagIds();
         for (Tag oldTag : oldTags) {
             if (!requiredTagIds.contains(oldTag.getId())) {
@@ -105,4 +122,27 @@ public class ProductServiceImpl implements ProductService {
 
         return mapper.toDTO(product);
     }
+
+    @Transactional
+    @Override
+    public Long deleteById(long id) {
+        Product product = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.PRODUCT_NOT_FOUND.format(id)));
+
+        if (purchaseItemRepository.existsByProductId(id)) {
+            throw new ConflictException("Cannot delete product " + id + " because it is used in purchase items");
+        }
+
+        if (orderItemRepository.existsByProductId(id)) {
+            throw new ConflictException("Cannot delete product " + id + " because it is used in orders");
+        }
+
+        Long productImage = product.getImage() == null ? null : product.getImage().getId();
+        eventPublisher.publishEvent(new ProductDeleteEvent(id));
+        repository.delete(product);
+
+        return productImage;
+
+    }
+
 }

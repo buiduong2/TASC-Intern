@@ -11,4 +11,6 @@ public interface StockService {
 
     void create(long productId);
 
+    void deleteByProductId(long productId);
+
 }

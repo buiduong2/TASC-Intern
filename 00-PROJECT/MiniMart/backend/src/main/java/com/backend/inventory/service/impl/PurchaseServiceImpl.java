@@ -18,6 +18,7 @@ import com.backend.inventory.dto.event.PurchaseDeleteEvent;
 import com.backend.inventory.dto.req.CreatePurchaseReq;
 import com.backend.inventory.dto.req.UpdatePurchaseReq;
 import com.backend.inventory.dto.res.PurchaseDTO;
+import com.backend.inventory.dto.res.PurchaseDetailDTO;
 import com.backend.inventory.mapper.PurchaseMapper;
 import com.backend.inventory.model.Purchase;
 import com.backend.inventory.model.PurchaseItem;
@@ -118,6 +119,11 @@ public class PurchaseServiceImpl implements PurchaseService {
                         .map(PurchaseItem::getProduct)
                         .map(Product::getId)
                         .toList()));
+    }
+
+    @Override
+    public PurchaseDetailDTO findDetailById(long id) {
+        return null;
     }
 
 }

@@ -213,3 +213,175 @@ Mini Mart là ứng dụng web E-commerce dạng demo, được xây dựng tron
 -   Không được xóa nếu:
     -   `PurchaseItem` đã được sử dụng 1 phần (remainingQuantity < quantity).
     -   Có `StockAllocation` tồn tại.
+
+## Luồng về DELETE PRoduct
+
+-   Không được xóa nếu:
+    -   Tham chiếu từ PurchaseItem
+    -   Tham chiếu từ OrderItem
+-   Khi xóa thành công cần
+    -   Xóa ProductImage, product_tag (many to Many)
+
+## Luong DELETE category
+
+-   Xóa category.
+
+-   Tách tham chiếu khỏi Product
+
+## Luồng thực hiện Payment
+
+- `Đôi khi việc callback ko được gọi lại vào server của chúng ta`
+
+- User bị trừ tiền, nhưng hệ thống của bạn không nhận được callback
+- Payment của bạn vẫn là PENDING.
+
+- Lưu PaymentTransaction khi tạo link
+- Nhân viên CSKH có thể nhập mã giao dịch (vnp_TransactionNo) để query trực tiếp từ VNPay và update đơn hàng.
+
+```java
+@Entity
+@Getter @Setter
+@Table(name = "payments")
+public class Payment {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    /** Liên kết với Order */
+    @OneToOne
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order;
+
+    /** Phương thức mà user chọn cho đơn hàng */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private PaymentMethod method;   // COD, VNPAY, MOMO...
+
+    /** Trạng thái thanh toán tổng quan của đơn hàng */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private PaymentStatus status;   // UNPAID, PARTIAL, PAID
+
+    /** Tổng số tiền cần trả (snapshot từ Order) */
+    @Column(nullable = false)
+    private BigDecimal totalAmount;
+
+    /** Tổng đã trả (cộng dồn từ transaction thành công) */
+    @Column(nullable = false)
+    private BigDecimal paidAmount = BigDecimal.ZERO;
+
+    /** Số tiền còn lại */
+    @Column(nullable = false)
+    private BigDecimal dueAmount;
+
+    /** Lịch sử các transaction gắn với Payment */
+    @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PaymentTransaction> transactions = new ArrayList<>();
+
+    /** Cập nhật số tiền còn nợ */
+    public void updateAmounts(BigDecimal newPaid) {
+        this.paidAmount = this.paidAmount.add(newPaid);
+        this.dueAmount = this.totalAmount.subtract(this.paidAmount);
+        if (dueAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            this.status = PaymentStatus.PAID;
+            this.dueAmount = BigDecimal.ZERO;
+        } else if (paidAmount.compareTo(BigDecimal.ZERO) > 0) {
+            this.status = PaymentStatus.PARTIAL;
+        } else {
+            this.status = PaymentStatus.UNPAID;
+        }
+    }
+}
+
+```
+
+```java
+@Entity
+@Getter @Setter
+@Table(name = "payment_transactions")
+public class PaymentTransaction {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "payment_id")
+    private Payment payment;
+
+    /** Số tiền của lần thanh toán này */
+    @Column(nullable = false)
+    private BigDecimal amount;
+
+    /** Trạng thái lần giao dịch này */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private TransactionStatus status;   // PENDING, SUCCESS, FAILED
+
+    /** Mã tham chiếu bạn sinh ra khi tạo URL gửi VNPay */
+    @Column(length = 100, nullable = false, unique = true)
+    private String txnRef;
+
+    /** Mã giao dịch bên VNPay trả về */
+    @Column(length = 100)
+    private String transactionNo;
+
+    private String bankCode;
+    private String cardType;
+
+    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime payAt;
+}
+```
+
+```java
+public enum PaymentMethod {
+    COD, VNPAY, MOMO, ZALOPAY
+}
+
+public enum PaymentStatus {
+    UNPAID, PARTIAL, PAID
+}
+
+public enum TransactionStatus {
+    PENDING, SUCCESS, FAILED, CANCELLED
+}
+```
+
+## Luồng
+
+- **B1. Tạo Order**
+- Backend nhận request tạo đơn hàng.
+- Tạo record `Order`
+- Tạo kèm một record `Payment` (chỉ giữ thông tin tổng quan).
+    - method = null hoặc method = COD
+    - status = UNPAID.
+    - totalAmount = order.total
+    - paidAmount = 0, dueAmount = total
+
+- **B2. Khi user chọn phương thức thanh toán**
+    - FE gửi request `POST /orders/{id}/payment/method`
+    - Backend update `Payment.method`.
+    - Nếu chọn Online (VNPay/Momo…) → user sẽ cần click thêm lần nữa để “thanh toán ngay”
+    - Nếu chọn COD → Payment vẫn ở trạng thái `UNPAID` cho đến khi shipper xác nhận đã thu.
+
+- **B3. Khi user click “Thanh toán online”**
+
+- Backend tạo một bản ghi PaymentTransaction
+- status = PENDING.
+
+- amount = payment.dueAmount.
+
+- txnRef = sinh mã unique.
+- `Payment`
+- Backend build `payUrl` (VNPay/Momo…) dựa trên txnRef, amount, orderId
+
+- **B4: Khi cổng thanh toán redirect về**
+
+- Backend nhận callback với `txnRef`, `amount`, `transactionNo`, `bankCode`, …
+- Tìm PaymentTransaction theo `txnRef`.
+
+- Nếu `SUCCESS` → update transaction = SUCCESS, set `payAt = now().`
+- Gọi `Payment.updateAmounts(amount)` để cộng vào `paidAmount` và tính lại `dueAmount` + `status`.
+- Nếu `FAILED` hoặc user cancel → update `transaction = FAILED`.

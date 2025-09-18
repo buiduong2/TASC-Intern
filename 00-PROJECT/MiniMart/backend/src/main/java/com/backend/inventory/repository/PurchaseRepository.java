@@ -12,8 +12,8 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Long>, Custo
     @Query("""
             SELECT DISTINCT p
             FROM Purchase AS p
-            FETCH JOIN p.purchaseItems
-            WHERE id = ?1
+            LEFT JOIN FETCH p.purchaseItems
+            WHERE p.id = ?1
             """)
     Optional<Purchase> findByIdForDelete(long id);
 

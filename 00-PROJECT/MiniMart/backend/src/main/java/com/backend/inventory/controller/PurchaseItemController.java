@@ -29,7 +29,7 @@ public class PurchaseItemController {
      */
     @PutMapping("{id}")
     public PurchaseItemDTO update(@PathVariable long id, @Valid @RequestBody UpdatePurchaseItemReq req) {
-        return service.update(id,req);
+        return service.update(id, req);
     }
 
     /**
@@ -37,7 +37,7 @@ public class PurchaseItemController {
      */
     @PostMapping("{id}/adjustment")
     public PurchaseItemDTO adjustment(@PathVariable long id, @Valid @RequestBody AdjustmentPurchaseItemReq req) {
-        return service.adjustment(id,req);
+        return service.adjustment(id, req);
     }
 
     /**
@@ -45,7 +45,7 @@ public class PurchaseItemController {
      */
     @PostMapping("{id}/returns")
     public PurchaseItemDTO returns(@PathVariable long id, @Valid @RequestBody ReturnedPurchaseItemReq req) {
-        return service.returns(id,req);
+        return service.returns(id, req);
     }
 
     /*

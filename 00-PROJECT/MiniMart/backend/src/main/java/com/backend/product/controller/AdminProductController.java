@@ -3,6 +3,7 @@ package com.backend.product.controller;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +18,7 @@ import com.backend.common.service.impl.ImageCloudServiceImpl;
 import com.backend.common.validation.Image;
 import com.backend.product.dto.req.ProductUpdateReq;
 import com.backend.product.dto.res.ProductDTO;
+import com.backend.product.dto.res.ProductDetailDTO;
 import com.backend.product.service.ProductImageService;
 import com.backend.product.service.ProductService;
 
@@ -39,6 +41,11 @@ public class AdminProductController {
     public Page<ProductDTO> findAll(
             @PageableDefault(size = 10) Pageable pageable) {
         return service.findAdminAll(pageable);
+    }
+
+    @GetMapping("{id}")
+    public ProductDetailDTO findById(@PathVariable long id) {
+        return service.findAdminDetailById(id);
     }
 
     @PostMapping()
@@ -64,5 +71,15 @@ public class AdminProductController {
                     .thenAccept(meta -> productImageService.save(meta, result.getId()));
         }
         return result;
+    }
+
+    @DeleteMapping("{id}")
+    public void deleteById(@PathVariable long id) {
+        Long imageId = service.deleteById(id);
+
+        productImageService.delete(imageId)
+                .thenAccept(
+                        publicId -> imageCloudService.deleteImageForId(ImageCloudServiceImpl.PRODUCT_PREFIX, publicId));
+
     }
 }

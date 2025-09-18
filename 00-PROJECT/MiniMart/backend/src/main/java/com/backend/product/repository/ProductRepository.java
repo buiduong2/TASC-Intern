@@ -39,6 +39,16 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @EntityGraph(value = Product.NamedGraph_DetailDTO, type = EntityGraphType.FETCH)
     Optional<Product> findDetailDTOByIdAndStatus(long id, ProductStatus status);
 
+    @EntityGraph(value = Product.NamedGraph_DetailDTO, type = EntityGraphType.FETCH)
+    Optional<Product> findAdminDetailById(long id);
+
     List<Product> findByIdInAndStatus(List<Long> productId, ProductStatus status);
+
+    @Query("""
+            FROM Product AS p 
+            LEFT JOIN FETCH p.image
+            WHERE p.id = ?1
+            """)
+    Optional<Product> findByIdForUpdate(long id);
 
 }

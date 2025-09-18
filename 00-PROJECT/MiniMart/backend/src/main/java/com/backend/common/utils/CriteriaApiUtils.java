@@ -25,6 +25,12 @@ public class CriteriaApiUtils {
     }
 
     @SuppressWarnings("unchecked")
+    public static <X, Y> Join<X, Y> getOrCreateJoin(Root<X> root, SingularAttribute<X, Y> attr) {
+        return (Join<X, Y>) findJoin(root, attr)
+                .orElseGet(() -> root.join(attr));
+    }
+
+    @SuppressWarnings("unchecked")
     public static <X, Y> Join<X, Y> getOrCreateJoin(Root<X> root, ListAttribute<X, Y> attr,
             JoinType type) {
         return (Join<X, Y>) findJoin(root, attr, type)
@@ -35,6 +41,13 @@ public class CriteriaApiUtils {
         return root.getJoins()
                 .stream()
                 .filter(j -> j.getAttribute().getName().equals(attr.getName()) && j.getJoinType().equals(type))
+                .findFirst();
+    }
+
+    private static <X, Y> Optional<Join<X, ?>> findJoin(Root<X> root, Attribute<X, Y> attr) {
+        return root.getJoins()
+                .stream()
+                .filter(j -> j.getAttribute().getName().equals(attr.getName()))
                 .findFirst();
     }
 

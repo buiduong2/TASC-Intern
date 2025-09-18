@@ -11,7 +11,6 @@ import com.backend.common.model.Audit;
 import com.backend.common.model.GetIdAble;
 import com.backend.inventory.model.Stock;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -71,7 +70,7 @@ public class Product implements GetIdAble<Long> {
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "product")
     private Stock stock;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToOne(fetch = FetchType.LAZY)
     private ProductImage image;
 
     @ManyToMany

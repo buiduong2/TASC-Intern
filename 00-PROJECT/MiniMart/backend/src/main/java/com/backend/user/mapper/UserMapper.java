@@ -11,8 +11,8 @@ import org.mapstruct.MappingTarget;
 import com.backend.common.utils.ToEntity;
 import com.backend.user.dto.req.RegisterReq;
 import com.backend.user.dto.req.UpdateUserAdminReq;
-import com.backend.user.dto.res.AuthRes;
 import com.backend.user.dto.res.UserAdminDTO;
+import com.backend.user.dto.res.UserDTO;
 import com.backend.user.model.Customer;
 import com.backend.user.model.Role;
 import com.backend.user.model.User;
@@ -35,7 +35,7 @@ public interface UserMapper {
     @Mapping(target = "addresses", ignore = true)
     Customer toCustomerEntity(RegisterReq req);
 
-    AuthRes.UserDTO toDTO(User user);
+    UserDTO toDTO(User user);
 
     default List<String> toRoles(Collection<Role> roles) {
         return roles.stream().map(Role::getName).map(String::valueOf).toList();

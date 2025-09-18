@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.backend.common.config.JpaConfig;
 import com.backend.user.dto.req.LoginReq;
 import com.backend.user.dto.res.AuthRes;
+import com.backend.user.dto.res.UserDTO;
 import com.backend.user.exception.UserInactiveException;
 import com.backend.user.model.Role;
 import com.backend.user.model.RoleName;
@@ -74,7 +75,7 @@ public class AuthControllerMvcTest {
         authRes = new AuthRes();
         authRes.setAccessToken("FAKE ACCESS");
         authRes.setRefreshToken("FAKE REFRESH");
-        authRes.setUser(new AuthRes.UserDTO());
+        authRes.setUser(new UserDTO());
 
         user = new User();
         user.setId(1L);

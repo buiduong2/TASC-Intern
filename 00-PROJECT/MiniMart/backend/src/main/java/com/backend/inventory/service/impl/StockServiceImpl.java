@@ -3,8 +3,10 @@ package com.backend.inventory.service.impl;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.backend.common.exception.ResourceNotFoundException;
 import com.backend.inventory.model.Stock;
 import com.backend.inventory.repository.StockRepository;
 import com.backend.inventory.service.StockService;
@@ -38,6 +40,16 @@ public class StockServiceImpl implements StockService {
         Stock stock = new Stock();
         stock.setProduct(productRepository.getReferenceById(productId));
         repository.save(stock);
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    @Override
+    public void deleteByProductId(long productId) {
+        Stock stock = repository.findByProductId(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Stock not found"));
+
+        repository.delete(stock);
+
     }
 
 }

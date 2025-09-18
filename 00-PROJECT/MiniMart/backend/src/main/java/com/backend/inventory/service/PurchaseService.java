@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import com.backend.inventory.dto.req.CreatePurchaseReq;
 import com.backend.inventory.dto.req.UpdatePurchaseReq;
 import com.backend.inventory.dto.res.PurchaseDTO;
+import com.backend.inventory.dto.res.PurchaseDetailDTO;
 
 public interface PurchaseService {
 
@@ -20,4 +21,6 @@ public interface PurchaseService {
     PurchaseDTO update(long id, UpdatePurchaseReq req);
 
     void deleteById(Long id);
+
+    PurchaseDetailDTO findDetailById(long id);
 }

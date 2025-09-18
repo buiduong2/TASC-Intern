@@ -6,6 +6,7 @@ import com.backend.user.dto.req.RefreshTokenReq;
 import com.backend.user.dto.req.RegisterReq;
 import com.backend.user.dto.req.RevokeJwtReq;
 import com.backend.user.dto.res.AuthRes;
+import com.backend.user.dto.res.UserDTO;
 
 public interface AuthService {
 
@@ -18,4 +19,6 @@ public interface AuthService {
     void changePassword(ChangePasswordReq req, long userId);
 
     void revoke(RevokeJwtReq req, long userId);
+
+    UserDTO getInfo(long userId);
 }

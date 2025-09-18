@@ -13,6 +13,7 @@ import com.backend.user.dto.req.RefreshTokenReq;
 import com.backend.user.dto.req.RegisterReq;
 import com.backend.user.dto.req.RevokeJwtReq;
 import com.backend.user.dto.res.AuthRes;
+import com.backend.user.dto.res.UserDTO;
 import com.backend.user.exception.UserInactiveException;
 import com.backend.user.mapper.UserMapper;
 import com.backend.user.model.Customer;
@@ -135,6 +136,12 @@ public class AuthServiceImpl implements AuthService {
     public void revoke(RevokeJwtReq req, long userId) {
         User user = repository.findById(userId).orElseThrow(() -> new BadCredentialsException("User missing"));
         jwtService.invalidateToken(req, user);
+    }
+
+    @Override
+    public UserDTO getInfo(long userId) {
+        User user = repository.findById(userId).orElseThrow(() -> new BadCredentialsException("User missing"));
+        return mapper.toDTO(user);
     }
 
 }

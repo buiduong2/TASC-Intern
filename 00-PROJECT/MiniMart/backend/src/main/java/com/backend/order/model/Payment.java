@@ -1,12 +1,16 @@
 package com.backend.order.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,10 +29,18 @@ public class Payment {
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
 
-    private LocalDateTime payAt;
+    private LocalDateTime completedAt;
 
+    /** Snap shot */
+    private double amountTotal;
+
+    /** Snapshot */
     private double amountPaid;
-    
-    private double amountDue;
+
+    @OneToOne(mappedBy = "payment")
+    private Order order;
+
+    @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL)
+    private List<PaymentTransaction> transactions;
 
 }

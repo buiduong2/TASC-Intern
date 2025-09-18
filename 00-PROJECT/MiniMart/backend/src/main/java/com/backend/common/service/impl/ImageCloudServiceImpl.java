@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,7 +33,7 @@ public class ImageCloudServiceImpl implements ImageCloudService {
 
     public static final String PRODUCT_PREFIX = "product";
     public static final String CATEGORY_PREFIX = "category";
-    
+
     private static final String CATEGORY_FOLDER = "/categries/";
     private static final String PRODUCT_FOLDER = "/products/";
 
@@ -83,7 +84,11 @@ public class ImageCloudServiceImpl implements ImageCloudService {
     }
 
     @Override
+    @Async
     public void deleteImageForId(String prefix, String publicId) {
+        if (publicId == null) {
+            return;
+        }
         executor.submit(() -> cloudinary.uploader()
                 .destroy(publicId,
                         ObjectUtils.emptyMap()));

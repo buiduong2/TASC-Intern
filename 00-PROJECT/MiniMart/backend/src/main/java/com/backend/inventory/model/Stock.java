@@ -3,6 +3,7 @@ package com.backend.inventory.model;
 import com.backend.product.model.Product;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
@@ -20,7 +21,7 @@ public class Stock {
 
     private int quantity;
 
-    @OneToOne()
+    @OneToOne(fetch = FetchType.LAZY)
     private Product product;
 
     @Override

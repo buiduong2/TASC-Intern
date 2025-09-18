@@ -9,4 +9,5 @@ import com.backend.product.model.ProductImage;
 public interface ProductImageRepository extends JpaRepository<ProductImage, Long> {
 
     Optional<ProductImage> findByPublicId(String publicId);
+
 }

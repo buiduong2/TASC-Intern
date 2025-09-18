@@ -1,5 +1,6 @@
 package com.backend.order.model;
 
+
 import com.backend.common.model.GetIdAble;
 
 import jakarta.persistence.Entity;

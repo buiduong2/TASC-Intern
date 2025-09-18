@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.backend.inventory.dto.req.CreatePurchaseReq;
 import com.backend.inventory.dto.req.UpdatePurchaseReq;
 import com.backend.inventory.dto.res.PurchaseDTO;
+import com.backend.inventory.dto.res.PurchaseDetailDTO;
+import com.backend.inventory.dto.res.PurchaseItemDTO;
+import com.backend.inventory.service.PurchaseItemService;
 import com.backend.inventory.service.PurchaseService;
 
 import jakarta.validation.Valid;
@@ -29,9 +32,21 @@ public class PurchaseController {
 
     private final PurchaseService service;
 
+    private final PurchaseItemService itemService;
+
     @GetMapping
     public Page<PurchaseDTO> findByPage(@PageableDefault Pageable pageable) {
         return service.findPage(pageable);
+    }
+
+    @GetMapping("{id}")
+    public PurchaseDetailDTO findById(@PathVariable long id) {
+        return service.findDetailById(id);
+    }
+
+    @GetMapping("{id}/purchase-items")
+    public Page<PurchaseItemDTO> findItemsById(@PathVariable long id, @PageableDefault Pageable pageable) {
+        return itemService.findByPurchaseId(id, pageable);
     }
 
     @PostMapping
@@ -48,13 +63,13 @@ public class PurchaseController {
     /**
      * CHo phpes delete khi remaining_quantity == quantity
      * 
-     * - Khi xóa xóa tất cả cả purchaseItem và purchase 
+     * - Khi xóa xóa tất cả cả purchaseItem và purchase
      * 
-     * - Kịch bản : 
-     *  - Nhập sai
+     * - Kịch bản :
+     * - Nhập sai
      * - Hủy kèo với nhà cung cấp (trả hàng)
      * - Nhập nhầm
-     * - 
+     * -
      * 
      */
     @DeleteMapping("{id}")

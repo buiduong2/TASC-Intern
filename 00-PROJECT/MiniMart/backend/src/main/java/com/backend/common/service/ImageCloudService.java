@@ -9,6 +9,6 @@ import com.backend.common.dto.ImageMetaRes;
 public interface ImageCloudService {
     CompletableFuture<ImageMetaRes> updateImage(MultipartFile file, Long dto, String prefix);
 
-    void deleteImageForId(String prefix, String publicId);
+    void deleteImageForId(String prefix, String id);
 
 }

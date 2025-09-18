@@ -8,12 +8,11 @@ import com.backend.order.dto.res.OrderAdminDTO;
 import com.backend.order.dto.res.OrderDTO;
 import com.backend.order.dto.res.OrderFilter;
 
-
 public interface OrderService {
 
-    Page<OrderDTO> findPage(Pageable pageable);
+    Page<OrderDTO> findPage(Pageable pageable, long userId);
 
-    void cancel(Long orderId);
+    void cancel(Long orderId, long l);
 
     OrderDTO create(OrderCreateReq req, long userId);
 

@@ -41,7 +41,7 @@ public class OrderServiceImpl implements OrderService {
     private final PaymentCalculator paymentCalculator;
 
     @Override
-    public Page<OrderDTO> findPage(Pageable pageable) {
+    public Page<OrderDTO> findPage(Pageable pageable, long userId) {
         throw new UnsupportedOperationException("Unimplemented method 'findPage'");
     }
 
@@ -58,7 +58,7 @@ public class OrderServiceImpl implements OrderService {
 
         Payment payment = paymentCalculator.calculate(order, req.getPaymentMethod());
         order.setPayment(payment);
-        order.setTotal(payment.getAmountDue());
+        order.setTotal(payment.getAmountTotal());
 
         orderItemRepository.saveAll(orderItems);
         repository.save(order);
@@ -69,10 +69,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional
     @Override
-    public void cancel(Long orderId) {
+    public void cancel(Long orderId, long userId) {
         Order order = repository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order id = " + orderId + " is not found"));
-        // TODO: implement rule ... Refund ...
         if (!(order.getStatus() == OrderStatus.PENDING || order.getStatus() == OrderStatus.SHIPPED)) {
             throw new IllegalStateException("Order cannot be canceled in status = " + order.getStatus());
         }

@@ -2,6 +2,7 @@ package com.backend.user.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,7 @@ import com.backend.user.dto.req.RefreshTokenReq;
 import com.backend.user.dto.req.RegisterReq;
 import com.backend.user.dto.req.RevokeJwtReq;
 import com.backend.user.dto.res.AuthRes;
+import com.backend.user.dto.res.UserDTO;
 import com.backend.user.security.CustomUserDetail;
 import com.backend.user.service.AuthService;
 
@@ -26,6 +28,15 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
 
     private final AuthService authService;
+
+    @GetMapping("@me")
+    public UserDTO getInfo(Authentication authentication) {
+        if (authentication.getPrincipal() instanceof CustomUserDetail customUserDetail) {
+            return authService.getInfo(customUserDetail.getUserId());
+        } else {
+            throw new RuntimeException("Printcipal not implemeted yet");
+        }
+    }
 
     @PostMapping("login")
     public AuthRes login(@Valid @RequestBody LoginReq loginReq) {

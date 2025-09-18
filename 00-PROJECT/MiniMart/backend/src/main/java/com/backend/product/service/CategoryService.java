@@ -24,4 +24,6 @@ public interface CategoryService {
     CategoryAdminDetailDTO update(Long id, CategoryUpdateReq dto);
 
     CategoryAdminDetailDTO findAdminById(long id);
+
+    void deleteById(long id);
 }

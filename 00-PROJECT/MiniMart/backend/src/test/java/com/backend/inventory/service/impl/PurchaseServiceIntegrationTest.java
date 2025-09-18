@@ -164,4 +164,9 @@ public class PurchaseServiceIntegrationTest {
     void testFindPage() {
         service.findPage(Pageable.ofSize(5));
     }
+
+    @Test
+    void testFindByPurchaseId() {
+        service.findDetailById(1L);
+    }
 }

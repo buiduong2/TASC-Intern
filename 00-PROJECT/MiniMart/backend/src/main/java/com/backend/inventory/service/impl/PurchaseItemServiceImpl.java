@@ -1,6 +1,8 @@
 package com.backend.inventory.service.impl;
 
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -127,6 +129,11 @@ public class PurchaseItemServiceImpl implements PurchaseItemService {
 
         repository.delete(purchaseItem);
         publisher.publishEvent(new PurchaseItemUpdateEvent(purchaseItem.getProduct().getId()));
+    }
+
+    @Override
+    public Page<PurchaseItemDTO> findByPurchaseId(long id, Pageable pageable) {
+        return repository.findByPurchaseId(id, pageable);
     }
 
 }

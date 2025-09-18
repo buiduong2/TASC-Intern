@@ -2,6 +2,7 @@ package com.backend.inventory.service.impl;
 
 import java.util.List;
 
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -13,6 +14,7 @@ import com.backend.inventory.dto.event.PurchaseItemUpdateEvent;
 import com.backend.inventory.service.StockService;
 import com.backend.order.dto.event.OrderCreatedEvent;
 import com.backend.product.dto.event.ProductCreatedEvent;
+import com.backend.product.dto.event.ProductDeleteEvent;
 
 import lombok.RequiredArgsConstructor;
 
@@ -50,6 +52,11 @@ public class StockEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void sendNotificatioNOnPurchaseDelete(PurchaseDeleteEvent event) {
         service.syncQuantity(event.getProductIds());
+    }
+
+    @EventListener
+    public void sendNotificationOnProductDelete(ProductDeleteEvent event) {
+        service.deleteByProductId(event.getProductId());
     }
 
 }
