@@ -67,7 +67,6 @@ public class StockAllocationSpecs {
     public Specification<StockAllocation> byFilter(StockAllocationFilter filter) {
         if (filter == null) {
             return (root, query, builder) -> builder.conjunction();
-
         }
         List<Specification<StockAllocation>> specs = new ArrayList<>();
 
@@ -91,7 +90,7 @@ public class StockAllocationSpecs {
             specs.add(byPurchaseId(filter.getPurchaseId()));
         }
 
-        if (!specs.isEmpty()) {
+        if (specs.isEmpty()) {
             return (root, query, builder) -> builder.conjunction();
         }
 

@@ -76,11 +76,13 @@ public class WebSecurityConfig {
                                 .requestMatchers("/api/admin/users").hasAuthority(ADMIN)
                                 .requestMatchers("/api/auth/change-password").authenticated()
                                 .requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers("/api/products").permitAll()
-                                .requestMatchers("/api/categories").permitAll()
-                                .anyRequest().authenticated()
+                                .requestMatchers("/api/products/**").permitAll()
+                                .requestMatchers("/api/payments/*/return").permitAll()
+                                .requestMatchers("/api/payments/*/ipn").permitAll()
+                                .requestMatchers("/api/categories/**").permitAll()
+                                .anyRequest().authenticated());
                 // .anyRequest().permitAll());
-                );
+                
 
         return http.build();
     }

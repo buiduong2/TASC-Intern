@@ -10,14 +10,17 @@ import org.springframework.transaction.annotation.Transactional;
 import com.backend.common.exception.ResourceNotFoundException;
 import com.backend.common.utils.ErrorCode;
 import com.backend.order.dto.req.PaymentTransactionReq;
+import com.backend.order.dto.req.RefundReq;
 import com.backend.order.dto.res.GatewayResponseData;
 import com.backend.order.dto.res.PaymentDTO;
 import com.backend.order.dto.res.PaymentGatewayCreateDTO;
 import com.backend.order.dto.res.PaymentTransactionDTO;
+import com.backend.order.exception.InvalidSignatureException;
 import com.backend.order.exception.PaymentAlreadyCompletedException;
 import com.backend.order.mapper.PaymentMapper;
 import com.backend.order.model.Payment;
 import com.backend.order.model.PaymentMethod;
+import com.backend.order.model.PaymentStatus;
 import com.backend.order.model.PaymentTransaction;
 import com.backend.order.model.TransactionStatus;
 import com.backend.order.repository.PaymentRepository;
@@ -25,7 +28,6 @@ import com.backend.order.repository.PaymentTransactionRepository;
 import com.backend.order.service.PaymentGateway;
 import com.backend.order.service.PaymentService;
 
-import io.jsonwebtoken.security.SecurityException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
@@ -45,9 +47,16 @@ public class PaymentServiceImpl implements PaymentService {
 
     private PaymentGateway getPaymentGateway(String name) {
         if (!paymentGatewayMap.containsKey(name)) {
-            throw new RuntimeException("cannot find paymentgateway");
+            throw new IllegalArgumentException("cannot find paymentgateway");
         }
         return paymentGatewayMap.get(name);
+    }
+
+    private PaymentGateway getPaymentGateway(PaymentMethod method) {
+        return switch (method) {
+            case VNPAY -> paymentGatewayMap.get("vnpay");
+            default -> throw new IllegalArgumentException("cannot find paymentgateway");
+        };
     }
 
     private String generateTxnRef() {
@@ -93,7 +102,7 @@ public class PaymentServiceImpl implements PaymentService {
         PaymentGateway paymentGateway = getPaymentGateway(gateway);
         GatewayResponseData resultDTO = paymentGateway.verifyReturn(allParams);
         if (!resultDTO.isIssignatureValid()) {
-            throw new SecurityException("Invalid " + gateway + " signature");
+            throw new InvalidSignatureException("Invalid " + gateway + " signature");
         }
 
         PaymentTransaction transaction = transactionRepository.findByTxnRef(resultDTO.getTxnRef())
@@ -151,10 +160,12 @@ public class PaymentServiceImpl implements PaymentService {
             transaction.setStatus(TransactionStatus.CANCELLED);
             return paymentGateway.getIpnResponse(IpnResponseType.AMOUNT_NOT_VALID);
         }
+
         if (transaction.getStatus() == TransactionStatus.SUCCESS && !grd.isSuccess()) {
             transaction.setStatus(TransactionStatus.CANCELLED);
             return paymentGateway.getIpnResponse(IpnResponseType.STATUS_NOT_VALID);
         }
+
         if (transaction.getStatus() == TransactionStatus.FAILED && grd.isSuccess()) {
             transaction.setStatus(TransactionStatus.CANCELLED);
             return paymentGateway.getIpnResponse(IpnResponseType.STATUS_NOT_VALID);
@@ -171,6 +182,62 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public PaymentDTO findAdminById(long paymentId) {
         throw new UnsupportedOperationException("Unimplemented method 'findAdminById'");
+    }
+
+    @Transactional
+    @Override
+    public PaymentTransactionDTO queryDr(long transactionId) {
+        PaymentTransaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        ErrorCode.PAYMENT_TRANSACTION_NOT_FOUND.format(transactionId)));
+
+        PaymentGateway gateway = getPaymentGateway(transaction.getMethod());
+
+        GatewayResponseData grd = gateway.queryDr(transaction.getTxnRef(), transaction.getDescription(),
+                transaction.getCreatedAt());
+
+        if (grd.isIssignatureValid()) {
+            throw new InvalidSignatureException("Invalid signature from gateway query Dr response");
+        }
+
+        if (transaction.getStatus() == TransactionStatus.PENDING && grd.isSuccess()) {
+            updateTransaction(grd, transaction);
+            calculator.calculateAmountPaid(transaction.getPayment().getId());
+
+            return mapper.toTransactionDTO(transaction);
+        }
+
+        return mapper.toTransactionDTO(transaction);
+    }
+
+    @Transactional
+    @Override
+    public PaymentDTO refund(long paymentId, RefundReq req) {
+        Payment payment = repository.findByIdForUpdateAmountPaid(paymentId)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.PAYMENT_NOT_FOUND.format(paymentId)));
+
+        if (payment.getStatus() == PaymentStatus.REFUNDED || payment.getStatus() == PaymentStatus.CANCELLED) {
+            return mapper.toDTO(payment);
+        }
+
+        // Transaction
+        PaymentTransaction transaction = new PaymentTransaction();
+
+        transaction.setAmount(req.getAmount());
+        transaction.setMethod(PaymentMethod.valueOf(req.getMethod()));
+        transaction.setDescription(req.getReason());
+        transaction.setStatus(TransactionStatus.REFUNDED);
+        transaction.setPaidAt(LocalDateTime.now());
+        transaction.setPayment(payment);
+        transaction.setTxnRef("SYSTEM-REFUND-" + generateTxnRef());
+
+        transactionRepository.save(transaction);
+
+        // Payment
+        calculator.calculateAmountPaidAfterRefund(payment, transaction);
+        repository.save(payment);
+
+        return mapper.toDTO(payment);
     }
 
 }

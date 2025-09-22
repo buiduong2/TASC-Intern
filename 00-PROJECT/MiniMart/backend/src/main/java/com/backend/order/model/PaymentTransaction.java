@@ -2,8 +2,14 @@ package com.backend.order.model;
 
 import java.time.LocalDateTime;
 
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.backend.user.model.User;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -16,6 +22,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@EntityListeners(AuditingEntityListener.class)
 public class PaymentTransaction {
 
     @Id
@@ -43,5 +50,9 @@ public class PaymentTransaction {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Payment payment;
+
+    @CreatedBy
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User createdBy;
 
 }

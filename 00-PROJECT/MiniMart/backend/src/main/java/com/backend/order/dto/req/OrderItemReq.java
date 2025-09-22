@@ -1,6 +1,6 @@
 package com.backend.order.dto.req;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,8 +9,8 @@ import lombok.Setter;
 @Setter
 public class OrderItemReq {
 
-    @NotEmpty
-    private long productId;
+    @NotNull
+    private Long productId;
 
     @Positive
     private int quantity;

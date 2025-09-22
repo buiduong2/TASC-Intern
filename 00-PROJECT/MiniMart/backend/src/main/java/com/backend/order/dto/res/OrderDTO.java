@@ -19,6 +19,8 @@ public class OrderDTO {
 
     private PaymentMethod paymentMethod;
 
+    private long paymentId;
+
     private OrderStatus status;
 
     private String shippingMethod;

@@ -2,23 +2,42 @@ package com.backend.inventory.dto.res;
 
 import java.time.LocalDateTime;
 
-public interface StockAllocationDTO {
-    Long getId();
+import lombok.Getter;
+import lombok.Setter;
 
-    int getAllocatedQuantity();
+@Getter
+@Setter
+public class StockAllocationDTO {
 
-    LocalDateTime getCreatedAt();
+    private long id;
+
+    private int allocatedQuantity;
+
+    private LocalDateTime createdAt;
 
     // Ánh xạ từ các entity liên quan
-    Long getPurchaseItem_Id();
+    private PurchaseItemDTO purchaseItem;
+    private OrderItemDTO orderItem;
+    private ProductDTO product;
 
-    String getPurchaseItem_Product_Name();
+    @Getter
+    @Setter
+    public static class PurchaseItemDTO {
+        private Long id;
+        private double costPrice;
+    }
 
-    Double getPurchaseItem_CostPrice();
+    @Getter
+    @Setter
+    public static class OrderItemDTO {
+        private Long id;
+        private double unitPrice;
+    }
 
-    Long getOrderItem_Id();
-
-    Double getOrderItem_UnitPrice();
-
-    String getOrderItem_Product_Name(); // Nếu cần tên sản phẩm từ OrderItem
+    @Getter
+    @Setter
+    public static class ProductDTO {
+        private Long id;
+        private String name;
+    }
 }

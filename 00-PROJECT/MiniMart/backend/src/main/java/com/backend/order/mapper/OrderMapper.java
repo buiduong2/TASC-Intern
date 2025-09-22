@@ -32,6 +32,7 @@ public interface OrderMapper {
 
     @Mapping(target = ".", source = "audit")
     @Mapping(target = "paymentMethod", source = "payment.name")
+    @Mapping(target = "paymentId", source = "payment.id")
     @Mapping(target = "shippingMethod", source = "shippingMethod.name")
     @Mapping(target = "shippingCost", source = "shippingMethod.cost")
     OrderDTO toDTO(Order order);

@@ -1,5 +1,6 @@
 package com.backend.order.service;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import com.backend.order.dto.res.PaymentGatewayCreateDTO;
@@ -19,4 +20,6 @@ public interface PaymentGateway {
     Object getIpnResponse(PaymentService.IpnResponseType responseType);
 
     PaymentTransactionDTO refund(Long paymentId, Long transactionId, Long adminId);
+
+    GatewayResponseData queryDr(String txnRef, String orderInfo,LocalDateTime createdAt);
 }

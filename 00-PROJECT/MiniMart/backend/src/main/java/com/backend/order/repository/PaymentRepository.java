@@ -13,9 +13,8 @@ import jakarta.persistence.LockModeType;
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     @Query("""
-            SELECT p
-            FROM Order AS o
-            LEFT JOIN o.payment AS p
+            FROM Payment AS p
+            LEFT JOIN FETCH p.order AS o
             LEFT JOIN o.customer AS c
             WHERE p.id = ?1 AND c.id = ?2
             """)
@@ -29,5 +28,15 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
             WHERE p.id = ?1
             """)
     Optional<Payment> findByIdForUpdateAmountPaid(long id);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            SELECT p
+            FROM Payment AS p
+            LEFT JOIN FETCH p.transactions
+            LEFT JOIN FETCH p.order
+            WHERE p.id = ?1
+            """)
+    Optional<Payment> findByIdForRefund(long id);
 
 }

@@ -32,7 +32,7 @@ public class BaseImage {
     private String publicId;
 
     @Embedded
-    private Audit audit;
+    private Audit audit = new Audit();
 
     @Override
     public final boolean equals(Object o) {

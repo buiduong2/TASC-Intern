@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.backend.inventory.dto.req.StockAllocationFilter;
 import com.backend.inventory.dto.res.StockAllocationDTO;
+import com.backend.inventory.mapper.StockMapper;
 import com.backend.inventory.repository.StockAllocationRepository;
 import com.backend.inventory.service.StockAllocationService;
 import com.backend.inventory.utils.StockAllocationSpecs;
@@ -20,11 +21,12 @@ public class StockAllocationServiceImpl implements StockAllocationService {
 
     private final StockAllocationSpecs specs;
 
+    private final StockMapper mapper;
+
     @Override
     public Page<StockAllocationDTO> findAll(StockAllocationFilter filter, Pageable pageable) {
-        // return repository.findAll(specs.byFilter(filter), pageable,
-        // StockAllocationDTO.class);
-        return null;
+        return repository.findAll(specs.byFilter(filter), pageable)
+                .map(mapper::toDTO);
     }
 
 }

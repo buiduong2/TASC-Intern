@@ -1,0 +1,264 @@
+package com.backend.common.repository.impl;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Repository;
+
+import com.backend.common.dto.ProfitReportDTO.ProfitDataDTO;
+import com.backend.common.dto.RevenueFilter;
+import com.backend.common.dto.RevenueReportDTO.RevenueDataDTO;
+import com.backend.common.dto.TopProductDTO;
+import com.backend.common.dto.TopProductFilter;
+import com.backend.common.model.Audit_;
+import com.backend.common.repository.ReportRepository;
+import com.backend.common.utils.CriteriaApiUtils;
+import com.backend.inventory.model.PurchaseItem;
+import com.backend.inventory.model.PurchaseItem_;
+import com.backend.inventory.model.StockAllocation;
+import com.backend.inventory.model.StockAllocation_;
+import com.backend.order.model.Order;
+import com.backend.order.model.OrderItem;
+import com.backend.order.model.OrderItem_;
+import com.backend.order.model.OrderStatus;
+import com.backend.order.model.Order_;
+import com.backend.order.model.PaymentStatus;
+import com.backend.order.model.Payment_;
+import com.backend.product.model.Category_;
+import com.backend.product.model.Product;
+import com.backend.product.model.Product_;
+import com.backend.user.model.Customer_;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import lombok.RequiredArgsConstructor;
+
+@Repository
+@RequiredArgsConstructor
+public class ReportRepositoryImpl implements ReportRepository {
+
+    private final EntityManager em;
+
+    @Override
+    public BigDecimal getTotalRevenue(RevenueFilter filter) {
+
+        CriteriaBuilder builder = em.getCriteriaBuilder();
+        CriteriaQuery<BigDecimal> query = builder.createQuery(BigDecimal.class);
+        Root<Order> order = query.from(Order.class);
+
+        query.select(builder.coalesce(builder.sum(order.get(Order_.total).as(BigDecimal.class)), new BigDecimal(0d)));
+        query.where(baseFilter(filter).and(byRelationId(filter)).toPredicate(order, query, builder));
+
+        return em.createQuery(query).getSingleResult();
+    }
+
+    @Override
+    public List<RevenueDataDTO> getRevenueGrouping(RevenueFilter filter) {
+        String groupBy = filter.getGroupBy();
+        CriteriaBuilder builder = em.getCriteriaBuilder();
+        CriteriaQuery<RevenueDataDTO> query = builder.createQuery(RevenueDataDTO.class);
+        Root<Order> order = query.from(Order.class);
+
+        Predicate byFilter = byRelationId(filter).toPredicate(order, query, builder);
+        Predicate baseFilter = baseFilter(filter).toPredicate(order, query, builder);
+        query.where(builder.and(byFilter, baseFilter));
+
+        Path<LocalDateTime> createdAtPath = order.get(Order_.audit).get(Audit_.createdAt);
+        Expression<BigDecimal> totalRevenueExpr = builder.sum(order.get(Order_.total)).as(BigDecimal.class);
+
+        if (groupBy.equals("DAY")) {
+            Expression<String> labelExpr = builder.function("DATE", LocalDate.class, createdAtPath)
+                    .as(String.class);
+            query.groupBy(labelExpr);
+            query.select(builder.construct(RevenueDataDTO.class, labelExpr, totalRevenueExpr));
+            query.orderBy(builder.asc(labelExpr));
+        } else {
+            Expression<String> yearExpr = builder.function("DATE_PART", Integer.class,
+                    builder.literal("year"), createdAtPath)
+                    .as(String.class);
+
+            Expression<String> monthExpr = builder.function("DATE_PART", Integer.class,
+                    builder.literal("month"), createdAtPath).as(String.class);
+
+            if (groupBy.equals("MONTH")) {
+                Expression<String> labelExpr = builder.concat(builder.concat(yearExpr, "-"), monthExpr);
+                query.groupBy(yearExpr, monthExpr);
+
+                query.select(builder.construct(RevenueDataDTO.class, labelExpr, totalRevenueExpr));
+                query.orderBy(builder.asc(yearExpr), builder.asc(monthExpr));
+            } else if (groupBy.equals("YEAR")) {
+                query.groupBy(yearExpr);
+                query.select(builder.construct(RevenueDataDTO.class, yearExpr, totalRevenueExpr));
+                query.orderBy(builder.asc(yearExpr));
+            } else {
+                throw new IllegalArgumentException("Filter['groupBy']  value not valid");
+            }
+        }
+
+        return em.createQuery(query).getResultList();
+    }
+
+    private Specification<Order> baseFilter(RevenueFilter filter) {
+        Specification<Order> createdAtBetween = getOrderCreatedAtBetween(filter.getStartDate(), filter.getEndDate());
+        Specification<Order> orderIsPaid = orderIsPaid();
+        Specification<Order> orderIsCompleted = orderIsCompleted();
+        return Specification.allOf(createdAtBetween, orderIsCompleted, orderIsPaid);
+
+    }
+
+    private Specification<Order> getOrderCreatedAtBetween(LocalDateTime startdate, LocalDateTime endDate) {
+        return (root, query, builder) -> {
+            return builder.between(root.get(Order_.audit).get(Audit_.createdAt), startdate, endDate);
+        };
+    }
+
+    private Specification<Order> orderIsCompleted() {
+        return (root, query, builder) -> {
+            return builder.equal(root.get(Order_.status), OrderStatus.COMPLETED);
+        };
+    }
+
+    private Specification<Order> orderIsPaid() {
+        return (root, query, builder) -> {
+            return builder.equal(root.get(Order_.payment).get(Payment_.status), PaymentStatus.PAID);
+        };
+    }
+
+    private Specification<Order> byRelationId(RevenueFilter filter) {
+        List<Specification<Order>> specs = new ArrayList<>();
+        if (filter.getCategoryId() != null) {
+            specs.add(isCategoryId(filter.getCategoryId()));
+        }
+
+        if (filter.getProductId() != null) {
+            specs.add(isProductId(filter.getProductId()));
+        }
+
+        if (filter.getCustomerId() != null) {
+            specs.add(isCustomerId(filter.getCustomerId()));
+        }
+
+        if (specs.isEmpty()) {
+            return Specification.unrestricted();
+        }
+
+        return Specification.allOf(specs);
+    }
+
+    private Specification<Order> isCustomerId(long customerId) {
+        return (root, query, builder) -> {
+            return builder.equal(root.get(Order_.customer).get(Customer_.id), customerId);
+        };
+    }
+
+    private Specification<Order> isCategoryId(long categoryId) {
+        return (root, query, builder) -> {
+            Join<Order, OrderItem> orderItem = CriteriaApiUtils.getOrCreateJoin(root,
+                    Order_.orderItems);
+
+            Join<OrderItem, Product> product = CriteriaApiUtils.getOrCreateJoin(orderItem,
+                    OrderItem_.product);
+
+            return builder.equal(root.get(Order_.customer).get(Customer_.id),
+                    product.get(Product_.category).get(Category_.id));
+        };
+    }
+
+    private Specification<Order> isProductId(long productId) {
+        return (root, query, builder) -> {
+            Join<Order, OrderItem> orderItem = CriteriaApiUtils.getOrCreateJoin(root,
+                    Order_.orderItems);
+
+            return builder.equal(root.get(Order_.customer).get(Customer_.id),
+                    orderItem.get(OrderItem_.product).get(Product_.id));
+        };
+    }
+
+    @Override
+    public List<ProfitDataDTO> getTotalProfit(RevenueFilter filter) {
+        CriteriaBuilder builder = em.getCriteriaBuilder();
+        CriteriaQuery<ProfitDataDTO> query = builder.createQuery(ProfitDataDTO.class);
+
+        // FROM
+        Root<Order> root = query.from(Order.class);
+        Join<Order, OrderItem> oi = root.join(Order_.orderItems);
+        Join<OrderItem, StockAllocation> sa = oi.join(OrderItem_.allocations);
+        Join<StockAllocation, PurchaseItem> pi = sa.join(StockAllocation_.purchaseItem);
+
+        // SELECT
+        Expression<BigDecimal> totalRevenueExpr = builder.coalesce(builder
+                .sum(builder.prod(sa.get(StockAllocation_.allocatedQuantity), oi.get(OrderItem_.unitPrice))
+                        .as(BigDecimal.class)),
+                builder.literal(BigDecimal.ZERO));
+        Expression<BigDecimal> totalCostExpr = builder.coalesce(builder
+                .sum(builder.prod(sa.get(StockAllocation_.allocatedQuantity), pi.get(PurchaseItem_.costPrice))
+                        .as(BigDecimal.class)),
+                builder.literal(BigDecimal.ZERO));
+        Expression<BigDecimal> totalProfitExpr = builder.diff(totalRevenueExpr, totalCostExpr);
+
+        // WHERE
+        query.where(baseFilter(filter).and(byRelationId(filter)).toPredicate(root, query, builder));
+
+        // GROUP BY
+        String groupBy = filter.getGroupBy();
+        Path<LocalDateTime> createdAtPath = sa.get(StockAllocation_.createdAt);
+
+        if (groupBy.equals("NONE")) {
+            query.select(builder.construct(
+                    ProfitDataDTO.class,
+                    builder.literal("Total"), totalRevenueExpr, totalCostExpr, totalProfitExpr));
+
+        } else if (groupBy.equals("DAY")) {
+            Expression<String> labelExpr = builder
+                    .function("DATE", LocalDate.class, createdAtPath)
+                    .as(String.class);
+            query.groupBy(labelExpr);
+            query.select(builder.construct(ProfitDataDTO.class, labelExpr, totalRevenueExpr, totalCostExpr,
+                    totalProfitExpr));
+            query.orderBy(builder.asc(labelExpr));
+        } else {
+            Expression<String> yearExpr = builder.function("DATE_PART", Integer.class,
+                    builder.literal("year"), createdAtPath)
+                    .as(String.class);
+
+            Expression<String> monthExpr = builder.function("DATE_PART", Integer.class,
+                    builder.literal("month"), createdAtPath).as(String.class);
+
+            if (groupBy.equals("MONTH")) {
+                Expression<String> labelExpr = builder.concat(builder.concat(yearExpr, "-"), monthExpr);
+                query.groupBy(yearExpr, monthExpr);
+
+                query.select(builder.construct(ProfitDataDTO.class, labelExpr,
+                        totalRevenueExpr, totalCostExpr, totalProfitExpr));
+                query.orderBy(builder.asc(yearExpr), builder.asc(monthExpr));
+            } else if (groupBy.equals("YEAR")) {
+                query.groupBy(yearExpr);
+                query.select(builder.construct(ProfitDataDTO.class, yearExpr,
+                        totalRevenueExpr, totalCostExpr, totalProfitExpr));
+                query.orderBy(builder.asc(yearExpr));
+            } else {
+                throw new IllegalArgumentException("Filter['groupBy']  value not valid");
+            }
+        }
+
+        return em.createQuery(query).getResultList();
+    }
+
+    @Override
+    public TopProductDTO getTopProduct(TopProductFilter filter) {
+        
+
+        return null;
+    }
+
+}

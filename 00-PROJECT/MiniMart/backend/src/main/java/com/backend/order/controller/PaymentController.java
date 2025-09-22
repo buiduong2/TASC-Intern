@@ -53,9 +53,12 @@ public class PaymentController {
     }
 
     // IPN
-    @PostMapping("{gateway:vnpay}/ipn")
+    @GetMapping("{gateway:vnpay}/ipn")
     public Object handleIpn(@PathVariable String gateway,
             @RequestParam Map<String, String> allParams) {
+        if (allParams == null || allParams.size() == 0) {
+            return "Hello";
+        }
         return paymentService.handleIpn(gateway, allParams);
     }
 

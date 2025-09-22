@@ -3,6 +3,7 @@ package com.backend.order.service;
 import java.util.Map;
 
 import com.backend.order.dto.req.PaymentTransactionReq;
+import com.backend.order.dto.req.RefundReq;
 import com.backend.order.dto.res.PaymentDTO;
 import com.backend.order.dto.res.PaymentTransactionDTO;
 
@@ -30,5 +31,9 @@ public interface PaymentService {
     PaymentTransactionDTO verifyReturn(String gateway, Map<String, String> allParams);
 
     Object handleIpn(String gateway, Map<String, String> allParams);
+
+    PaymentTransactionDTO queryDr(long transactionId);
+
+    PaymentDTO refund(long paymentId, RefundReq req);
 
 }

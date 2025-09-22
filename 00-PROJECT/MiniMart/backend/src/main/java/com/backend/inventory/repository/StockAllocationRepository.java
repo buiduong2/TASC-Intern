@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -31,6 +32,7 @@ public interface StockAllocationRepository
             """)
     List<Long> findAllocatedPurchaseItemIdsByPurchaseId(Long purchaseId);
 
-    <T> Page<T> findAll(Specification<StockAllocation> spec, Pageable pageable, Class<T> type);
-
+    @SuppressWarnings("null")
+    @EntityGraph(value = "StockAllocation.withRelations")
+    Page<StockAllocation> findAll(Specification<StockAllocation> spec, Pageable pageable);
 }

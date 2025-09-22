@@ -15,9 +15,20 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedSubgraph;
 import lombok.Getter;
 import lombok.Setter;
 
+@NamedEntityGraph(name = "StockAllocation.withRelations", attributeNodes = {
+        @NamedAttributeNode(value = "orderItem", subgraph = "orderItem-subgraph"),
+        @NamedAttributeNode("purchaseItem")
+}, subgraphs = {
+        @NamedSubgraph(name = "orderItem-subgraph", attributeNodes = {
+                @NamedAttributeNode("product")
+        })
+})
 @Entity
 @Getter
 @Setter

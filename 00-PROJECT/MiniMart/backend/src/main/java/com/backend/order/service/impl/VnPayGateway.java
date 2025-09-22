@@ -1,36 +1,43 @@
 package com.backend.order.service.impl;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TimeZone;
-import java.util.TreeMap;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
-import com.backend.order.dto.res.PaymentGatewayCreateDTO;
 import com.backend.order.dto.res.GatewayResponseData;
+import com.backend.order.dto.res.PaymentGatewayCreateDTO;
 import com.backend.order.dto.res.PaymentTransactionDTO;
 import com.backend.order.service.PaymentGateway;
 import com.backend.order.service.PaymentService;
+import com.backend.order.utils.VnpayUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 
 @Component("vnpay")
+@RequiredArgsConstructor
 public class VnPayGateway implements PaymentGateway {
+
+    private static final String MERCHANT_IP = "127.0.0.1";
+
+    private static final String ZONE_ID = "Asia/Ho_Chi_Minh";
 
     @Value("${custom.vnpay.pay-url}")
     private String payUrl;
 
     @Value("${custom.vnpay.return-url}")
     private String returnUrl;
+
+    @Value("${custom.vnpay.query-dr-url}")
+    private String queryDrUrl;
 
     @Value("${custom.vnpay.tmn-code}")
     private String tmnCode;
@@ -42,6 +49,8 @@ public class VnPayGateway implements PaymentGateway {
     public PaymentGatewayCreateDTO createTransaction(String orderInfo, String txnRef, double amount,
             HttpServletRequest request) {
         Map<String, String> params = new HashMap<>();
+        ZoneId zone = ZoneId.of(ZONE_ID);
+        LocalDateTime now = LocalDateTime.now(zone);
         params.put("vnp_Version", "2.1.0");
         params.put("vnp_Command", "pay");
         params.put("vnp_TmnCode", tmnCode);
@@ -53,16 +62,12 @@ public class VnPayGateway implements PaymentGateway {
         params.put("vnp_Locale", "vn");
         params.put("vnp_ReturnUrl", returnUrl);
         params.put("vnp_IpAddr", request.getRemoteAddr());
+        params.put("vnp_CreateDate", VnpayUtils.toVnpDate(now));
+        params.put("vnp_ExpireDate", VnpayUtils.toVnpDate(now.plusMinutes(15)));
 
-        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-        params.put("vnp_CreateDate", formatter.format(cld.getTime()));
-        cld.add(Calendar.MINUTE, 15);
-        params.put("vnp_ExpireDate", formatter.format(cld.getTime()));
-
-        String hashData = buildHashData(params);
-        String secureHash = hmacSHA512(hashSecret, hashData);
-        String query = buildQuery(params) + "&vnp_SecureHash=" + secureHash;
+        String hashData = VnpayUtils.buildHashData(params);
+        String secureHash = VnpayUtils.hmacSHA512(hashSecret, hashData);
+        String query = VnpayUtils.buildQuery(params) + "&vnp_SecureHash=" + secureHash;
         String redirectUrl = payUrl + "?" + query;
 
         return new PaymentGatewayCreateDTO(redirectUrl, params.get("vnp_TxnRef"));
@@ -80,8 +85,8 @@ public class VnPayGateway implements PaymentGateway {
 
     private GatewayResponseData verifySignature(Map<String, String> params) {
         String receivedHash = params.get("vnp_SecureHash");
-        String hashData = buildHashData(params);
-        String calculatedHash = hmacSHA512(hashSecret, hashData);
+        String hashData = VnpayUtils.buildHashData(params);
+        String calculatedHash = VnpayUtils.hmacSHA512(hashSecret, hashData);
 
         if (!calculatedHash.equalsIgnoreCase(receivedHash)) {
             return GatewayResponseData.builder()
@@ -103,52 +108,6 @@ public class VnPayGateway implements PaymentGateway {
                 .success(success)
                 .issignatureValid(true)
                 .build();
-    }
-
-    /** Sinh HMAC SHA512 */
-    public static String hmacSHA512(String key, String data) {
-        try {
-            Mac hmac512 = Mac.getInstance("HmacSHA512");
-            hmac512.init(new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA512"));
-            byte[] result = hmac512.doFinal(data.getBytes(StandardCharsets.UTF_8));
-            StringBuilder sb = new StringBuilder(2 * result.length);
-            for (byte b : result) {
-                sb.append(String.format("%02x", b & 0xff));
-            }
-            return sb.toString();
-        } catch (Exception ex) {
-            throw new RuntimeException("Error while generating HMAC SHA512", ex);
-        }
-    }
-
-    /** Build rawData để ký hash (phải encode key và value) */
-    public static String buildHashData(Map<String, String> params) {
-        Map<String, String> sorted = new TreeMap<>(params);
-        sorted.remove("vnp_SecureHash");
-        sorted.remove("vnp_SecureHashType");
-
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, String> entry : sorted.entrySet()) {
-            if (sb.length() > 0)
-                sb.append("&");
-            sb.append(URLEncoder.encode(entry.getKey(), StandardCharsets.US_ASCII))
-                    .append("=")
-                    .append(URLEncoder.encode(entry.getValue(), StandardCharsets.US_ASCII));
-        }
-        return sb.toString();
-    }
-
-    /** Build query string để redirect */
-    public static String buildQuery(Map<String, String> params) {
-        StringBuilder query = new StringBuilder();
-        for (Map.Entry<String, String> entry : new TreeMap<>(params).entrySet()) {
-            if (query.length() > 0)
-                query.append("&");
-            query.append(URLEncoder.encode(entry.getKey(), StandardCharsets.US_ASCII))
-                    .append("=")
-                    .append(URLEncoder.encode(entry.getValue(), StandardCharsets.US_ASCII));
-        }
-        return query.toString();
     }
 
     @Override
@@ -173,4 +132,37 @@ public class VnPayGateway implements PaymentGateway {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'refund'");
     }
+
+    @Override
+    public GatewayResponseData queryDr(String txnRef, String orderInfo, LocalDateTime createdAt) {
+
+        ZoneId zone = ZoneId.of(ZONE_ID); // GMT+7
+        LocalDateTime now = LocalDateTime.now(zone);
+        Map<String, String> params = new HashMap<>();
+        params.put("vnp_RequestId", String.valueOf(System.currentTimeMillis()));
+        params.put("vnp_Version", "2.1.0");
+        params.put("vnp_Command", "querydr");
+        params.put("vnp_TmnCode", tmnCode);
+        params.put("vnp_TxnRef", txnRef);
+        params.put("vnp_OrderInfo", orderInfo);
+        params.put("vnp_TransactionDate", VnpayUtils.toVnpDate(createdAt));
+        params.put("vnp_CreateDate", VnpayUtils.toVnpDate(now));
+        params.put("vnp_IpAddr", MERCHANT_IP);
+
+        String hashData = VnpayUtils.buildHashData(params);
+        String secureHash = VnpayUtils.hmacSHA512(hashSecret, hashData);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        Map<String, String> body = new HashMap<>(params);
+        body.put("vnp_SecureHash", secureHash);
+
+        HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+        String response = restTemplate.postForObject(queryDrUrl, request, String.class);
+        Map<String, String> resultParams = VnpayUtils.parseQuery(response);
+        return verifySignature(resultParams);
+    }
+
 }

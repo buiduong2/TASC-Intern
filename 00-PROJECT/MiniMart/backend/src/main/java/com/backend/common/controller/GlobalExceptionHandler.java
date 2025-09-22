@@ -18,6 +18,7 @@ import com.backend.common.exception.ResourceNotFoundException;
 import com.backend.common.exception.ValidationErrorResponse;
 import com.backend.common.exception.ValidationErrorResponse.ErrorDetail;
 import com.backend.common.exception.ValidationException;
+import com.backend.order.exception.InvalidSignatureException;
 import com.backend.user.exception.TokenBlacklistedException;
 import com.backend.user.exception.TokenVersionMismatchException;
 import com.backend.user.exception.UserInactiveException;
@@ -140,11 +141,24 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(JwtException.class)
     public ResponseEntity<GenericErrorResponse> handleJwtException(JwtException ex) {
+        ex.printStackTrace();
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(GenericErrorResponse.builder()
                         .status(HttpStatus.UNAUTHORIZED.value())
                         .error("JWT_INVALID")
                         .message("Invalid or expired token")
+                        .timestamp(LocalDateTime.now())
+                        .build());
+    }
+
+    @ExceptionHandler(InvalidSignatureException.class)
+    public ResponseEntity<GenericErrorResponse> handleInvalidSignatureException(InvalidSignatureException ex) {
+        ex.printStackTrace();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(GenericErrorResponse.builder()
+                        .status(HttpStatus.UNAUTHORIZED.value())
+                        .error("PAYMENT_SIGNATURE_INVALID")
+                        .message(ex.getMessage())
                         .timestamp(LocalDateTime.now())
                         .build());
     }

@@ -1,5 +1,7 @@
 package com.backend.order.service.impl;
 
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,6 +60,13 @@ public class PaymentCalculator {
         } else {
             payment.setStatus(PaymentStatus.PAID);
         }
+
+    }
+
+    public void calculateAmountPaidAfterRefund(Payment payment, PaymentTransaction paymentTransaction) {
+        payment.setAmountPaid(payment.getAmountPaid() - paymentTransaction.getAmount());
+        payment.setStatus(PaymentStatus.REFUNDED);
+        payment.setCompletedAt(LocalDateTime.now());
 
     }
 }
