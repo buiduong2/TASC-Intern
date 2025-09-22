@@ -194,11 +194,11 @@
         -   Luôn xác định tính duy nhất PARTITION chứa một hàng theo key
         -   Dễ kiểm soát và kiểm tra tính toàn vẹn dữ liệu
 
-- `Các CSDL khác`
-    - Chỉ yêu cầu phải chứa đủ UNIQUE Key mà thôi
+-   `Các CSDL khác`
 
-- Vậy MySQL sẽ thay đổi logic của hệ thống. Nhưng nó ổn định và đoán trước
+    -   Chỉ yêu cầu phải chứa đủ UNIQUE Key mà thôi
 
+-   Vậy MySQL sẽ thay đổi logic của hệ thống. Nhưng nó ổn định và đoán trước
 
 -   VD nếu ko có quản lý đó:
 

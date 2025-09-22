@@ -345,3 +345,93 @@ CREATE INDEX idx_active_users ON users(email) WHERE active = true;
 ```sql
 CREATE INDEX idx_lower_email ON users(LOWER(email));
 ```
+
+## Về nahf
+
+-   Khi nào store Khi nào dùng Function
+
+-   Tạo các VD về index
+
+    -   Phải có hơn 1m bản ghi chẳng hạn
+        composite
+    -   Giả sử 3 cái
+    -   trộn hết lên có ăn index không. hay chỉ đầu cuối ăn thôi
+    -   Lên lớn hơn 2 thì sẽ như thế nào
+    -   Rất rõ ràng sẽ ăn rồi. TH 2 index nhưng đảo ngược vẫn ăn. Có cái Reoorder
+    -   3 cái nhưng xáo trộn vị trí. Xem các trường hợp để lúc sau dùng
+    -   Tại sao lại như vậy. Nhiều tình huống.
+
+-   -   Project. lên lịch: chia ra sẽ làm nhuwgn gì. 1 dạng Deadline . Lên kế hoạch
+-   Tạo các index của Pattition
+
+-
+
+## Về nhà có thể cho thêm một triệu dữ liêu jvafo để kiểm tra
+
+## Reorder Index
+
+-   trong truow3ngf hợp 2 cái . nó sẽ cố gắng tự động tối ưu hóa lại câu lệnh SQL
+
+-   Reorder : theo chiều thuận và theo chiều nghịc thôi. không phải sắp xếp loạn mà cso thể sdungf được
+
+## Chuyện
+
+-   Tạo ra vài index. Tìm kiếm theo một điều kiện được hay không
+-   Thay đổi thứ tự các idnex để tái sử dụng được hay không
+-   Hệ thống DB tự động tối ưu hóa.
+
+## Procdure 1 câu queryr duy nahast. CÓ thể viết ở tầng ứng dụng. Tại sao người ta lại cần viết ở DB
+
+-   **Hiệu năng và tối ưu db**
+
+    -   Execution plan cache (người lên kế hoạch tối ưu query - biên dịch) chạy nhiều lần thì nhanh hơn query động
+    -   Toàn bộ Logic chạy ngay trong DB engnie , giảm network overhead và tận dụng khả năng tối ưu của DB
+
+-   **XỬ lý nghiệp vụ ngay trong DB**
+
+    -   Có những luật về nghiệp vụ liên quan chặt chẽ đến dữ liệu (tính toán số dư, phân bổ tồn kho, chạy batch xử lý hàng triệu record)
+
+    -   Để ở tầng ứng dụng sẽ phải kéo dữ liệu về update ngược lại -> tốn tài nguyên và chậm
+
+    -   Đặt trong DB thì xử lý 1 lần ngay trong DB, thay vì tự quản lý transaction
+
+-   **Bảo mật phân quyền**
+    -   có khi không muốn SELECT/UPDATE tực tiếp vòa bảng'
+    -   cấp quyền cho app chỉ có thể gọi `EXECUTE PROCEDURE`
+-   **Tái sử dụng và chuẩn hóa**
+
+    -   PROCEDURE dùng chung cho nhiều ứng dụng (JAVa APp, NET APP, Report Tool, script)
+    -   Nếu viết query ở tàng ứng dụng mỗi team sẽ tự viết , dễ sai khác
+    -   Viết ở DB thì gọi chung một logic
+
+    -   _tận dụng khả năng tối ưu của DB_
+
+-   **Tòm lại . Nếu native Query SELECT + PROCEDURE đều gọi được ở tầng ứng dụng**
+    -   Stored Procedure tạo `API ổn định ở tầng DB`, che giấu chi tiết schema.
+        -   Schema có thay đổi thế nào thì ta vẫn chỉ làm việc với `API - tên function`
+    -   DBA có thể `tối ưu / thay đổi bên trong` mà không cần `build & deploy ứng dụng`.
+    -   Cho phép kiểm soát `execution plan` tốt hơn, tránh sự khác biệt do ORM hoặc driver
+    -   Có tên rõ ràng → `dễ log (log tên đã gọi), giám sát, đo đạc hiệu năng.`
+    -   `Tái sử dụng` cho `nhiều ứng dụng` / report, giống như view có tham số.
+    -   Có thể `hot-fix trực tiếp trên DB`khi cần khắc phục sự cố khẩn cấp.
+    -   Chuẩn bị cho tương lai: dễ dàng chuyển sang mô hình `phân quyền chỉ EXECUTE`, tăng bảo mật.
+
+## Store 
+
+- Được Compile sẵn nên tốc độ sẽ nhanah hơn chút
+- Câu được dùng ở nhiều nơi trong application
+- Khi sửa code: rất phức tạp. 
+
+- Khi nào sử dụng Store
+    - Khi mà câu Query phức tpaj JOIN từ 3-4 bảng trở lên có nhiều điều kiện khác nhau thì viết Store
+    
+- Trong trương hợp khi mà có 1 thay đổi phải update hoặc delete nhiều bảng một lúc 
+    - Viết trong 1 store. update DELETE . 
+    - Quản lý sổ đỏ. Phải update 1 lúc hơn 10 bảng. 
+
+- Kho quản lý khi sử dụng Store
+    - Viêt 2 store cùng 1 lúc. Bị rác store
+
+
+### 
+

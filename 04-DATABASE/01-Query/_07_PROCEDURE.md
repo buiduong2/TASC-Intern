@@ -206,4 +206,23 @@ DROP PROCEDURE ten_procedure([kiểu tham số]);
 -- Để EDIT thì DROP xong CREATE lại
 ```
 
--
+## NÓ là gì
+
+## nó dùng trong trường hợp nào
+
+## VỀ nhà
+
+-   Tạo các VD về index của PARTITION
+
+    -   Phải có hơn 1m bản ghi chẳng hạn
+
+-   Về nhà tìm hiểu tại sao . Procdure 1 câu queryr duy nahast. CÓ thể viết ở tầng ứng dụng. Tại sao người ta lại cần viết ở DB
+    -   Trong khi đó việc lưu lại cắt 1 phần bô jnhwos
+    -   Compile
+
+    - Nếu ko có Entity ko lây được. Nhuwgn vnax map sang DTO bình thường
+    - 
+
+- Có bao nhiệu công nghệ lại công nghệ này. 
+
+
