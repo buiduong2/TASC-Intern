@@ -1,9 +1,15 @@
 package com.backend.common.controller;
 
+import java.util.List;
+
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.backend.common.dto.LowStockProductFilter;
+import com.backend.common.dto.ProductLowStockDTO;
 import com.backend.common.dto.ProfitReportDTO;
 import com.backend.common.dto.RevenueFilter;
 import com.backend.common.dto.RevenueReportDTO;
@@ -39,8 +45,9 @@ public class ReportController {
         return service.getProfit(filter);
     }
 
+    // Top Sản phẩm lợi nhuận theo Kì
     @GetMapping("/top-products")
-    public TopProductDTO getTopProduct(TopProductFilter filter) {
+    public List<TopProductDTO> getTopProduct(TopProductFilter filter) {
         return service.getTopProduct(filter);
     }
 
@@ -48,6 +55,13 @@ public class ReportController {
     // Danh sách tồn kho hiện tại
     // Sản phẩm sắp hết hàng
     // Lịch sử nhập – xuất kho
+    @GetMapping("/low-stock")
+    public List<ProductLowStockDTO> getLowStockProduct(LowStockProductFilter filter,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        return service.getLowStockProduct(filter,PageRequest.of(page, size));
+    }
 
     // Thống kê đơn hàng (tổng số, trạng thái)
     // Số lượng đơn theo trạng thái

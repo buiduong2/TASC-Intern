@@ -2,6 +2,7 @@ package com.backend.common.dto;
 
 import java.time.LocalDateTime;
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
@@ -12,8 +13,11 @@ import lombok.Setter;
 @Setter
 public class TopProductFilter {
 
+    @Pattern(regexp = "quantity|revenue|profit")
+    @NotNull
     private String metric; // "quantity" | "revenue" | "profit"
     @Pattern(regexp = "DAY|WEEK|MONTH|YEAR|RANGE")
+    @NotNull
     private String period; // "DAY" | "WEEK" | "MONTH" | "YEAR" | "RANGE"
 
     @Past

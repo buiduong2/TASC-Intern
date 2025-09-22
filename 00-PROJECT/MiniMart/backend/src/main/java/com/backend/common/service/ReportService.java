@@ -1,5 +1,11 @@
 package com.backend.common.service;
 
+import java.util.List;
+
+import org.springframework.data.domain.PageRequest;
+
+import com.backend.common.dto.LowStockProductFilter;
+import com.backend.common.dto.ProductLowStockDTO;
 import com.backend.common.dto.ProfitReportDTO;
 import com.backend.common.dto.RevenueFilter;
 import com.backend.common.dto.RevenueReportDTO;
@@ -12,6 +18,8 @@ public interface ReportService {
 
     ProfitReportDTO getProfit(RevenueFilter filter);
 
-    TopProductDTO getTopProduct(TopProductFilter filter);
+    List<TopProductDTO> getTopProduct(TopProductFilter filter);
+
+    List<ProductLowStockDTO> getLowStockProduct(LowStockProductFilter filter, PageRequest of);
 
 }

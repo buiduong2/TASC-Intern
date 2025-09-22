@@ -3,8 +3,11 @@ package com.backend.common.service.impl;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.backend.common.dto.LowStockProductFilter;
+import com.backend.common.dto.ProductLowStockDTO;
 import com.backend.common.dto.ProfitReportDTO;
 import com.backend.common.dto.ProfitReportDTO.ProfitDataDTO;
 import com.backend.common.dto.RevenueFilter;
@@ -58,8 +61,13 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public TopProductDTO getTopProduct(TopProductFilter filter) {
+    public List<TopProductDTO> getTopProduct(TopProductFilter filter) {
         return repository.getTopProduct(filter);
+    }
+
+    @Override
+    public List<ProductLowStockDTO> getLowStockProduct(LowStockProductFilter filter, PageRequest pageRequest) {
+        return repository.getLowStockProduct(filter, pageRequest);
     }
 
 }

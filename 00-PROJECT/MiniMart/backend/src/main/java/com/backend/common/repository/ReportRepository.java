@@ -3,6 +3,10 @@ package com.backend.common.repository;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
+
+import com.backend.common.dto.LowStockProductFilter;
+import com.backend.common.dto.ProductLowStockDTO;
 import com.backend.common.dto.ProfitReportDTO.ProfitDataDTO;
 import com.backend.common.dto.RevenueFilter;
 import com.backend.common.dto.RevenueReportDTO.RevenueDataDTO;
@@ -17,6 +21,8 @@ public interface ReportRepository {
 
     List<ProfitDataDTO> getTotalProfit(RevenueFilter filter);
 
-    TopProductDTO getTopProduct(TopProductFilter filter);
+    List<TopProductDTO> getTopProduct(TopProductFilter filter);
+
+    List<ProductLowStockDTO> getLowStockProduct(LowStockProductFilter filter, PageRequest pageRequest);
 
 }
