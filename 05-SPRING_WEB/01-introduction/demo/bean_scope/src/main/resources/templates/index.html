@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Count Application</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+</head>
+
+<body>
+    <div class="m-20">
+        <h1 class="text-lg underline">Theo dõi</h1>
+        <ul>
+            <li>Sô lần khởi tọa lại SingletonBean: <span th:text="${monitorBean.singletonBeanCreateCount}"></span></li>
+            <li> Sô lần khởi tọa lại PrototypeBean: <span th:text="${monitorBean.prototypeBeanCreateCount}"></span></li>
+            <li>Sô lần khởi tọa lại RequestBean: <span th:text="${monitorBean.requestBeanCreateCount}"></span></li>
+            <li>Sô lần khởi tọa lại SesionBean: <span th:text="${monitorBean.sessionBeanCreateCount}"></span></li>
+        </ul>
+
+
+        <hr>
+        <h1>Giá trị của Bean: </h1>
+        <ul>
+            <li class="flex gap-10">
+                <p>Singletonbean: <span th:text="${singletonBean.value}"></span></p>
+                <form method="post" action="/singleton"> <button class="border px-2 py-0.5">+</button></form>
+            </li>
+            <li class="flex gap-10">
+                <p>Prototype Bean: <span th:text="${prototypeBean.value}"></span></p>
+                <form method="post" action="/prototype"><button class="border px-2 py-0.5">+</button></form>
+            </li>
+            <li class="flex gap-10">
+                <p>Request Bean: <span th:text="${requestBean.value}"></span></p>
+                <form method="post" action="/request"><button class="border px-2 py-0.5">+</button></form>
+            </li>
+            <li class="flex gap-10">
+                <p>Session Bean: <span th:text="${sessionBean.value}"></span></p>
+                <form method="post" action="/session"><button class="border px-2 py-0.5">+</button></form>
+            </li>
+        </ul>
+    </div>
+
+
+
+</body>
+
+</html>
