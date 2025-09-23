@@ -1,5 +1,6 @@
 package com.backend.inventory.mapper;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.mapstruct.CollectionMappingStrategy;
@@ -35,11 +36,11 @@ public interface PurchaseMapper {
         return sum;
     }
 
-    default double getTotalCostPrice(Purchase purchase) {
+    default BigDecimal getTotalCostPrice(Purchase purchase) {
         List<PurchaseItem> items = purchase.getPurchaseItems();
-        double sum = 0;
+        BigDecimal sum = BigDecimal.ZERO;
         for (PurchaseItem item : items) {
-            sum += item.getCostPrice();
+            sum = sum.add(item.getCostPrice());
         }
         return sum;
     }

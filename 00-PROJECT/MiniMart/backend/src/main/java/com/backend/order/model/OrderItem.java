@@ -1,11 +1,14 @@
 package com.backend.order.model;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 import com.backend.inventory.model.StockAllocation;
 import com.backend.product.model.Product;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -30,9 +33,11 @@ public class OrderItem {
 
     private int quantity;
 
-    private double unitPrice;
+    @Column(precision = 19, scale = 2)
+    private BigDecimal unitPrice;
 
-    private double avgCostPrice;
+    @Column(precision = 19, scale = 2)
+    private BigDecimal avgCostPrice;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Order order;
@@ -41,19 +46,24 @@ public class OrderItem {
     private List<StockAllocation> allocations;
 
     @Transient
-    public double getTotalPrice() {
-        return quantity * unitPrice;
+    public BigDecimal getTotalPrice() {
+        return unitPrice.multiply(BigDecimal.valueOf(quantity));
     }
 
     public void calculateAvgCost() {
-        double totalCost = 0;
+        BigDecimal totalCost = BigDecimal.ZERO;
         int totalQty = 0;
 
         for (StockAllocation allocation : allocations) {
-            totalCost += allocation.getPurchaseItem().getCostPrice() * allocation.getAllocatedQuantity();
-            totalQty += allocation.getAllocatedQuantity();
+            BigDecimal costPrice = allocation.getPurchaseItem().getCostPrice(); // BigDecimal
+            int qty = allocation.getAllocatedQuantity(); // int
+
+            totalCost = totalCost.add(costPrice.multiply(BigDecimal.valueOf(qty)));
+            totalQty += qty;
         }
 
-        this.avgCostPrice = totalQty == 0 ? 0 : totalCost / totalQty;
+        this.avgCostPrice = totalQty == 0
+                ? BigDecimal.ZERO
+                : totalCost.divide(BigDecimal.valueOf(totalQty), 2, RoundingMode.HALF_UP);
     }
 }

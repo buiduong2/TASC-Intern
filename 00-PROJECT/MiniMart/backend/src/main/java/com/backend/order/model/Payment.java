@@ -1,9 +1,11 @@
 package com.backend.order.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -32,10 +34,12 @@ public class Payment {
     private LocalDateTime completedAt;
 
     /** Snap shot */
-    private double amountTotal;
+    @Column(precision = 19, scale = 2)
+    private BigDecimal amountTotal;
 
     /** Snapshot */
-    private double amountPaid;
+    @Column(precision = 19, scale = 2)
+    private BigDecimal amountPaid = BigDecimal.ZERO;
 
     @OneToOne(mappedBy = "payment")
     private Order order;

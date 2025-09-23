@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -29,6 +30,7 @@ import com.backend.common.config.JpaConfig;
 import com.backend.inventory.dto.req.CreatePurchaseReq;
 import com.backend.inventory.dto.req.PurchaseItemReq;
 import com.backend.inventory.dto.res.PurchaseDTO;
+import com.backend.inventory.service.PurchaseItemService;
 import com.backend.inventory.service.PurchaseService;
 import com.backend.user.security.JwtAuthenticationFilter;
 import com.backend.user.service.JwtService;
@@ -50,6 +52,9 @@ public class PurchaseControllerTest {
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @MockitoBean
+    private PurchaseItemService purchaseItemService;
+
+    @MockitoBean
     private JwtService jwtService;
 
     private CreatePurchaseReq req;
@@ -59,12 +64,12 @@ public class PurchaseControllerTest {
         PurchaseItemReq item1 = new PurchaseItemReq();
         item1.setProductId(1L);
         item1.setQuantity(10);
-        item1.setCostPrice(1000.0);
+        item1.setCostPrice(BigDecimal.valueOf(1000));
 
         PurchaseItemReq item2 = new PurchaseItemReq();
         item2.setProductId(2L);
         item2.setQuantity(5);
-        item2.setCostPrice(2000.0);
+        item2.setCostPrice(BigDecimal.valueOf(2000.0));
 
         req = new CreatePurchaseReq();
         req.setSupplier("ABC Corp");
@@ -165,10 +170,10 @@ public class PurchaseControllerTest {
     @Test
     void createPurchaseItem_withNegativeCostPrice_shouldReturnBadRequest() throws Exception {
 
-        req.getItems().get(0).setCostPrice(-1d);
+        req.getItems().get(0).setCostPrice(BigDecimal.valueOf(-1d));
         testValidate(req, 400);
 
-        req.getItems().get(0).setCostPrice(0);
+        req.getItems().get(0).setCostPrice(BigDecimal.valueOf(0));
         testValidate(req, 400);
     }
 
@@ -190,7 +195,7 @@ public class PurchaseControllerTest {
                 LocalDateTime.of(2025, 9, 7, 10, 0), // giả lập createdAt
                 "ABC Corp",
                 15, // totalQuantity = 10 + 5
-                39500.0 // totalCostPrice = 25000 + 14500
+                new BigDecimal("39500") // totalCostPrice = 25000 + 14500
         );
         when(purchaseService.create(Mockito.any())).thenReturn(fakeResponse);
 

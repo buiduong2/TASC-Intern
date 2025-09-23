@@ -1,5 +1,7 @@
 package com.backend.order.dto.res;
 
+import java.math.BigDecimal;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +12,7 @@ import lombok.Setter;
 public class GatewayResponseData {
     private String txnRef;
     private String gatewayTxnId;
-    private double amount;
+    private BigDecimal amount;
     private String orderInfo;
     private boolean success;
     private boolean issignatureValid;

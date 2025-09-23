@@ -1,5 +1,7 @@
 package com.backend.common.dto;
 
+import java.math.BigDecimal;
+
 import com.backend.product.model.ProductStatus;
 
 import lombok.AllArgsConstructor;
@@ -22,9 +24,9 @@ public class ProductLowStockDTO {
 
     private ProductStatus status;
 
-    private Double salePrice;
+    private BigDecimal salePrice;
 
-    private double compareAtPrice;
+    private BigDecimal compareAtPrice;
 
     @Getter
     @Setter

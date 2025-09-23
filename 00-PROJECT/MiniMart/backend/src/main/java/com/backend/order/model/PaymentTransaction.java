@@ -1,5 +1,6 @@
 package com.backend.order.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.CreatedBy;
@@ -29,7 +30,8 @@ public class PaymentTransaction {
     @GeneratedValue
     private Long id;
 
-    private double amount;
+    @Column(precision = 19, scale = 2)
+    private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)

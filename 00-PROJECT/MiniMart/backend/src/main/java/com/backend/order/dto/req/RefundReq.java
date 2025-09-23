@@ -1,5 +1,7 @@
 package com.backend.order.dto.req;
 
+import java.math.BigDecimal;
+
 import com.backend.common.validation.EnumValue;
 import com.backend.order.model.PaymentMethod;
 
@@ -11,7 +13,7 @@ import lombok.Data;
 public class RefundReq {
 
     @Positive
-    private double amount;
+    private BigDecimal amount;
 
     @NotEmpty
     private String reason;

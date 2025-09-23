@@ -40,6 +40,7 @@ public class ReportServiceImplTest {
         RevenueFilter filter = new RevenueFilter();
         filter.setEndDate(LocalDateTime.now());
         filter.setStartDate(LocalDateTime.now().minusMonths(1));
+        filter.setGroupBy("NONE");
 
         RevenueReportDTO dto = reportService.getRevenue(filter);
 

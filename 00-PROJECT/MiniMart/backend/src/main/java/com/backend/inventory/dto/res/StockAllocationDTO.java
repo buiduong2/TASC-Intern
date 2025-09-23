@@ -1,5 +1,6 @@
 package com.backend.inventory.dto.res;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import lombok.Getter;
@@ -24,14 +25,14 @@ public class StockAllocationDTO {
     @Setter
     public static class PurchaseItemDTO {
         private Long id;
-        private double costPrice;
+        private BigDecimal costPrice;
     }
 
     @Getter
     @Setter
     public static class OrderItemDTO {
         private Long id;
-        private double unitPrice;
+        private BigDecimal unitPrice;
     }
 
     @Getter

@@ -3,13 +3,16 @@ package com.backend.inventory.service.impl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +60,11 @@ public class PurchaseServiceIntegrationTest {
     @Qualifier("mockPublisher")
     private ApplicationEventPublisher publisher;
 
+    @BeforeEach
+    void setup() {
+        doNothing().when(publisher).publishEvent(isA(PurchaseCreatedEvent.class));
+    }
+
     /**
      * Sau khi save. DB phải có đủ Purchase và PurchaseItem
      */
@@ -80,7 +88,7 @@ public class PurchaseServiceIntegrationTest {
         assertThat(dto.getCreatedAt()).isNotNull();
         assertThat(dto.getId()).isGreaterThan(0);
         assertThat(dto.getSupplier()).isNotNull();
-        assertThat(dto.getTotalCostPrice()).isGreaterThan(0);
+        assertThat(dto.getTotalCostPrice()).isGreaterThan(BigDecimal.ZERO);
         assertThat(dto.getTotalQuantity()).isGreaterThan(0);
 
         // Assert persisted Purchase + Items
@@ -93,7 +101,7 @@ public class PurchaseServiceIntegrationTest {
         assertThat(result.getPurchaseItems())
                 .allSatisfy(item -> {
                     assertThat(item.getProduct()).isNotNull();
-                    assertThat(item.getCostPrice()).isGreaterThan(0);
+                    assertThat(item.getCostPrice()).isGreaterThan(BigDecimal.ZERO);
                     assertThat(item.getCreatedAt()).isNotNull();
                     assertThat(item.getQuantity()).isGreaterThan(0);
                     assertThat(item.getRemainingQuantity())
@@ -152,7 +160,7 @@ public class PurchaseServiceIntegrationTest {
 
         for (Product product : products) {
             PurchaseItemReq itemReq = new PurchaseItemReq();
-            itemReq.setCostPrice(faker.number().randomDouble(2, 10, 100));
+            itemReq.setCostPrice(BigDecimal.valueOf(faker.number().randomDouble(2, 10, 100)));
             itemReq.setQuantity(faker.random().nextInt(1, 5));
             itemReq.setProductId(product.getId());
             reqItems.add(itemReq);

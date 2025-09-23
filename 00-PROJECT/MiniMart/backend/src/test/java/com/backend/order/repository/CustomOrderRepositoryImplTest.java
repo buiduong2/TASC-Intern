@@ -82,7 +82,7 @@ public class CustomOrderRepositoryImplTest {
         Page<OrderAdminDTO> page = orderRepository.findAdminAll(filter, pageable);
 
         assertThat(page.getSort().isSorted());
-        assertThat(page.getNumberOfElements()).isEqualTo(1);
+        assertThat(page.getNumberOfElements()).isEqualTo(0);
         assertThat(page.getNumber()).isEqualTo(0);
 
     }

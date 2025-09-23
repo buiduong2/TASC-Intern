@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
@@ -86,12 +87,12 @@ public class PurchaseServiceUnitTest {
         PurchaseItemReq item1 = new PurchaseItemReq();
         item1.setProductId(1L);
         item1.setQuantity(10);
-        item1.setCostPrice(1000.0);
+        item1.setCostPrice(BigDecimal.valueOf(1000.0));
 
         PurchaseItemReq item2 = new PurchaseItemReq();
         item2.setProductId(2L);
         item2.setQuantity(5);
-        item2.setCostPrice(2000.0);
+        item2.setCostPrice(BigDecimal.valueOf(2000.0));
 
         req = new CreatePurchaseReq();
         req.setSupplier("ABC Corp");

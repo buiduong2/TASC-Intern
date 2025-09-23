@@ -230,13 +230,13 @@ Mini Mart là ứng dụng web E-commerce dạng demo, được xây dựng tron
 
 ## Luồng thực hiện Payment
 
-- `Đôi khi việc callback ko được gọi lại vào server của chúng ta`
+-   `Đôi khi việc callback ko được gọi lại vào server của chúng ta`
 
-- User bị trừ tiền, nhưng hệ thống của bạn không nhận được callback
-- Payment của bạn vẫn là PENDING.
+-   User bị trừ tiền, nhưng hệ thống của bạn không nhận được callback
+-   Payment của bạn vẫn là PENDING.
 
-- Lưu PaymentTransaction khi tạo link
-- Nhân viên CSKH có thể nhập mã giao dịch (vnp_TransactionNo) để query trực tiếp từ VNPay và update đơn hàng.
+-   Lưu PaymentTransaction khi tạo link
+-   Nhân viên CSKH có thể nhập mã giao dịch (vnp_TransactionNo) để query trực tiếp từ VNPay và update đơn hàng.
 
 ```java
 @Entity
@@ -351,37 +351,341 @@ public enum TransactionStatus {
 
 ## Luồng
 
-- **B1. Tạo Order**
-- Backend nhận request tạo đơn hàng.
-- Tạo record `Order`
-- Tạo kèm một record `Payment` (chỉ giữ thông tin tổng quan).
-    - method = null hoặc method = COD
-    - status = UNPAID.
-    - totalAmount = order.total
-    - paidAmount = 0, dueAmount = total
+-   **B1. Tạo Order**
+-   Backend nhận request tạo đơn hàng.
+-   Tạo record `Order`
+-   Tạo kèm một record `Payment` (chỉ giữ thông tin tổng quan).
 
-- **B2. Khi user chọn phương thức thanh toán**
-    - FE gửi request `POST /orders/{id}/payment/method`
-    - Backend update `Payment.method`.
-    - Nếu chọn Online (VNPay/Momo…) → user sẽ cần click thêm lần nữa để “thanh toán ngay”
-    - Nếu chọn COD → Payment vẫn ở trạng thái `UNPAID` cho đến khi shipper xác nhận đã thu.
+    -   method = null hoặc method = COD
+    -   status = UNPAID.
+    -   totalAmount = order.total
+    -   paidAmount = 0, dueAmount = total
 
-- **B3. Khi user click “Thanh toán online”**
+-   **B2. Khi user chọn phương thức thanh toán**
 
-- Backend tạo một bản ghi PaymentTransaction
-- status = PENDING.
+    -   FE gửi request `POST /orders/{id}/payment/method`
+    -   Backend update `Payment.method`.
+    -   Nếu chọn Online (VNPay/Momo…) → user sẽ cần click thêm lần nữa để “thanh toán ngay”
+    -   Nếu chọn COD → Payment vẫn ở trạng thái `UNPAID` cho đến khi shipper xác nhận đã thu.
 
-- amount = payment.dueAmount.
+-   **B3. Khi user click “Thanh toán online”**
 
-- txnRef = sinh mã unique.
-- `Payment`
-- Backend build `payUrl` (VNPay/Momo…) dựa trên txnRef, amount, orderId
+-   Backend tạo một bản ghi PaymentTransaction
+-   status = PENDING.
 
-- **B4: Khi cổng thanh toán redirect về**
+-   amount = payment.dueAmount.
 
-- Backend nhận callback với `txnRef`, `amount`, `transactionNo`, `bankCode`, …
-- Tìm PaymentTransaction theo `txnRef`.
+-   txnRef = sinh mã unique.
+-   `Payment`
+-   Backend build `payUrl` (VNPay/Momo…) dựa trên txnRef, amount, orderId
 
-- Nếu `SUCCESS` → update transaction = SUCCESS, set `payAt = now().`
-- Gọi `Payment.updateAmounts(amount)` để cộng vào `paidAmount` và tính lại `dueAmount` + `status`.
-- Nếu `FAILED` hoặc user cancel → update `transaction = FAILED`.
+-   **B4: Khi cổng thanh toán redirect về**
+
+-   Backend nhận callback với `txnRef`, `amount`, `transactionNo`, `bankCode`, …
+-   Tìm PaymentTransaction theo `txnRef`.
+
+-   Nếu `SUCCESS` → update transaction = SUCCESS, set `payAt = now().`
+-   Gọi `Payment.updateAmounts(amount)` để cộng vào `paidAmount` và tính lại `dueAmount` + `status`.
+-   Nếu `FAILED` hoặc user cancel → update `transaction = FAILED`.
+
+## Dbdiagram
+
+```
+Enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  COMPLETED
+  CANCELED
+}
+
+Enum StockAllocationStatus {
+  ACTIVE
+  RELEASED
+}
+
+Enum PaymentMethod {
+  CASH
+  CARD
+  VNPAY
+}
+
+Enum PaymentStatus {
+  PENDING
+  PARTIAL
+  PAID
+  REFUND_PENDING
+  REFUNDED
+  CANCELLED
+}
+
+Enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+Enum TransactionType {
+  PAYMENT
+  REFUND
+}
+
+Enum ProductStatus {
+  ACTIVE
+  DRAFT
+  ARCHIVED
+}
+
+Enum RoleName {
+  ADMIN
+  STAFF
+  CUSTOMER
+}
+
+Enum TokenType {
+  ACCESS
+  REFRESH
+}
+
+Enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+--------------------------------------------------
+
+Table Purchase {
+  id Long [pk]
+  supplier varchar
+  createdAt LocalDateTime
+  updatedAt LocalDateTime
+  createdBy_id Long
+  updatedBy_id Long
+}
+
+Table PurchaseItem {
+  id Long [pk]
+  quantity int
+  remainingQuantity int
+  costPrice BigDecimal(19,2)
+  purchase_id Long [ref: > Purchase.id]
+  product_id Long [ref: > Product.id]
+  createdAt LocalDateTime
+}
+
+Table Stock {
+  id Long [pk]
+  quantity int
+  product_id Long [ref: > Product.id]
+}
+
+Table StockAllocation {
+  id Long [pk]
+  orderItem_id Long [ref: > OrderItem.id]
+  purchaseItem_id Long [ref: > PurchaseItem.id]
+  allocatedQuantity int
+  status StockAllocationStatus
+  createdAt LocalDateTime
+}
+
+Table Order {
+  id Long [pk]
+  total BigDecimal(19,2)
+  message varchar
+  status OrderStatus
+  shippingMethod_id Long [ref: > ShippingMethod.id]
+  address_id Long [ref: > OrderAddress.id]
+  payment_id Long [ref: > Payment.id]
+  customer_id Long [ref: > Customer.id]
+  version Long
+  createdAt LocalDateTime
+  updatedAt LocalDateTime
+  createdBy_id Long
+  updatedBy_id Long
+}
+
+Table OrderAddress {
+  id Long [pk]
+  details varchar
+  city varchar
+  area varchar
+  profile_firstName varchar
+  profile_lastName varchar
+  profile_phone varchar
+  createdAt LocalDateTime
+  updatedAt LocalDateTime
+  createdBy_id Long
+  updatedBy_id Long
+  order_id Long [ref: - Order.id]
+}
+
+Table OrderItem {
+  id Long [pk]
+  product_id Long [ref: > Product.id]
+  quantity int
+  unitPrice BigDecimal(19,2)
+  avgCostPrice BigDecimal(19,2)
+  order_id Long [ref: > Order.id]
+}
+
+Table Payment {
+  id Long [pk]
+  name PaymentMethod
+  status PaymentStatus
+  completedAt LocalDateTime
+  amountTotal BigDecimal(19,2)
+  amountPaid BigDecimal(19,2)
+  order_id Long [ref: - Order.id]
+}
+
+Table PaymentTransaction {
+  id Long [pk]
+  amount BigDecimal(19,2)
+  method PaymentMethod
+  description varchar
+  status TransactionStatus
+  txnRef varchar [unique]
+  gatewayTxnId varchar
+  createdAt LocalDateTime
+  paidAt LocalDateTime
+  payment_id Long [ref: > Payment.id]
+  createdBy_id Long [ref: > User.id]
+}
+
+Table ShippingMethod {
+  id Long [pk]
+  name varchar
+  description varchar
+  cost BigDecimal(19,2)
+}
+
+Table Category {
+  id Long [pk]
+  name varchar
+  description varchar
+  status ProductStatus
+  image_id Long [ref: > CategoryImage.id]
+  createdAt LocalDateTime
+  updatedAt LocalDateTime
+  createdBy_id Long
+  updatedBy_id Long
+}
+
+Table CategoryImage {
+  id Long [pk]
+  url varchar
+  alt varchar
+  publicId varchar [unique]
+  createdAt LocalDateTime
+  updatedAt LocalDateTime
+  createdBy_id Long
+  updatedBy_id Long
+  category_id Long [ref: - Category.id]
+}
+
+Table Product {
+  id Long [pk]
+  name varchar
+  description TEXT
+  salePrice BigDecimal(19,2)
+  compareAtPrice BigDecimal(19,2)
+  status ProductStatus
+  stock_id Long [ref: - Stock.id]
+  image_id Long [ref: > ProductImage.id]
+  category_id Long [ref: > Category.id]
+  createdAt LocalDateTime
+  updatedAt LocalDateTime
+  createdBy_id Long
+  updatedBy_id Long
+}
+
+Table ProductImage {
+  id Long [pk]
+  url varchar
+  alt varchar
+  publicId varchar [unique]
+  createdAt LocalDateTime
+  updatedAt LocalDateTime
+  createdBy_id Long
+  updatedBy_id Long
+  product_id Long [ref: - Product.id]
+}
+
+Table Tag {
+  id Long [pk]
+  name varchar
+  description varchar
+  createdAt LocalDateTime
+  updatedAt LocalDateTime
+  createdBy_id Long
+  updatedBy_id Long
+}
+
+Table Customer {
+  id Long [pk]
+  user_id Long [ref: > User.id]
+  profile_firstName varchar
+  profile_lastName varchar
+  profile_phone varchar
+  createdAt LocalDateTime
+  updatedAt LocalDateTime
+  createdBy_id Long
+  updatedBy_id Long
+}
+
+Table CustomerAddress {
+  id Long [pk]
+  customer_id Long [ref: > Customer.id]
+  isDefault boolean
+  profile_firstName varchar
+  profile_lastName varchar
+  profile_phone varchar
+  details varchar
+  city varchar
+  area varchar
+  createdAt LocalDateTime
+  updatedAt LocalDateTime
+  createdBy_id Long
+  updatedBy_id Long
+}
+
+Table JwtBlacklist {
+  id varchar [pk]
+  type TokenType
+  expiredAt LocalDateTime
+  createdAt LocalDateTime
+}
+
+Table Role {
+  id Long [pk]
+  name RoleName [unique]
+  description TEXT
+}
+
+Table User {
+  id Long [pk]
+  fullName varchar
+  username varchar [unique]
+  password varchar
+  email varchar [unique]
+  status UserStatus
+  tokenVersion Long
+  createdAt LocalDateTime
+  updatedAt LocalDateTime
+  createdBy_id Long
+  updatedBy_id Long
+}
+
+Table User_Role {
+  user_id Long [ref: > User.id]
+  role_id Long [ref: > Role.id]
+}
+
+Table Product_Tag {
+  product_id Long [ref: > Product.id]
+  tag_id Long [ref: > Tag.id]
+}
+
+```

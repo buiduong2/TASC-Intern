@@ -1,8 +1,10 @@
 package com.backend.order.model;
 
+import java.math.BigDecimal;
 
 import com.backend.common.model.GetIdAble;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -22,5 +24,6 @@ public class ShippingMethod implements GetIdAble<Long> {
 
     private String description;
 
-    private double cost;
+    @Column(precision = 19, scale = 2)
+    private BigDecimal cost;
 }

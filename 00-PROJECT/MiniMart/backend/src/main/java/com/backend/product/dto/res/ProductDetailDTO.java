@@ -1,5 +1,6 @@
 package com.backend.product.dto.res;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import lombok.Getter;
@@ -12,8 +13,8 @@ public class ProductDetailDTO {
     private String name;
     private String imageUrl;
     private String description;
-    private Double salePrice;
-    private double compareAtPrice;
+    private BigDecimal salePrice;
+    private BigDecimal compareAtPrice;
     private int stock;
     private List<TagDTO> tags;
 

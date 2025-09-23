@@ -1,5 +1,6 @@
 package com.backend.inventory.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -8,6 +9,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.backend.product.model.Product;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
@@ -35,7 +37,8 @@ public class PurchaseItem {
 
     private int remainingQuantity;
 
-    private double costPrice;
+    @Column(precision = 19, scale = 2)
+    private BigDecimal costPrice;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Purchase purchase;

@@ -1,5 +1,6 @@
 package com.backend.order.service.impl;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
@@ -28,12 +29,13 @@ public class PaymentCalculator {
         Payment payment = new Payment();
         payment.setName(paymentMethod);
         payment.setStatus(PaymentStatus.PENDING);
-        payment.setAmountPaid(0);
+        payment.setAmountPaid(BigDecimal.ZERO);
 
-        double shippingCost = order.getShippingMethod().getCost();
-        double subTotal = order.getOrderItems().stream().mapToDouble(OrderItem::getTotalPrice).sum();
-
-        payment.setAmountTotal(shippingCost + subTotal);
+        BigDecimal shippingCost = order.getShippingMethod().getCost();
+        BigDecimal subTotal = order.getOrderItems().stream()
+                .map(OrderItem::getTotalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        payment.setAmountTotal(shippingCost.add(subTotal));
         return payment;
     }
 
@@ -43,19 +45,18 @@ public class PaymentCalculator {
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.PAYMENT_NOT_FOUND.format(paymentId)));
 
         if (payment.getTransactions() == null || payment.getTransactions().isEmpty()) {
-            payment.setAmountPaid(0d);
+            payment.setAmountPaid(BigDecimal.ZERO);
             return;
         }
 
-        double amountPaid = payment.getTransactions()
-                .stream()
+        BigDecimal amountPaid = payment.getTransactions().stream()
                 .filter(t -> t.getStatus() == TransactionStatus.SUCCESS)
-                .mapToDouble(PaymentTransaction::getAmount)
-                .sum();
+                .map(PaymentTransaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         payment.setAmountPaid(amountPaid);
 
-        if (amountPaid < payment.getAmountTotal()) {
+        if (amountPaid.compareTo(payment.getAmountTotal()) < 0) {
             payment.setStatus(PaymentStatus.PARTIAL);
         } else {
             payment.setStatus(PaymentStatus.PAID);
@@ -64,9 +65,11 @@ public class PaymentCalculator {
     }
 
     public void calculateAmountPaidAfterRefund(Payment payment, PaymentTransaction paymentTransaction) {
-        payment.setAmountPaid(payment.getAmountPaid() - paymentTransaction.getAmount());
+        BigDecimal newAmountPaid = payment.getAmountPaid()
+                .subtract(paymentTransaction.getAmount());
+
+        payment.setAmountPaid(newAmountPaid);
         payment.setStatus(PaymentStatus.REFUNDED);
         payment.setCompletedAt(LocalDateTime.now());
-
     }
 }

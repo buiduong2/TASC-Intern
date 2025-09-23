@@ -1,5 +1,6 @@
 package com.backend.order.dto.res;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.backend.order.model.OrderStatus;
@@ -25,7 +26,7 @@ public class OrderDTO {
 
     private String shippingMethod;
 
-    private double shippingCost;
+    private BigDecimal shippingCost;
 
-    private double total;
+    private BigDecimal total;
 }

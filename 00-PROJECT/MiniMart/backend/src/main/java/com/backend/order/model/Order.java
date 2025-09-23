@@ -11,6 +11,7 @@ import com.backend.order.dto.res.OrderAdminDTO;
 import com.backend.user.model.Customer;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.ColumnResult;
 import jakarta.persistence.ConstructorResult;
 import jakarta.persistence.Embedded;
@@ -44,9 +45,9 @@ import lombok.Setter;
                 @ColumnResult(name = "status", type = String.class),
                 @ColumnResult(name = "paymentMethod", type = String.class),
                 @ColumnResult(name = "shippingMethod", type = String.class),
-                @ColumnResult(name = "totalPrice", type = Double.class),
-                @ColumnResult(name = "totalCost", type = Double.class),
-                @ColumnResult(name = "profit", type = Double.class),
+                @ColumnResult(name = "totalPrice", type = BigDecimal.class),
+                @ColumnResult(name = "totalCost", type = BigDecimal.class),
+                @ColumnResult(name = "profit", type = BigDecimal.class),
                 @ColumnResult(name = "customerId", type = Long.class),
                 @ColumnResult(name = "createdAt", type = LocalDateTime.class),
                 @ColumnResult(name = "updatedAt", type = LocalDateTime.class)
@@ -89,7 +90,8 @@ public class Order {
     private Long id;
 
     // Snapshot
-    private double total;
+    @Column(precision = 19, scale = 2)
+    private BigDecimal total = BigDecimal.ZERO;
 
     private String message;
 

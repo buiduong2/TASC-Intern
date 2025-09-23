@@ -1,5 +1,7 @@
 package com.backend.inventory.service.impl;
 
+import java.math.BigDecimal;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,7 +42,7 @@ public class PurchaseItemServiceImpl implements PurchaseItemService {
     public PurchaseItemDTO update(long id, UpdatePurchaseItemReq req) {
         PurchaseItem purchaseItem = repository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.PURCHASE_ITEM_NOT_FOUND.format(id)));
-        Double newCostPrice = req.getCostPrice();
+        BigDecimal newCostPrice = req.getCostPrice();
         Integer newQuantity = req.getQuantity();
 
         if (newCostPrice != null && !newCostPrice.equals(purchaseItem.getCostPrice())) {

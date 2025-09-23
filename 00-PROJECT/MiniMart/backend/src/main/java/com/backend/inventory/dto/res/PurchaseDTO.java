@@ -1,5 +1,6 @@
 package com.backend.inventory.dto.res;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
@@ -16,5 +17,5 @@ public class PurchaseDTO {
     private LocalDateTime createdAt; 
     private String supplier;
     private int totalQuantity;
-    private double totalCostPrice;
+    private BigDecimal totalCostPrice;
 }

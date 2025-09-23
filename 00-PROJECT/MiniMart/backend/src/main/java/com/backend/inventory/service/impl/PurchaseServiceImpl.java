@@ -1,5 +1,6 @@
 package com.backend.inventory.service.impl;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -84,11 +85,11 @@ public class PurchaseServiceImpl implements PurchaseService {
         repository.save(purchase);
 
         int totalQuantity = 0;
-        double totalCostPrice = 0;
+        BigDecimal totalCostPrice = BigDecimal.ZERO;
 
         for (PurchaseItem purchaseItem : purchase.getPurchaseItems()) {
             totalQuantity += purchaseItem.getQuantity();
-            totalCostPrice += purchaseItem.getCostPrice();
+            totalCostPrice = totalCostPrice.add(purchaseItem.getCostPrice());
         }
 
         return new PurchaseDTO(id, purchase.getAudit().getCreatedAt(), purchase.getSupplier(), totalQuantity,

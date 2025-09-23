@@ -81,10 +81,12 @@ public class ReportRepositoryImpl implements ReportRepository {
 
         Predicate byFilter = byRelationId(filter).toPredicate(order, query, builder);
         Predicate baseFilter = baseFilter(filter).toPredicate(order, query, builder);
+        System.out.println("by FIlter" + byFilter);
+        System.out.println("baseFilter" + baseFilter);
         query.where(builder.and(byFilter, baseFilter));
 
         Path<LocalDateTime> createdAtPath = order.get(Order_.audit).get(Audit_.createdAt);
-        Expression<BigDecimal> totalRevenueExpr = builder.sum(order.get(Order_.total)).as(BigDecimal.class);
+        Expression<BigDecimal> totalRevenueExpr = builder.sum(order.get(Order_.total));
 
         if (groupBy.equals("DAY")) {
             Expression<String> labelExpr = builder.function("DATE", LocalDate.class, createdAtPath)
@@ -184,7 +186,7 @@ public class ReportRepositoryImpl implements ReportRepository {
         }
 
         if (specs.isEmpty()) {
-            return Specification.unrestricted();
+            return (root, query, cb) -> cb.conjunction();
         }
 
         return Specification.allOf(specs);
@@ -204,8 +206,7 @@ public class ReportRepositoryImpl implements ReportRepository {
             Join<OrderItem, Product> product = CriteriaApiUtils.getOrCreateJoin(orderItem,
                     OrderItem_.product);
 
-            return builder.equal(root.get(Order_.customer).get(Customer_.id),
-                    product.get(Product_.category).get(Category_.id));
+            return builder.equal(product.get(Product_.category).get(Category_.id), categoryId);
         };
     }
 
@@ -214,8 +215,7 @@ public class ReportRepositoryImpl implements ReportRepository {
             Join<Order, OrderItem> orderItem = CriteriaApiUtils.getOrCreateJoin(root,
                     Order_.orderItems);
 
-            return builder.equal(root.get(Order_.customer).get(Customer_.id),
-                    orderItem.get(OrderItem_.product).get(Product_.id));
+            return builder.equal(orderItem.get(OrderItem_.product).get(Product_.id), productId);
         };
     }
 
@@ -303,15 +303,13 @@ public class ReportRepositoryImpl implements ReportRepository {
         Join<Product, ProductImage> i = p.join(Product_.image);
 
         // where
-        Specification<Order> spec = Specification.unrestricted();
-
-        spec.and(isOrderInPeriod(filter));
-        spec.and(orderIsPaid());
+        Specification<Order> spec = isOrderInPeriod(filter)
+                .and(orderIsPaid());
         if (filter.getStartDate() != null && filter.getEndDate() != null) {
-            spec.and(isOrderCreatedAtBetween(filter.getStartDate(), filter.getEndDate()));
+            spec = spec.and(isOrderCreatedAtBetween(filter.getStartDate(), filter.getEndDate()));
         }
         if (filter.getCategoryId() != null) {
-            spec.and(isCategoryId(filter.getCategoryId()));
+            spec = spec.and(isCategoryId(filter.getCategoryId()));
         }
         // SELECT
 
@@ -374,7 +372,7 @@ public class ReportRepositoryImpl implements ReportRepository {
         Join<Product, Category> c = root.join(Product_.category, JoinType.LEFT);
         Join<Product, Stock> s = root.join(Product_.stock, JoinType.LEFT);
 
-        Specification<Product> spec = Specification.unrestricted();
+        Specification<Product> spec = (r, q, b) -> b.conjunction();
         // WHERE
         if (filter.getCategoryId() != null) {
             spec.and((r, q, b) -> b.equal(r.get(Product_.category).get(Category_.id), filter.getCategoryId()));

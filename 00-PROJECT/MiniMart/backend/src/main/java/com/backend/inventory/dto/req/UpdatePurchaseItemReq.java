@@ -1,5 +1,7 @@
 package com.backend.inventory.dto.req;
 
+import java.math.BigDecimal;
+
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,5 +14,5 @@ public class UpdatePurchaseItemReq {
     private Integer quantity;
 
     @Positive
-    private Double costPrice;
+    private BigDecimal costPrice;
 }

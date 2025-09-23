@@ -1,5 +1,6 @@
 package com.backend.product.dto.req;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 
 import org.hibernate.validator.constraints.Length;
@@ -24,11 +25,11 @@ public class ProductUpdateReq {
     @NotEmpty
     private String description;
 
-    private Double salePrice;
+    private BigDecimal salePrice;
 
     @Positive
     @NotNull
-    private Double compareAtPrice;
+    private BigDecimal compareAtPrice;
 
     @NotEmpty
     private HashSet<Long> tagIds;

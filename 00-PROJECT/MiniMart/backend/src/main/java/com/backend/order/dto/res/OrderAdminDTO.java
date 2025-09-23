@@ -1,5 +1,6 @@
 package com.backend.order.dto.res;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
@@ -19,11 +20,11 @@ public class OrderAdminDTO {
 
     private String shippingMethod;
 
-    private Double totalPrice;
+    private BigDecimal totalPrice;
 
-    private Double totalCost;
+    private BigDecimal totalCost;
 
-    private Double profit;
+    private BigDecimal profit;
 
     private Long customerId;
 

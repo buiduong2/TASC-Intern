@@ -1,5 +1,6 @@
 package com.backend.order.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -10,7 +11,7 @@ import com.backend.order.dto.res.PaymentTransactionDTO;
 import jakarta.servlet.http.HttpServletRequest;
 
 public interface PaymentGateway {
-    PaymentGatewayCreateDTO createTransaction(String orderInfo, String txnRef, double amount,
+    PaymentGatewayCreateDTO createTransaction(String orderInfo, String txnRef, BigDecimal amount,
             HttpServletRequest request);
 
     GatewayResponseData verifyReturn(Map<String, String> params);

@@ -1,5 +1,7 @@
 package com.backend.order.service.impl;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
@@ -46,7 +48,7 @@ public class VnPayGateway implements PaymentGateway {
     private String hashSecret;
 
     @Override
-    public PaymentGatewayCreateDTO createTransaction(String orderInfo, String txnRef, double amount,
+    public PaymentGatewayCreateDTO createTransaction(String orderInfo, String txnRef, BigDecimal amount,
             HttpServletRequest request) {
         Map<String, String> params = new HashMap<>();
         ZoneId zone = ZoneId.of(ZONE_ID);
@@ -54,7 +56,7 @@ public class VnPayGateway implements PaymentGateway {
         params.put("vnp_Version", "2.1.0");
         params.put("vnp_Command", "pay");
         params.put("vnp_TmnCode", tmnCode);
-        params.put("vnp_Amount", String.valueOf((long) (amount * 100)));
+        params.put("vnp_Amount", amount.multiply(BigDecimal.valueOf(100)).toBigInteger().toString());
         params.put("vnp_CurrCode", "VND");
         params.put("vnp_TxnRef", txnRef);
         params.put("vnp_OrderInfo", orderInfo);
@@ -96,7 +98,8 @@ public class VnPayGateway implements PaymentGateway {
 
         String txnRef = params.get("vnp_TxnRef");
         String gatewayTxnId = params.get("vnp_TransactionNo");
-        double amount = Double.parseDouble(params.get("vnp_Amount")) / 100.0;
+        BigDecimal amount = new BigDecimal(params.get("vnp_Amount"))
+                .divide(BigDecimal.valueOf(100), 0, RoundingMode.UNNECESSARY);
         String orderInfo = params.get("vnp_OrderInfo");
         boolean success = "00".equals(params.get("vnp_ResponseCode"));
 

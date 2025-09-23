@@ -14,6 +14,8 @@ import lombok.Setter;
 public class RevenueReportDTO {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+
+  
     private String groupBy; // NONE, DAY, MONTH, YEAR
 
     private BigDecimal totalRevenue; // dùng khi groupBy = NONE

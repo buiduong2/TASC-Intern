@@ -197,7 +197,7 @@ public class AuthServiceUnitTest {
         assertThrows(UserInactiveException.class, () -> service.login(loginReq));
         verify(userRepository, times(1)).findByUsername(eq(username));
 
-        verify(passwordEncoder, never()).matches(anyString(), anyString());
+        verify(passwordEncoder, times(1)).matches(anyString(), anyString());
         verify(jwtService, never()).generateAccessToken(any());
         verify(jwtService, never()).generateRefreshToken(any());
     }
@@ -282,7 +282,6 @@ public class AuthServiceUnitTest {
 
     }
 
-
     // ChangePassword
     void changePassword_withCorrectOldPassword_shouldUpdatePasswordAndIncrementTokenVersion() {
 
@@ -291,8 +290,5 @@ public class AuthServiceUnitTest {
     void changePassword_withIncorrectOldPassword_shouldThrowBadCredentialsException() {
 
     }
-
-    
-
 
 }

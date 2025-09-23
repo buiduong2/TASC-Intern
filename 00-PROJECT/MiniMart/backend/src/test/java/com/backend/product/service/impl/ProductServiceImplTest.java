@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 
@@ -84,7 +85,7 @@ public class ProductServiceImplTest {
         assertThat(pageDtos.getContent())
                 .allMatch(p -> p.getId() > 0)
                 .allMatch(p -> p.getName() != null)
-                .allMatch(p -> p.getCompareAtPrice() > 0)
+                .allMatch(p -> p.getCompareAtPrice().compareTo(BigDecimal.valueOf(0)) == 1)
                 .anyMatch(p -> p.getSalePrice() != null);
     }
 
@@ -115,8 +116,8 @@ public class ProductServiceImplTest {
         ProductUpdateReq req = new ProductUpdateReq();
         req.setName("hello world");
         req.setDescription("Description");
-        req.setSalePrice(100d);
-        req.setCompareAtPrice(80d);
+        req.setSalePrice(BigDecimal.valueOf(100));
+        req.setCompareAtPrice(BigDecimal.valueOf(80.00));
         req.setTagIds(new HashSet<>(List.of(tag.getId(), tag2.getId())));
         req.setCategoryId(category.getId());
         req.setStatus(ProductStatus.ACTIVE.name());
@@ -135,9 +136,11 @@ public class ProductServiceImplTest {
         Product product = productRepository.findById(dto.getId()).orElseThrow();
 
         assertThat(dto.getCompareAtPrice())
+                .usingComparator(BigDecimal::compareTo)
                 .isEqualTo(req.getCompareAtPrice())
                 .isEqualTo(product.getCompareAtPrice());
         assertThat(dto.getSalePrice())
+                .usingComparator(BigDecimal::compareTo)
                 .isEqualTo(req.getSalePrice())
                 .isEqualTo(product.getSalePrice());
         assertThat(dto.getStock())
@@ -160,8 +163,13 @@ public class ProductServiceImplTest {
         ProductUpdateReq req = new ProductUpdateReq();
         req.setName("random Name");
         req.setDescription("random description");
-        req.setSalePrice(product.getSalePrice() == null ? 100d : product.getSalePrice() + 1d);
-        req.setCompareAtPrice(product.getCompareAtPrice() + 1d);
+        req.setSalePrice(
+                product.getSalePrice() == null
+                        ? BigDecimal.valueOf(100)
+                        : product.getSalePrice().add(BigDecimal.ONE));
+
+        req.setCompareAtPrice(
+                product.getCompareAtPrice().add(BigDecimal.ONE));
 
         List<Tag> tags = tagRepository.findRandomProductsInMemory(3,
                 new HashSet<>(product.getTags().stream().map(Tag::getId).toList()));
@@ -246,8 +254,8 @@ public class ProductServiceImplTest {
         ProductUpdateReq req = new ProductUpdateReq();
         req.setName("hello world");
         req.setDescription("Description");
-        req.setSalePrice(100d);
-        req.setCompareAtPrice(80d);
+        req.setSalePrice(BigDecimal.valueOf(100));
+        req.setCompareAtPrice(BigDecimal.valueOf(80));
         req.setTagIds(new HashSet<>(List.of(tag.getId(), tag2.getId())));
         req.setCategoryId(category.getId());
         req.setStatus(ProductStatus.ACTIVE.name());

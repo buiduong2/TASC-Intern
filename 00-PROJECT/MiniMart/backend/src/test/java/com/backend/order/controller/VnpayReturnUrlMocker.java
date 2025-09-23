@@ -47,16 +47,9 @@ public class VnpayReturnUrlMocker {
         params.put("vnp_TransactionStatus", "00");
 
         // Ký lại hash
-        //"vnp_Amount=458943000&vnp_BankCode=NCB&vnp_BankTranNo=VNP1758264086270&vnp_CardType=ATM&vnp_OrderInfo=Pay%2Bfor%2Border%2Bid%2B%253D1502&vnp_PayDate=20250919134126&vnp_ResponseCode=00&vnp_TmnCode=C270LVZU&vnp_TransactionNo=86270&vnp_TransactionStatus=00&vnp_TxnRef=11f12bae5f554e75a6e9"
-        //"vnp_Amount=458943000&vnp_BankCode=NCB&vnp_BankTranNo=VNP1758264187803&vnp_CardType=ATM&vnp_OrderInfo=Pay+for+order+id+%3D1602&vnp_PayDate=20250919134307&vnp_ResponseCode=00&vnp_TmnCode=C270LVZU&vnp_TransactionNo=187803&vnp_TransactionStatus=00&vnp_TxnRef=4c3a5a380fc74e769c43"
-        //"vnp_Amount=458943000&vnp_BankCode=NCB&vnp_BankTranNo=VNP1758264187803&vnp_CardType=ATM&vnp_OrderInfo=Pay+for+order+id+%3D1602&vnp_PayDate=20250919134307&vnp_ResponseCode=00&vnp_TmnCode=C270LVZU&vnp_TransactionNo=187803&vnp_TransactionStatus=00&vnp_TxnRef=4c3a5a380fc74e769c43"
-        //"vnp_Amount=458943000&vnp_BankCode=NCB&vnp_BankTranNo=VNP1758264522383&vnp_CardType=ATM&vnp_OrderInfo=Pay+for+order+id+%3D1802&vnp_PayDate=20250919134842&vnp_ResponseCode=00&vnp_TmnCode=C270LVZU&vnp_TransactionNo=522383&vnp_TransactionStatus=00&vnp_TxnRef=686decef66584ce5a642"
-
-
         String hashData = VnpayUtils.buildHashData(params);
         String secureHash = VnpayUtils.hmacSHA512(hashSecret, hashData);
 
-        // Build returnUrl
         String query = VnpayUtils.buildQuery(params) + "&vnp_SecureHash=" + secureHash;
 
         return baseReturnUrl + "?" + query;

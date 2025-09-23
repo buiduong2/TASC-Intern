@@ -1,5 +1,6 @@
 package com.backend.product.model;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -57,9 +58,11 @@ public class Product implements GetIdAble<Long> {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    private Double salePrice;
+    @Column(precision = 19, scale = 2)
+    private BigDecimal salePrice;
 
-    private double compareAtPrice;
+    @Column(precision = 19, scale = 2)
+    private BigDecimal compareAtPrice = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
     private ProductStatus status;

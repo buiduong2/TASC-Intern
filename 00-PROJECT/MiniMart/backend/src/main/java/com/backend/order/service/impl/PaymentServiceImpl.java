@@ -1,5 +1,6 @@
 package com.backend.order.service.impl;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
@@ -75,7 +76,9 @@ public class PaymentServiceImpl implements PaymentService {
 
         String txnRef = generateTxnRef();
         String orderInfo = "Pay for order id =" + payment.getOrder().getId();
-        double amountDue = payment.getAmountTotal() - payment.getAmountPaid();
+        BigDecimal amountDue = payment.getAmountTotal()
+                .subtract(payment.getAmountPaid());
+
         PaymentTransaction transaction = new PaymentTransaction();
         transaction.setAmount(amountDue);
         transaction.setPayment(payment);
@@ -156,7 +159,7 @@ public class PaymentServiceImpl implements PaymentService {
             return paymentGateway.getIpnResponse(IpnResponseType.ORDER_CANCELD);
         }
 
-        if (Math.abs(transaction.getAmount() - grd.getAmount()) > 0.001) {
+        if (transaction.getAmount().compareTo(grd.getAmount()) != 0) {
             transaction.setStatus(TransactionStatus.CANCELLED);
             return paymentGateway.getIpnResponse(IpnResponseType.AMOUNT_NOT_VALID);
         }
