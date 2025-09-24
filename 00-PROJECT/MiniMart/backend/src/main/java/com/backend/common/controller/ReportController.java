@@ -3,6 +3,7 @@ package com.backend.common.controller;
 import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/reports")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyAuthority('STAFF','ADMIN')")
 public class ReportController {
 
     private final ReportService service;
@@ -60,7 +62,7 @@ public class ReportController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
 
-        return service.getLowStockProduct(filter,PageRequest.of(page, size));
+        return service.getLowStockProduct(filter, PageRequest.of(page, size));
     }
 
     // Thống kê đơn hàng (tổng số, trạng thái)

@@ -1,5 +1,6 @@
 package com.backend.order.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/admin/payments")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyAuthority('STAFF','ADMIN')")
 public class AdminPaymentController {
 
     private final PaymentService paymentService;

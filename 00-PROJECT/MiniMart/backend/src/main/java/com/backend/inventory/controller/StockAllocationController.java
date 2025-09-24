@@ -3,6 +3,7 @@ package com.backend.inventory.controller;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/admin/allocations")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyAuthority('STAFF','ADMIN')")
 public class StockAllocationController {
 
     private final StockAllocationService service;
@@ -24,7 +26,7 @@ public class StockAllocationController {
     @GetMapping
     public Page<StockAllocationDTO> findAll(@Valid StockAllocationFilter filter, @PageableDefault Pageable pageable) {
 
-        return service.findAll(filter,pageable);
+        return service.findAll(filter, pageable);
     }
 
 }

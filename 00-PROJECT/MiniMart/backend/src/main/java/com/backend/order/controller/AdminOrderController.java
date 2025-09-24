@@ -3,6 +3,7 @@ package com.backend.order.controller;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/admin/orders")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyAuthority('STAFF','ADMIN')")
 public class AdminOrderController {
 
     private final OrderService orderService;
@@ -24,7 +26,7 @@ public class AdminOrderController {
     @GetMapping
     public Page<OrderAdminDTO> findAll(@Valid OrderFilter filter, @PageableDefault(size = 10) Pageable pageable) {
 
-        return orderService.findAdminAll(filter,pageable);
+        return orderService.findAdminAll(filter, pageable);
     }
 
     // Hủy đơn hàng

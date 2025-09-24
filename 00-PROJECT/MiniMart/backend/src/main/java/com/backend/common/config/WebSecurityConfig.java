@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -15,7 +16,6 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.backend.common.exception.GenericErrorResponse;
-import com.backend.user.model.RoleName;
 import com.backend.user.security.JwtAuthenticationEntryPoint;
 import com.backend.user.security.JwtAuthenticationFilter;
 import com.backend.user.service.impl.CustomUserDetailService;
@@ -26,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 
 @Configuration
 @RequiredArgsConstructor
+@EnableMethodSecurity
 public class WebSecurityConfig {
 
     private final CustomUserDetailService customUserDetailService;
@@ -56,8 +57,6 @@ public class WebSecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        final String STAFF = RoleName.STAFF.toString();
-        final String ADMIN = RoleName.ADMIN.toString();
         http
                 .exceptionHandling(ex -> ex
                         .accessDeniedHandler(accessDeniedHandler())
@@ -71,18 +70,8 @@ public class WebSecurityConfig {
                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**",
                                         "/swagger-ui.html")
                                 .permitAll()
-                                .requestMatchers("/api/orders/**").authenticated()
-                                .requestMatchers("/api/admin/**").hasAnyAuthority(STAFF, ADMIN)
-                                .requestMatchers("/api/admin/users").hasAuthority(ADMIN)
-                                .requestMatchers("/api/auth/change-password").authenticated()
-                                .requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers("/api/products/**").permitAll()
-                                .requestMatchers("/api/payments/*/return").permitAll()
-                                .requestMatchers("/api/payments/*/ipn").permitAll()
-                                .requestMatchers("/api/categories/**").permitAll()
                                 .anyRequest().authenticated());
-                // .anyRequest().permitAll());
-                
+        // .anyRequest().permitAll());
 
         return http.build();
     }

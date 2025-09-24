@@ -1,5 +1,6 @@
 package com.backend.inventory.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/purchase-items")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyAuthority('STAFF','ADMIN')")
 public class PurchaseItemController {
 
     private final PurchaseItemService service;

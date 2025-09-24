@@ -1,6 +1,7 @@
 package com.backend.user.controller;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,11 +26,13 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
+@PreAuthorize("permitAll()")
 public class AuthController {
 
     private final AuthService authService;
 
-    @GetMapping("@me")
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/me")
     public UserDTO getInfo(Authentication authentication) {
         if (authentication.getPrincipal() instanceof CustomUserDetail customUserDetail) {
             return authService.getInfo(customUserDetail.getUserId());
@@ -38,22 +41,26 @@ public class AuthController {
         }
     }
 
+    @PreAuthorize("isAnonymous()")
     @PostMapping("login")
     public AuthRes login(@Valid @RequestBody LoginReq loginReq) {
         return authService.login(loginReq);
     }
 
+    @PreAuthorize("isAnonymous()")
     @PostMapping("register")
     @ResponseStatus(HttpStatus.CREATED)
     public AuthRes register(@Valid @RequestBody RegisterReq registerReq) {
         return authService.register(registerReq);
     }
 
+    @PreAuthorize("permitAll()")
     @PostMapping("refresh")
     public AuthRes refresh(@Valid @RequestBody RefreshTokenReq req) {
         return authService.refreshToken(req);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("change-password")
     public void changePassword(@Valid @RequestBody ChangePasswordReq req, Authentication authentication) {
         if (authentication.getPrincipal() instanceof CustomUserDetail customUserDetail) {
@@ -63,6 +70,7 @@ public class AuthController {
         }
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/revoke")
     public void revoke(@Valid @RequestBody RevokeJwtReq req, Authentication authentication) {
         if (authentication.getPrincipal() instanceof CustomUserDetail customUserDetail) {

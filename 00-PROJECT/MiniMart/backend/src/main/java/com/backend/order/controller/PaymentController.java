@@ -2,6 +2,7 @@ package com.backend.order.controller;
 
 import java.util.Map;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +30,7 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     // Xem danh sách giao dịch
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("{id}")
     public PaymentDTO getAll(@PathVariable long id,
             @AuthenticationPrincipal CustomUserDetail userDetail) {
@@ -36,6 +38,7 @@ public class PaymentController {
     }
 
     // Tạo thanh toán
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("{paymentId}/transactions")
     public PaymentTransactionDTO createTransaction(
             @PathVariable long paymentId,
@@ -46,6 +49,7 @@ public class PaymentController {
     }
 
     // Callback từ cổng thanh toán
+    @PreAuthorize("permitAll()")
     @GetMapping("{gateway:vnpay}/return")
     public PaymentTransactionDTO verifyReturn(@PathVariable String gateway,
             @RequestParam Map<String, String> allParams) {
@@ -53,6 +57,7 @@ public class PaymentController {
     }
 
     // IPN
+    @PreAuthorize("permitAll()")
     @GetMapping("{gateway:vnpay}/ipn")
     public Object handleIpn(@PathVariable String gateway,
             @RequestParam Map<String, String> allParams) {

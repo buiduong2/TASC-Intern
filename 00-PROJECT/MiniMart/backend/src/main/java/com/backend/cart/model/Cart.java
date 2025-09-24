@@ -2,6 +2,7 @@ package com.backend.cart.model;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -59,7 +60,7 @@ public class Cart {
     private User user;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private LinkedHashSet<CartItem> items = new LinkedHashSet<>();
+    private Set<CartItem> items = new LinkedHashSet<>();
 
     @CreatedDate
     private LocalDateTime createdAt;
