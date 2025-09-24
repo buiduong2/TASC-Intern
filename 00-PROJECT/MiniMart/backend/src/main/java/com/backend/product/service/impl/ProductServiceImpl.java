@@ -1,9 +1,15 @@
 package com.backend.product.service.impl;
 
+import static com.backend.product.utils.CacheKeys.PRODUCT_DETAIL_NAME;
+import static com.backend.product.utils.CacheKeys.PRODUCT_PAGE_NAME;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,11 +55,13 @@ public class ProductServiceImpl implements ProductService {
 
     private final ApplicationEventPublisher eventPublisher;
 
+    @Cacheable(value = PRODUCT_PAGE_NAME, key = "T(com.backend.product.utils.CacheKeys).getProductsByCategoryKey(#categoryId, #pageable)")
     @Override
     public Page<ProductDTO> findByCategoryId(long categoryId, Pageable pageable) {
         return repository.findDTOByCategoryIdAndStatus(categoryId, ProductStatus.ACTIVE, pageable);
     }
 
+    @Cacheable(value = PRODUCT_DETAIL_NAME, key = "T(com.backend.product.utils.CacheKeys).getProductDetailByIdKey(#productId)")
     @Override
     public ProductDetailDTO findProductDetailById(long productId) {
         return repository.findDetailDTOByIdAndStatus(productId, ProductStatus.ACTIVE)
@@ -88,10 +96,14 @@ public class ProductServiceImpl implements ProductService {
         tags.forEach(product::addTag);
 
         product = repository.save(product);
-        eventPublisher.publishEvent(new ProductCreatedEvent(product.getId()));
+        eventPublisher.publishEvent(new ProductCreatedEvent(product.getId())); // evict
         return mapper.toDTO(product);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = PRODUCT_PAGE_NAME, allEntries = true),
+            @CacheEvict(value = "productDetailById", key = "T(com.backend.product.utils.CacheKeys).getProductDetailByIdKey(#productId)")
+    })
     @Transactional
     @Override
     public ProductDTO update(long productId, ProductUpdateReq dto) {
@@ -123,6 +135,10 @@ public class ProductServiceImpl implements ProductService {
         return mapper.toDTO(product);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = PRODUCT_PAGE_NAME, allEntries = true),
+            @CacheEvict(value = "productDetailById", key = "T(com.backend.product.utils.CacheKeys).getProductDetailByIdKey(#id)")
+    })
     @Transactional
     @Override
     public Long deleteById(long id) {

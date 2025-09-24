@@ -13,8 +13,10 @@ import com.backend.inventory.dto.event.PurchaseDeleteEvent;
 import com.backend.inventory.dto.event.PurchaseItemUpdateEvent;
 import com.backend.inventory.service.StockService;
 import com.backend.order.dto.event.OrderCreatedEvent;
+import com.backend.order.dto.event.OrderCreatedEvent.OrderItemEvent;
 import com.backend.product.dto.event.ProductCreatedEvent;
 import com.backend.product.dto.event.ProductDeleteEvent;
+import com.backend.product.service.ProductCacheService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,39 +26,52 @@ public class StockEventListener {
 
     private final StockService service;
 
+    private final ProductCacheService productCacheService;
+
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void sendNotificationOnProductCreated(ProductCreatedEvent event) {
         service.create(event.getProductId());
+        productCacheService.evictAllProductListCaches();
     }
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void sendNotificationOnPurchaseCreated(PurchaseCreatedEvent event) {
         service.syncQuantity(event.getProductIds());
+        productCacheService.evictAllProductListCaches();
     }
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void sendNotifiycationOnOrderCreated(OrderCreatedEvent event) {
         service.syncQuantity(event.getOrderItems().stream().map(i -> i.getProductId()).toList());
+        productCacheService.evictAllProductListCaches();
+        productCacheService
+                .evictProductDetailCache(event.getOrderItems().stream().map(OrderItemEvent::getProductId).toList());
     }
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void sendNotificationOnPurchaseItemUpdate(PurchaseItemUpdateEvent event) {
         service.syncQuantity(List.of(event.getProductId()));
+        productCacheService.evictAllProductListCaches();
+        productCacheService.evictProductDetailCache(event.getProductId());
     }
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void sendNotificatioNOnPurchaseDelete(PurchaseDeleteEvent event) {
         service.syncQuantity(event.getProductIds());
+        productCacheService.evictAllProductListCaches();
+        productCacheService.evictProductDetailCache(event.getProductIds());
     }
 
     @EventListener
     public void sendNotificationOnProductDelete(ProductDeleteEvent event) {
         service.deleteByProductId(event.getProductId());
+        productCacheService.evictAllProductListCaches();
+        productCacheService.evictProductDetailCache(event.getProductId());
     }
 
 }
