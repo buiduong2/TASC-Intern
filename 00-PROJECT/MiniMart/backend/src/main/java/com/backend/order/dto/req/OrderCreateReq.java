@@ -7,6 +7,7 @@ import com.backend.order.model.PaymentMethod;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,7 +26,8 @@ public class OrderCreateReq {
     @Valid
     private OrderAddressReq address;
 
-    @NotEmpty
+    @NotEmpty(groups = FromReqGroup.class)
+    @Null(groups = FromCartGroup.class)
     @Valid
     private LinkedHashSet<OrderItemReq> orderItems;
 

@@ -80,6 +80,6 @@ public class Cart {
 
     public void clearItem() {
         this.items.forEach(item -> item.setCart(null));
-        this.items = new LinkedHashSet<>();
+        this.items.clear();
     }
 }

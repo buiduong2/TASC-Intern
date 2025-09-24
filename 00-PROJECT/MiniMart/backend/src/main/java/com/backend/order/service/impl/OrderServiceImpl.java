@@ -1,6 +1,8 @@
 package com.backend.order.service.impl;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -8,9 +10,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.backend.cart.model.Cart;
+import com.backend.cart.repository.CartRepository;
 import com.backend.common.exception.ResourceNotFoundException;
+import com.backend.common.utils.ErrorCode;
 import com.backend.order.dto.event.OrderCanceledEvent;
 import com.backend.order.dto.req.OrderCreateReq;
+import com.backend.order.dto.req.OrderItemReq;
 import com.backend.order.dto.res.OrderAdminDTO;
 import com.backend.order.dto.res.OrderDTO;
 import com.backend.order.dto.res.OrderFilter;
@@ -32,6 +38,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository repository;
     private final OrderItemRepository orderItemRepository;
     private final OrderMapper mapper;
+    private final CartRepository cartRepository;
 
     private final ApplicationEventPublisher publisher;
 
@@ -43,6 +50,26 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Page<OrderDTO> findPage(Pageable pageable, long userId) {
         throw new UnsupportedOperationException("Unimplemented method 'findPage'");
+    }
+
+    @Transactional(timeout = 5)
+    @Override
+    public OrderDTO createFromCart(OrderCreateReq req, long userId) {
+        Cart cart = cartRepository.findByUserIdForClearItem(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.CART_NOT_FOUND.format(userId)));
+        LinkedHashSet<OrderItemReq> items = cart.getItems().stream().map(i -> {
+            OrderItemReq item = new OrderItemReq();
+            item.setProductId(i.getProduct().getId());
+            item.setQuantity(i.getQuantity());
+            return item;
+        }).collect(Collectors.toCollection(LinkedHashSet::new));
+        req.setOrderItems(items);
+
+        OrderDTO orderDTO = create(req, userId);
+
+        cart.clearItem();
+
+        return orderDTO;
     }
 
     @Override

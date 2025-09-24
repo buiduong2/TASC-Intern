@@ -17,4 +17,6 @@ public interface OrderService {
     OrderDTO create(OrderCreateReq req, long userId);
 
     Page<OrderAdminDTO> findAdminAll(OrderFilter filter, Pageable pageable);
+
+    OrderDTO createFromCart(OrderCreateReq req, long userId);
 }

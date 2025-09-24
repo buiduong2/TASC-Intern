@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,12 +13,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.backend.order.dto.req.FromCartGroup;
+import com.backend.order.dto.req.FromReqGroup;
 import com.backend.order.dto.req.OrderCreateReq;
 import com.backend.order.dto.res.OrderDTO;
 import com.backend.order.service.OrderService;
 import com.backend.user.security.CustomUserDetail;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -37,11 +39,18 @@ public class OrderController {
 
     @PostMapping
     public OrderDTO create(
-            @Valid @RequestBody OrderCreateReq req,
+            @Validated(FromReqGroup.class) @RequestBody OrderCreateReq req,
             @AuthenticationPrincipal CustomUserDetail userDetail
 
     ) {
         return service.create(req, userDetail.getUserId());
+    }
+
+    @PostMapping("from-cart")
+    public OrderDTO createFromCart(
+            @Validated(FromCartGroup.class) @RequestBody OrderCreateReq req,
+            @AuthenticationPrincipal CustomUserDetail userDetail) {
+        return service.createFromCart(req, userDetail.getUserId());
     }
 
     @PostMapping("{id}/cancel")
