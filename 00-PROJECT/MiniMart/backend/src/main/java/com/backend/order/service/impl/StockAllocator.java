@@ -74,7 +74,12 @@ public class StockAllocator {
         }
 
         if (remainingNeed > 0) {
-            throw new NotEnoughStockException("Not enough stock for product " + orderItem.getProduct().getId());
+            throw NotEnoughStockException.builder()
+                    .message("A product not enough Stock")
+                    .productId(orderItem.getProduct().getId())
+                    .availableQuantity(orderItem.getQuantity() - remainingNeed)
+                    .requestedQuantity(orderItem.getQuantity())
+                    .build();
         }
     }
 

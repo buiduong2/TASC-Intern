@@ -199,7 +199,7 @@ public class PaymentServiceImpl implements PaymentService {
         GatewayResponseData grd = gateway.queryDr(transaction.getTxnRef(), transaction.getDescription(),
                 transaction.getCreatedAt());
 
-        if (grd.isIssignatureValid()) {
+        if (!grd.isIssignatureValid()) {
             throw new InvalidSignatureException("Invalid signature from gateway query Dr response");
         }
 

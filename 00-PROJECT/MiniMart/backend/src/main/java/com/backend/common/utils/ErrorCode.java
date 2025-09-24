@@ -19,7 +19,11 @@ public enum ErrorCode {
     PAYMENT_COMPLETED("Payment with id={0} already completed and cannot be modified"),
     PAYMENT_TRANSACTION_NOT_FOUND("Payment transaction txnRef={0} not found"),
     // AUTH
-    ROLE_NOT_FOUND("Role with id={0} not found");
+    ROLE_NOT_FOUND("Role with id={0} not found"),
+
+    // Cart
+    CART_ITEM_NOT_FOUND("Cart Item with id={0} not found"),
+    CART_NOT_FOUND("Cart with userId={0} not found");
 
     private final String template;
 

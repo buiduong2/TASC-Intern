@@ -46,6 +46,70 @@ public class VnpayUtils {
         return sb.toString();
     }
 
+    public static String buildHashDataQueryDR(Map<String, String> params) {
+
+        String requestId = params.get("vnp_RequestId");
+        String version = params.get("vnp_Version");
+        String command = params.get("vnp_Command");
+        String tmnCode = params.get("vnp_TmnCode");
+        String txnRef = params.get("vnp_TxnRef");
+        String transactionDate = params.get("vnp_TransactionDate");
+        String createDate = params.get("vnp_CreateDate");
+        String ipAddr = params.get("vnp_IpAddr");
+        String orderInfo = params.get("vnp_OrderInfo");
+
+        // Ghép bằng ký tự "|"
+        return String.join("|",
+                requestId,
+                version,
+                command,
+                tmnCode,
+                txnRef,
+                transactionDate,
+                createDate,
+                ipAddr,
+                orderInfo);
+    }
+
+    public static String buildHashDataQueryDRResponse(Map<String, String> params) {
+        String responseId = nvl(params.get("vnp_ResponseId"));
+        String command = nvl(params.get("vnp_Command"));
+        String responseCode = nvl(params.get("vnp_ResponseCode"));
+        String message = nvl(params.get("vnp_Message"));
+        String tmnCode = nvl(params.get("vnp_TmnCode"));
+        String txnRef = nvl(params.get("vnp_TxnRef"));
+        String amount = nvl(params.get("vnp_Amount"));
+        String bankCode = nvl(params.get("vnp_BankCode"));
+        String payDate = nvl(params.get("vnp_PayDate"));
+        String transactionNo = nvl(params.get("vnp_TransactionNo"));
+        String transactionType = nvl(params.get("vnp_TransactionType"));
+        String transactionStatus = nvl(params.get("vnp_TransactionStatus"));
+        String orderInfo = nvl(params.get("vnp_OrderInfo"));
+        String promotionCode = nvl(params.get("vnp_PromotionCode"));
+        String promotionAmount = nvl(params.get("vnp_PromotionAmount"));
+
+        return String.join("|",
+                responseId,
+                command,
+                responseCode,
+                message,
+                tmnCode,
+                txnRef,
+                amount,
+                bankCode,
+                payDate,
+                transactionNo,
+                transactionType,
+                transactionStatus,
+                orderInfo,
+                promotionCode,
+                promotionAmount);
+    }
+
+    private static String nvl(String value) {
+        return value == null ? "" : value;
+    }
+
     /** Build query string để redirect */
     public static String buildQuery(Map<String, String> params) {
         StringBuilder query = new StringBuilder();

@@ -2,7 +2,9 @@ package com.backend.common.controller;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -15,10 +17,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.backend.common.exception.ConflictException;
 import com.backend.common.exception.GenericErrorResponse;
 import com.backend.common.exception.ResourceNotFoundException;
+import com.backend.common.exception.StockConflictResponse;
 import com.backend.common.exception.ValidationErrorResponse;
 import com.backend.common.exception.ValidationErrorResponse.ErrorDetail;
 import com.backend.common.exception.ValidationException;
+import com.backend.common.exception.StockConflictResponse.ConflictDetail;
 import com.backend.order.exception.InvalidSignatureException;
+import com.backend.order.exception.NotEnoughStockException;
 import com.backend.user.exception.TokenBlacklistedException;
 import com.backend.user.exception.TokenVersionMismatchException;
 import com.backend.user.exception.UserInactiveException;
@@ -161,5 +166,36 @@ public class GlobalExceptionHandler {
                         .message(ex.getMessage())
                         .timestamp(LocalDateTime.now())
                         .build());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleException(Exception ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", 500);
+        body.put("error", "Internal Server Error");
+        body.put("message", "Error server");
+        ex.printStackTrace();
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(body);
+    }
+
+    @ExceptionHandler(NotEnoughStockException.class)
+    public ResponseEntity<StockConflictResponse> handleNotEnoughStockException(NotEnoughStockException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                StockConflictResponse.builder()
+                        .code("INSUFFICIENT_STOCK")
+                        .message(ex.getMessage())
+                        .status(HttpStatus.CONFLICT.value())
+                        .timestamp(LocalDateTime.now())
+                        .detail(ConflictDetail.builder()
+                                .productId(ex.getProductId())
+                                .availableQuantity(ex.getAvailableQuantity())
+                                .requestedQuantity(ex.getRequestedQuantity())
+                                .build())
+                        .build()
+
+        );
     }
 }

@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -77,17 +78,19 @@ public class VnPayGateway implements PaymentGateway {
 
     @Override
     public GatewayResponseData verifyReturn(Map<String, String> params) {
-        return verifySignature(params);
+        return verifySignature(params, VnpayUtils::buildHashData);
     }
 
     @Override
     public GatewayResponseData verifyIpn(Map<String, String> params) {
-        return verifySignature(params);
+        return verifySignature(params, VnpayUtils::buildHashData);
     }
 
-    private GatewayResponseData verifySignature(Map<String, String> params) {
+    private GatewayResponseData verifySignature(Map<String, String> params,
+            Function<Map<String, String>, String> buildHashDataFunc) {
+
         String receivedHash = params.get("vnp_SecureHash");
-        String hashData = VnpayUtils.buildHashData(params);
+        String hashData = buildHashDataFunc.apply(params);
         String calculatedHash = VnpayUtils.hmacSHA512(hashSecret, hashData);
 
         if (!calculatedHash.equalsIgnoreCase(receivedHash)) {
@@ -152,7 +155,7 @@ public class VnPayGateway implements PaymentGateway {
         params.put("vnp_CreateDate", VnpayUtils.toVnpDate(now));
         params.put("vnp_IpAddr", MERCHANT_IP);
 
-        String hashData = VnpayUtils.buildHashData(params);
+        String hashData = VnpayUtils.buildHashDataQueryDR(params);
         String secureHash = VnpayUtils.hmacSHA512(hashSecret, hashData);
 
         HttpHeaders headers = new HttpHeaders();
@@ -163,9 +166,10 @@ public class VnPayGateway implements PaymentGateway {
         HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
 
         RestTemplate restTemplate = new RestTemplate();
-        String response = restTemplate.postForObject(queryDrUrl, request, String.class);
-        Map<String, String> resultParams = VnpayUtils.parseQuery(response);
-        return verifySignature(resultParams);
+        @SuppressWarnings("unchecked")
+        Map<String, String> response = (Map<String, String>) restTemplate.postForObject(queryDrUrl, request, Map.class);
+        System.out.println(response);
+        return verifySignature(response, VnpayUtils::buildHashDataQueryDRResponse);
     }
 
 }
