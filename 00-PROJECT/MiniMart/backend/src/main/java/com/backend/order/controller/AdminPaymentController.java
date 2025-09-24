@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.backend.order.dto.req.RefundReq;
+import com.backend.order.dto.res.PaymentAdminDetailDTO;
 import com.backend.order.dto.res.PaymentDTO;
 import com.backend.order.dto.res.PaymentTransactionDTO;
 import com.backend.order.service.PaymentService;
@@ -26,7 +27,7 @@ public class AdminPaymentController {
 
     // Xem danh sách thanh toán của một payment
     @GetMapping("{id}")
-    public PaymentDTO getAll(@PathVariable long id) {
+    public PaymentAdminDetailDTO getById(@PathVariable long id) {
         return paymentService.findAdminById(id);
     }
 

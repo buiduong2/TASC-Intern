@@ -35,5 +35,6 @@ public interface OrderMapper {
     @Mapping(target = "paymentId", source = "payment.id")
     @Mapping(target = "shippingMethod", source = "shippingMethod.name")
     @Mapping(target = "shippingCost", source = "shippingMethod.cost")
+    @Mapping(target = "paymentStatus", source = "payment.status")
     OrderDTO toDTO(Order order);
 }

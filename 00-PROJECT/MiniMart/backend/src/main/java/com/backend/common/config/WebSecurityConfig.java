@@ -57,6 +57,24 @@ public class WebSecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+        String[] publicUrls = {
+                "/api/payments/*/return",
+                "/api/payments/*/ipn",
+                "/api/categories/**",
+                "/api/products/**",
+                "/api/auth/login",
+                "/api/auth/register",
+                "/api/auth/refresh",
+        };
+
+        String[] otherUrls = { "/favicon.ico",
+                "/.well-known/appspecific/**",
+                "/swagger-ui/**",
+                "/v3/api-docs/**",
+                "/swagger-ui.html"
+        };
+
         http
                 .exceptionHandling(ex -> ex
                         .accessDeniedHandler(accessDeniedHandler())
@@ -67,8 +85,8 @@ public class WebSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         authorize -> authorize
-                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html")
-                                .permitAll()
+                                .requestMatchers(otherUrls).permitAll()
+                                .requestMatchers(publicUrls).permitAll()
                                 .anyRequest().authenticated());
         // .anyRequest().permitAll());
 

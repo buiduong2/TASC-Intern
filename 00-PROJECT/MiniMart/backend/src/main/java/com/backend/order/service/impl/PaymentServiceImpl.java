@@ -13,6 +13,7 @@ import com.backend.common.utils.ErrorCode;
 import com.backend.order.dto.req.PaymentTransactionReq;
 import com.backend.order.dto.req.RefundReq;
 import com.backend.order.dto.res.GatewayResponseData;
+import com.backend.order.dto.res.PaymentAdminDetailDTO;
 import com.backend.order.dto.res.PaymentDTO;
 import com.backend.order.dto.res.PaymentGatewayCreateDTO;
 import com.backend.order.dto.res.PaymentTransactionDTO;
@@ -179,12 +180,18 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentDTO findById(long paymentId, long userId) {
-        throw new UnsupportedOperationException("Unimplemented method 'findById'");
+        return repository.findByIdAndUserIdForDetailDTO(paymentId, userId)
+                .map(mapper::toDTO)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.PAYMENT_NOT_FOUND.format(paymentId)));
+
+        // return repo
     }
 
     @Override
-    public PaymentDTO findAdminById(long paymentId) {
-        throw new UnsupportedOperationException("Unimplemented method 'findAdminById'");
+    public PaymentAdminDetailDTO findAdminById(long paymentId) {
+        return repository.findByIdForAdminDetailDTO(paymentId)
+                .map(mapper::toAdminDetailDTO)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.PAYMENT_NOT_FOUND.format(paymentId)));
     }
 
     @Transactional

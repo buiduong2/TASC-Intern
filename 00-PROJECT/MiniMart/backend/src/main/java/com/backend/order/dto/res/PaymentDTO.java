@@ -1,5 +1,6 @@
 package com.backend.order.dto.res;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.backend.order.model.PaymentMethod;
@@ -15,7 +16,7 @@ public class PaymentDTO {
     private PaymentMethod name;
     private PaymentStatus status;
     private LocalDateTime completedAt;
-    private double amountTotal;
-    private double amountPaid;
+    private BigDecimal amountTotal;
+    private BigDecimal amountPaid;
     private long orderId;
 }

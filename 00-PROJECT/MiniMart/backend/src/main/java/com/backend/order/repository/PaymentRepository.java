@@ -39,4 +39,21 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
             """)
     Optional<Payment> findByIdForRefund(long id);
 
+    @Query("""
+            SELECT p
+            FROM Payment AS p
+            LEFT JOIN FETCH p.transactions
+            LEFT JOIN FETCH p.order
+            WHERE p.id = ?1
+            """)
+    Optional<Payment> findByIdForAdminDetailDTO(long paymentId);
+
+    @Query("""
+            SELECT p
+            FROM Payment AS p
+            LEFT JOIN FETCH p.order AS o
+            WHERE p.id = ?1 AND  o.customer.user.id = ?2
+            """)
+    Optional<Payment> findByIdAndUserIdForDetailDTO(long paymentId, long userId);
+
 }

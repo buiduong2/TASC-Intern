@@ -50,6 +50,8 @@ public class VnpayReturnUrlMocker {
         String hashData = VnpayUtils.buildHashData(params);
         String secureHash = VnpayUtils.hmacSHA512(hashSecret, hashData);
 
+        System.out.println(payUrl);
+
         String query = VnpayUtils.buildQuery(params) + "&vnp_SecureHash=" + secureHash;
 
         return baseReturnUrl + "?" + query;

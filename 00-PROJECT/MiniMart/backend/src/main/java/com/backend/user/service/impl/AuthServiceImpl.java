@@ -140,7 +140,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public UserDTO getInfo(long userId) {
-        User user = repository.findById(userId).orElseThrow(() -> new BadCredentialsException("User missing"));
+        User user = repository.findByIdForDTO(userId).orElseThrow(() -> new BadCredentialsException("User missing"));
         return mapper.toDTO(user);
     }
 

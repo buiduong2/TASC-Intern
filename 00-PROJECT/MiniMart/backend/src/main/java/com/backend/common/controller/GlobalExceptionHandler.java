@@ -2,26 +2,29 @@ package com.backend.common.controller;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.backend.common.exception.ConflictException;
 import com.backend.common.exception.GenericErrorResponse;
 import com.backend.common.exception.ResourceNotFoundException;
 import com.backend.common.exception.StockConflictResponse;
+import com.backend.common.exception.StockConflictResponse.ConflictDetail;
 import com.backend.common.exception.ValidationErrorResponse;
 import com.backend.common.exception.ValidationErrorResponse.ErrorDetail;
 import com.backend.common.exception.ValidationException;
-import com.backend.common.exception.StockConflictResponse.ConflictDetail;
 import com.backend.order.exception.InvalidSignatureException;
 import com.backend.order.exception.NotEnoughStockException;
 import com.backend.user.exception.TokenBlacklistedException;
@@ -110,6 +113,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<GenericErrorResponse> handleAuthorizationDeniedException(AuthorizationDeniedException ex) {
+        GenericErrorResponse error = GenericErrorResponse
+                .builder()
+                .status(HttpStatus.FORBIDDEN.value())
+                .error("FORBIDDEN")
+                .message("You are not allowed to access the resources")
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<GenericErrorResponse> handleBadCredentialsException(BadCredentialsException ex) {
         GenericErrorResponse error = GenericErrorResponse
@@ -168,17 +183,39 @@ public class GlobalExceptionHandler {
                         .build());
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleException(Exception ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("status", 500);
-        body.put("error", "Internal Server Error");
-        body.put("message", "Error server");
-        ex.printStackTrace();
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<GenericErrorResponse> handleNoResourceFoundException(NoResourceFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(GenericErrorResponse.builder()
+                        .status(HttpStatus.NOT_FOUND.value())
+                        .error("RESOURCE_NOT_FOUND")
+                        .message(ex.getMessage())
+                        .timestamp(LocalDateTime.now())
+                        .build());
+    }
 
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(body);
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<GenericErrorResponse> handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex) {
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                .body(GenericErrorResponse.builder()
+                        .status(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value())
+                        .error("UNSUPPORTED_MEDIA_TYPE")
+                        .message(ex.getMessage())
+                        .timestamp(LocalDateTime.now())
+                        .build());
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<GenericErrorResponse> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex) {
+        GenericErrorResponse error = GenericErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Bad Request")
+                .message("Request body is missing or invalid")
+                .build();
+
+        return ResponseEntity.badRequest().body(error);
     }
 
     @ExceptionHandler(NotEnoughStockException.class)
@@ -198,4 +235,17 @@ public class GlobalExceptionHandler {
 
         );
     }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<GenericErrorResponse> handleMethodNotSupported(
+            HttpRequestMethodNotSupportedException ex) {
+        GenericErrorResponse error = GenericErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.METHOD_NOT_ALLOWED.value())
+                .error("Method Not Allowed")
+                .message("Supported methods: " + String.join(", ", ex.getSupportedMethods()))
+                .build();
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(error);
+    }
+
 }

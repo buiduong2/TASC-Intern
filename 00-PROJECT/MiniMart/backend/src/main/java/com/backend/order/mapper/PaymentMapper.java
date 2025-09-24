@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
+import com.backend.order.dto.res.PaymentAdminDetailDTO;
 import com.backend.order.dto.res.PaymentDTO;
 import com.backend.order.dto.res.PaymentTransactionDTO;
 import com.backend.order.model.Payment;
@@ -18,4 +19,7 @@ public interface PaymentMapper {
 
     @Mapping(target = "orderId", source = "order.id")
     PaymentDTO toDTO(Payment payment);
+
+    @Mapping(target = "orderId", source = "order.id")
+    PaymentAdminDetailDTO toAdminDetailDTO(Payment payment);
 }

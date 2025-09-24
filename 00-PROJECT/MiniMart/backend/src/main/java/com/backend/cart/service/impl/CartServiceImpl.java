@@ -110,7 +110,7 @@ public class CartServiceImpl implements CartService {
             BigDecimal actualPrice = product.getSalePrice() == null ? product.getCompareAtPrice()
                     : product.getSalePrice();
 
-            if (status != ProductStatus.ACTIVE || availableQuantity == 0) {
+            if (status != ProductStatus.ACTIVE || availableQuantity == 0 || currentQuantity == 0) {
                 AdjustmentCartItem change = new AdjustmentCartItem();
                 CartItemDTO dto = mapper.toItemDTO(cartItem);
                 change.setOldItem(dto);

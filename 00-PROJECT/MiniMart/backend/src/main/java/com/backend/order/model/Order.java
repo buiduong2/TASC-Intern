@@ -19,11 +19,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedAttributeNode;
-import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.NamedStoredProcedureQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -34,10 +33,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.Setter;
-
-@NamedEntityGraph(name = "Order.EntityUpdate", attributeNodes = {
-        @NamedAttributeNode(value = "customer"),
-})
 
 @SqlResultSetMapping(name = "OrderAdminMapping", //
         classes = @ConstructorResult(targetClass = OrderAdminDTO.class, columns = {
@@ -98,22 +93,22 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private ShippingMethod shippingMethod;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private OrderAddress address;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Payment payment;
 
     @Embedded
     private Audit audit = new Audit();
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Customer customer;
 
     @Version

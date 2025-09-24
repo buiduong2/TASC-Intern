@@ -2,7 +2,6 @@ package com.backend.user.security;
 
 import java.io.IOException;
 
-import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,6 +10,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.backend.user.exception.TokenBlacklistedException;
+import com.backend.user.exception.TokenVersionMismatchException;
 import com.backend.user.repository.UserRepository;
 import com.backend.user.service.JwtService;
 
@@ -51,8 +52,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     userDetails, null, userDetails.getAuthorities());
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-        } catch (JwtException | AuthenticationException e) {
-            throw new InsufficientAuthenticationException(e.getMessage(), e);
+        } catch (JwtException | AuthenticationException | TokenVersionMismatchException | TokenBlacklistedException e) {
+            request.setAttribute("exception", e);
+            SecurityContextHolder.clearContext();
         }
         filterChain.doFilter(request, response);
     }

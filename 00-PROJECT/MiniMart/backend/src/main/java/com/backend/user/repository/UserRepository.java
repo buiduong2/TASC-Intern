@@ -15,6 +15,12 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     @EntityGraph(value = User.NamedGraph_Auth, type = EntityGraphType.FETCH)
     Optional<User> findByUsername(String username);
 
+    @EntityGraph(value = User.NamedGraph_Auth, type = EntityGraphType.FETCH)
+    @Query("""
+            FROM User WHERE id = ?1
+            """)
+    Optional<User> findByIdForDTO(long userId);
+
     boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);

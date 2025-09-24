@@ -15,6 +15,7 @@ public enum ErrorCode {
     PURCHASE_ITEM_NOT_FOUND("Purchase item with id={0} not found"),
 
     // Order
+    ORDER_NOT_FOUND("Order with id={0} not found"),
     PAYMENT_NOT_FOUND("Payment with id={0} not found"),
     PAYMENT_COMPLETED("Payment with id={0} already completed and cannot be modified"),
     PAYMENT_TRANSACTION_NOT_FOUND("Payment transaction txnRef={0} not found"),

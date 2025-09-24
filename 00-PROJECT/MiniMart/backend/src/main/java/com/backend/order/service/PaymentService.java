@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.backend.order.dto.req.PaymentTransactionReq;
 import com.backend.order.dto.req.RefundReq;
+import com.backend.order.dto.res.PaymentAdminDetailDTO;
 import com.backend.order.dto.res.PaymentDTO;
 import com.backend.order.dto.res.PaymentTransactionDTO;
 
@@ -26,7 +27,7 @@ public interface PaymentService {
 
     PaymentDTO findById(long paymentId, long userId);
 
-    PaymentDTO findAdminById(long paymentId);
+    PaymentAdminDetailDTO findAdminById(long paymentId);
 
     PaymentTransactionDTO verifyReturn(String gateway, Map<String, String> allParams);
 

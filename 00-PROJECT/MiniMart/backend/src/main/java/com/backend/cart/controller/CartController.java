@@ -1,6 +1,5 @@
 package com.backend.cart.controller;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,8 +21,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/cart/")
-@PreAuthorize("isAuthenticated()")
+@RequestMapping("/api/cart")
 public class CartController {
 
     private final CartService service;
@@ -41,7 +39,7 @@ public class CartController {
 
     @PutMapping("/items/{itemId}")
     public CartDTO updateQuantity(@PathVariable long itemId,
-            @RequestBody UpdateCartItemRequest req,
+            @Valid @RequestBody UpdateCartItemRequest req,
             @AuthenticationPrincipal CustomUserDetail userDetail) {
         return service.updateQuantity(userDetail.getUserId(), itemId, req.getQuantity());
     }
