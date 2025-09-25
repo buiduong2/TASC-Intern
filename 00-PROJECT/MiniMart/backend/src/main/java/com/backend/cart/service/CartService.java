@@ -15,4 +15,6 @@ public interface CartService {
 
     CartDTO clearCart(long userId);
 
+    CartDTO mergeCartFromOrderById(long orderId, long userId);
+
 }

@@ -3,6 +3,9 @@ package com.backend.cart.service.impl;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +24,9 @@ import com.backend.cart.service.CartService;
 import com.backend.common.exception.ResourceNotFoundException;
 import com.backend.common.utils.ErrorCode;
 import com.backend.order.exception.NotEnoughStockException;
+import com.backend.order.model.Order;
+import com.backend.order.model.OrderItem;
+import com.backend.order.repository.OrderRepository;
 import com.backend.product.model.Product;
 import com.backend.product.model.ProductStatus;
 import com.backend.product.repository.ProductRepository;
@@ -39,6 +45,8 @@ public class CartServiceImpl implements CartService {
     private final CartItemRepository itemRepository;
 
     private final ProductRepository productRepository;
+
+    private final OrderRepository orderRepository;
 
     private final CartMapper mapper;
 
@@ -207,6 +215,40 @@ public class CartServiceImpl implements CartService {
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.CART_NOT_FOUND.format(userId)));
 
         cart.clearItem();
+
+        return syncCart(cart);
+    }
+
+    @Transactional
+    @Override
+    public CartDTO mergeCartFromOrderById(long orderId, long userId) {
+
+        Order order = orderRepository.findByIdAndUserIdForCartDTO(orderId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.ORDER_NOT_FOUND.format(userId)));
+
+        Cart cart = repository.findByUserIdForDTO(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.CART_NOT_FOUND.format(userId)));
+
+        Map<Product, CartItem> mapOldItemByProduct = cart.getItems().stream()
+                .collect(Collectors.toMap(CartItem::getProduct, Function.identity()));
+
+        for (OrderItem oldOi : order.getOrderItems()) {
+            int requestedQuantity = oldOi.getQuantity();
+            Product requestedProduct = oldOi.getProduct();
+
+            if (mapOldItemByProduct.containsKey(requestedProduct)) {
+                CartItem oldCi = mapOldItemByProduct.get(requestedProduct);
+                oldCi.setQuantity(oldCi.getQuantity() + requestedQuantity);
+            } else {
+                CartItem ci = new CartItem();
+                ci.setProduct(requestedProduct);
+                ci.setQuantity(requestedQuantity);
+                ci.setUnitPrice(requestedProduct.getSalePrice() == null ? requestedProduct.getCompareAtPrice()
+                        : requestedProduct.getSalePrice());
+                cart.addItem(ci);
+            }
+
+        }
 
         return syncCart(cart);
     }

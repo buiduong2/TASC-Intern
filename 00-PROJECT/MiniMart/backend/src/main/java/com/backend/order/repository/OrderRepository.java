@@ -24,4 +24,26 @@ public interface OrderRepository extends JpaRepository<Order, Long>, CustomOrder
 
     @Query("FROM Order AS o  JOIN FETCH o.shippingMethod  JOIN FETCH o.payment  WHERE o.customer.user.id = ?1")
     Page<Order> findByIdAndUserIdForPage(long userId, Pageable pageable);
+
+    @Query("""
+                SELECT o FROM Order o
+                LEFT JOIN FETCH o.payment p
+                LEFT JOIN FETCH o.shippingMethod s
+                LEFT JOIN FETCH o.address a
+                LEFT JOIN FETCH o.orderItems oi
+                LEFT JOIN FETCH oi.product pr
+                LEFT JOIN FETCH pr.image img
+                WHERE o.id = :id AND o.customer.user.id = :userId
+            """)
+    Optional<Order> findByIdAndUserIdForDTO(long id, long userId);
+
+    @Query("""
+                SELECT o FROM Order o
+                LEFT JOIN FETCH o.orderItems oi
+                LEFT JOIN FETCH oi.product pr
+                LEFT JOIN FETCH pr.stock t
+                LEFT JOIN FETCH pr.image img
+                WHERE o.id = :id AND o.customer.user.id = :userId
+            """)
+    Optional<Order> findByIdAndUserIdForCartDTO(long id, long userId);
 }

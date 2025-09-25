@@ -16,6 +16,7 @@ import com.backend.order.dto.req.FromCartGroup;
 import com.backend.order.dto.req.FromReqGroup;
 import com.backend.order.dto.req.OrderCreateReq;
 import com.backend.order.dto.res.OrderDTO;
+import com.backend.order.dto.res.OrderDetailDTO;
 import com.backend.order.service.OrderService;
 import com.backend.user.security.CustomUserDetail;
 
@@ -33,6 +34,11 @@ public class OrderController {
             @PageableDefault Pageable pageable,
             @AuthenticationPrincipal CustomUserDetail userDetail) {
         return service.findPage(pageable, userDetail.getUserId());
+    }
+
+    @GetMapping("{id}")
+    public OrderDetailDTO findById(@PathVariable long id, @AuthenticationPrincipal CustomUserDetail userDetail) {
+        return service.findByIdAndUserId(id, userDetail.getUserId());
     }
 
     @PostMapping

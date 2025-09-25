@@ -31,6 +31,11 @@ public class CartController {
         return service.getCart(userDetail.getUserId());
     }
 
+    @PostMapping("/merge-from-order/{orderId}")
+    public CartDTO mergeCartFromOrderId(@PathVariable long orderId, @AuthenticationPrincipal CustomUserDetail userDetail) {
+        return service.mergeCartFromOrderById(orderId,userDetail.getUserId());
+    }
+
     @PostMapping("/items")
     public CartDTO addToCart(@AuthenticationPrincipal CustomUserDetail userDetail,
             @Valid @RequestBody AddCartItemRequest req) {

@@ -7,6 +7,7 @@ import com.backend.order.dto.req.OrderCreateReq;
 import com.backend.order.dto.req.OrderUpdateReq;
 import com.backend.order.dto.res.OrderAdminDTO;
 import com.backend.order.dto.res.OrderDTO;
+import com.backend.order.dto.res.OrderDetailDTO;
 import com.backend.order.dto.res.OrderFilter;
 
 public interface OrderService {
@@ -24,4 +25,6 @@ public interface OrderService {
     OrderDTO cancelAdmin(long id);
 
     OrderDTO updateStatus(long id, OrderUpdateReq req);
+
+    OrderDetailDTO findByIdAndUserId(long id, long userId);
 }

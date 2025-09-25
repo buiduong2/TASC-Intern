@@ -689,3 +689,7 @@ Table Product_Tag {
 }
 
 ```
+
+## Thêm chức năng Order lại từ Order đã có
+
+- 

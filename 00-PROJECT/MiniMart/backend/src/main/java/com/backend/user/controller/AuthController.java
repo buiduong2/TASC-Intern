@@ -1,7 +1,7 @@
 package com.backend.user.controller;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,12 +30,8 @@ public class AuthController {
     private final AuthService authService;
 
     @GetMapping("/me")
-    public UserDTO getInfo(Authentication authentication) {
-        if (authentication.getPrincipal() instanceof CustomUserDetail customUserDetail) {
-            return authService.getInfo(customUserDetail.getUserId());
-        } else {
-            throw new RuntimeException("Printcipal not implemeted yet");
-        }
+    public UserDTO getInfo(@AuthenticationPrincipal CustomUserDetail userDetail) {
+        return authService.getInfo(userDetail.getUserId());
     }
 
     @PostMapping("login")
@@ -55,21 +51,16 @@ public class AuthController {
     }
 
     @PostMapping("change-password")
-    public void changePassword(@Valid @RequestBody ChangePasswordReq req, Authentication authentication) {
-        if (authentication.getPrincipal() instanceof CustomUserDetail customUserDetail) {
-            authService.changePassword(req, customUserDetail.getUserId());
-        } else {
-            throw new RuntimeException("Printcipal not implemeted yet");
-        }
+    public void changePassword(@Valid @RequestBody ChangePasswordReq req,
+            @AuthenticationPrincipal CustomUserDetail userDetail) {
+        authService.changePassword(req, userDetail.getUserId());
+
     }
 
     @PostMapping("/revoke")
-    public void revoke(@Valid @RequestBody RevokeJwtReq req, Authentication authentication) {
-        if (authentication.getPrincipal() instanceof CustomUserDetail customUserDetail) {
-            authService.revoke(req, customUserDetail.getUserId());
-        } else {
-            throw new RuntimeException("Printcipal not implemeted yet");
-        }
+    public void revoke(@Valid @RequestBody RevokeJwtReq req, @AuthenticationPrincipal CustomUserDetail userDetail) {
+        authService.revoke(req, userDetail.getUserId());
+
     }
 
 }

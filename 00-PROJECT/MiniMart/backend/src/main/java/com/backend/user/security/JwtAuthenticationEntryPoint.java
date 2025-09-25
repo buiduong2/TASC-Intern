@@ -45,7 +45,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         if (cause == null) {
             cause = (Throwable) request.getAttribute("exception");
         }
-        if(cause == null) {
+        if (cause == null) {
             authException.printStackTrace();
         }
 
@@ -61,8 +61,6 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
             error.setMessage("The token version does not match. Please log in again.");
         } else if (cause instanceof TokenBlacklistedException) {
             error.setMessage("The token has been revoked.");
-        } else if (cause instanceof TokenVersionMismatchException) {
-            error.setMessage("Token is no longer valid, please re-login");
         } else {
             error.setMessage("Authentication failed. Please provide valid credentials.");
         }

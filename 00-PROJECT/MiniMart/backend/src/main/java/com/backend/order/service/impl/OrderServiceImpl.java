@@ -21,6 +21,7 @@ import com.backend.order.dto.req.OrderItemReq;
 import com.backend.order.dto.req.OrderUpdateReq;
 import com.backend.order.dto.res.OrderAdminDTO;
 import com.backend.order.dto.res.OrderDTO;
+import com.backend.order.dto.res.OrderDetailDTO;
 import com.backend.order.dto.res.OrderFilter;
 import com.backend.order.mapper.OrderMapper;
 import com.backend.order.model.Order;
@@ -123,7 +124,8 @@ public class OrderServiceImpl implements OrderService {
 
     private Order cancel(Order order) {
         if (!(order.getStatus() == OrderStatus.PENDING || order.getStatus() == OrderStatus.SHIPPED)) {
-            throw new ValidationException("status", "Order cannot be canceled in current status = " + order.getStatus());
+            throw new ValidationException("status",
+                    "Order cannot be canceled in current status = " + order.getStatus());
         }
 
         order.setStatus(OrderStatus.CANCELED);
@@ -157,6 +159,13 @@ public class OrderServiceImpl implements OrderService {
 
         order.setStatus(OrderStatus.valueOf(req.getStatus()));
         return mapper.toDTO(order);
+    }
+
+    @Override
+    public OrderDetailDTO findByIdAndUserId(long id, long userId) {
+        return repository.findByIdAndUserIdForDTO(id, userId)
+                .map(mapper::toDetailDTO)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.ORDER_NOT_FOUND.format(id)));
     }
 
 }
