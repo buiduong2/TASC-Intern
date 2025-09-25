@@ -57,6 +57,7 @@ public class _02_StaticHiding {
 
         System.out.println(childWithParentType.name); // Parent
         System.out.println(child.name); // Child
+        System.out.println(((Parent) child).name);// parent
     }
 
 }

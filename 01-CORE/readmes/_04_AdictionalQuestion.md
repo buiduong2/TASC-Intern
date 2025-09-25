@@ -134,7 +134,7 @@ class Outer {
 
 -
 
-## Làm soa để có Runnable mà sau khi nó chạy xong thì ta lấy dữ liệu
+## Làm sao để có Runnable mà sau khi nó chạy xong thì ta lấy dữ liệu
 
 -   **While**
 

@@ -34,9 +34,9 @@ public class _01_InstanceFieldHiding {
      * 
      */
     public static void main(String[] args) {
-        // accessWithVariableType();
+        accessWithVariableType();
         // accessWithCasting();
-        accessWithSuperAndThis();
+        // accessWithSuperAndThis();
     }
 
     /**
