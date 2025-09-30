@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "AuthenticationServiceApplication",
+            "request": "launch",
+            "mainClass": "com.authentication_service.AuthenticationServiceApplication",
+            "projectName": "authentication-service"
+        },
+        {
+            "type": "java",
             "name": "EurekaServerApplication",
             "request": "launch",
             "mainClass": "com.eureka_server.EurekaServerApplication",

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+</head>
+
+<body>
+
+
+    <div class="max-w-md" id="main-content">
+        <div th:if="${param.error}" class="p-5 bg-red-300 text-white">
+            Invalid username and password.
+        </div>
+
+        <form class="mt-8 grid grid-cols-1 gap-6" method="POST" th:action="@{/login}" th:object="${data}">
+
+            <label class="block" th:with="hasError=${#fields.hasErrors('username')}">
+                <span th:class="${hasError} ? 'text-red-400' : 'text-gray-700'">Tên tài khoản</span>
+                <input type="text"
+                    class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                    th:field="*{username}" th:classappend="${hasError} ? 'border-red-300' : 'border-gray-300'" />
+                <ul th:if="${hasError}">
+                    <li th:each="er : ${#fields.errors('username')}" class="text-red-300" th:text="${er}"></li>
+                </ul>
+            </label>
+
+            <label class="block" th:with="hasError=${#fields.hasErrors('password')}">
+                <span th:class="${hasError} ? 'text-red-400' : 'text-gray-700'">Mật khẩu</span>
+                <input type="password"
+                    class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                    th:field="*{password}" th:classappend="${hasError} ? 'border-red-300' : 'border-gray-300'" />
+                <ul th:if="${hasError}">
+                    <li th:each="er : ${#fields.errors('password')}" class="text-red-300" th:text="${er}"></li>
+                </ul>
+            </label>
+
+            <button class="bg-green-400 p-3 text-white hover:bg-green-300 text-lg">
+                Đăng nhập
+            </button>
+        </form>
+
+        <div class="mt-5"><a class="p-3 block rounded border text-center" th:href="@{/oauth2/authorization/github}">Đăng
+                nhập bằng Github</a></div>
+        <div class="mt-5"><a class="p-3 block rounded border text-center" th:href="@{/oauth2/authorization/google}">Đăng
+                nhập bằng Google</a></div>
+
+
+    </div>
+</body>
+
+</html>

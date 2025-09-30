@@ -1,0 +1,44 @@
+eureka:
+    client:
+        service-url:
+            defaultZone: http://localhost:8070/eureka/
+
+spring:
+    datasource:
+        url: jdbc:postgresql://localhost:5433/minimart-auth?createDatabaseIfNotExist=true
+        username: '{cipher}0c35e06f5f24dfe55d9f62e9599249074db2df82fef2be3709c290083efbc252'
+        password: '{cipher}1ca588545d584f480855460d4de9f8bf7faed630797ada8a8ca764f61b26e6e0'
+
+    jpa:
+        show-sql: true
+        properties:
+            hibernate:
+                format_sql: true
+                highlight_sql: true
+        hibernate:
+            ddl-auto: validate
+
+    security:
+        oauth2:
+            client:
+                registration:
+                    github:
+                        client-id: '{cipher}d8d2566f29c6209946b8971947f48a084fa337b97ae661d106656d039cb1d9e04221aca3a788f06a151e7c365b8177f2'
+                        client-secret: '{cipher}f022319a9a7df4e294a1ff024c3bb4de12ea94e70422743e8968cc452ef50c545e8bfd975ea39c9e37dfa6287bdd825c8f4861a8670026d63d0dd307703ea314'
+                    google:
+                        client-id: '{cipher}d29ed4dd4de1a2b8eb8334197429ffa413b09264368ca99f3593c88cc9316f4a92fa5d39dbb7124490dba3ed2f875af66e69afa7d7cf3a31d47f4d15240730cb87871b3114c65fc980fb8de5ba07751660436bc27058512a9181679585b031d2'
+                        client-secret: '{cipher}ac3a0c3f852983ad78ad11f6118b5aad38ad487bb418f6862b94368db10af35cd6f89c20a851559a539baece1e0e9d810096577ae685ce8d48236c7131edebff'
+custom:
+    client:
+        origins: http://localhost:5173/
+
+    security:
+        oauth2:
+            client:
+                registered:
+                    dashboard:
+                        client-id: dashboard
+                        client-secret: dashboard
+                        redirect-uri: http://localhost:5173/callback
+                        post-logout-redirect-uri: http://localhost:5173
+                        scope: DASHBOARD

@@ -1,0 +1,14 @@
+server:
+    port: 8081
+
+eureka:
+    instance:
+        preferIpAddress: true
+    client:
+        registerWithEureka: true
+        fetchRegistry: true
+
+
+spring: 
+    datasource:
+        driver-class-name: org.postgresql.Driver
