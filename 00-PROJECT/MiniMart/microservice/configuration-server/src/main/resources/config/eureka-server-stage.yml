@@ -1,0 +1,14 @@
+# bootstrap-stage.yml (docker)
+server:
+    port: 8070
+
+eureka:
+    instance:
+        hostname: ${EUREKA_HOSTNAME:eureka-server}
+    client:
+        registerWithEureka: false
+        fetchRegistry: false
+        serviceUrl:
+            defaultZone: http://${EUREKA_HOSTNAME:eureka-server}:8070/eureka/
+    server:
+        waitTimeInMsWhenSyncEmpty: 5

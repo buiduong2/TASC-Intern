@@ -1,0 +1,22 @@
+spring:
+    application:
+        name: configuration-server
+
+    profiles:
+        active: native
+
+    cloud:
+        config:
+            server:
+                native:
+                    search-locations: classpath:/config
+
+    output:
+        ansi:
+            enabled: always
+
+server:
+    port: 8071
+
+encrypt:
+    key: ${ENCRYPT_KEY}

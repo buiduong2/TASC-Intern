@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "EurekaServerApplication",
+            "request": "launch",
+            "mainClass": "com.eureka_server.EurekaServerApplication",
+            "projectName": "eureka-server"
+        },
+        {
+            "type": "java",
+            "name": "Launch ConfigServer",
+            "request": "launch",
+            "mainClass": "com.configuration_server.ConfigurationServerApplication",
+            "env": {
+                "ENCRYPT_KEY": "fjE83Ki8403lod87dne7Yj3ltHueh48jfu09j4U2hf64Lo"
+            }
+        }
+    ]
+}
