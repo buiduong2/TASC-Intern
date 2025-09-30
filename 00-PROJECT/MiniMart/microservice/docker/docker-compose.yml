@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+    configuration-server:
+        image: duongbd1997/configuration-server:0.0.1-SNAPSHOT
+        container_name: configuration-server
+        ports:
+            - '8071:8071'
+        env_file:
+            - .env
+        healthcheck:
+            test:
+                [
+                    'CMD-SHELL',
+                    'curl -f http://localhost:8071/actuator/health || exit 1'
+                ]
+
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 20s # cho Spring Boot thêm thời gian khởi động
+
+    eureka-server:
+        image: duongbd1997/eureka-server:0.0.1-SNAPSHOT
+        container_name: eureka-server
+        ports:
+            - '8070:8070'
+        depends_on:
+            configuration-server:
+                condition: service_healthy
+        env_file:
+            - .env
+        healthcheck:
+            test:
+                [
+                    'CMD-SHELL',
+                    'curl -f http://localhost:8070/actuator/health || exit 1'
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 30s
+
+networks:
+    minimart-net:
+        driver: bridge
