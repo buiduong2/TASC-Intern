@@ -1,0 +1,11 @@
+eureka:
+    client:
+        service-url:
+            defaultZone: http://localhost:8070/eureka/
+
+custom:
+    auth:
+        key_set_uri: http://localhost:8081/oauth2/jwks
+
+    client:
+        origins: http://localhost:5173/,http://127.0.0.1:5500/

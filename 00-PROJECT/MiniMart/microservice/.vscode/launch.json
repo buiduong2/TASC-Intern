@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "GatewayServerApplication",
+            "request": "launch",
+            "mainClass": "com.gateway_server.GatewayServerApplication",
+            "projectName": "gateway-server"
+        },
+        {
+            "type": "java",
             "name": "AuthenticationServiceApplication",
             "request": "launch",
             "mainClass": "com.authentication_service.AuthenticationServiceApplication",

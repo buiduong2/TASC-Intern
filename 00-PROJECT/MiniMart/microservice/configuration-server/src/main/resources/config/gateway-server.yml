@@ -1,0 +1,39 @@
+server:
+    port: 8082
+
+eureka:
+    instance:
+        preferIpAddress: true
+    client:
+        registerWithEureka: true
+        fetchRegistry: true
+
+spring:
+    cloud:
+        gateway:
+            server:
+                webflux:
+                    discovery:
+                        locator:
+                            enabled: false
+                            lower-case-service-id: true
+
+                    routes:
+                        - id: auth-mvc
+                          uri: lb://authentication-service
+                          predicates:
+                              - Path=/login
+
+                        - id: auth-api
+                          uri: lb://authentication-service
+                          predicates:
+                              - Path=/api/auth/**            
+management:
+    endpoint:
+        gateway:
+            access: unrestricted
+
+    endpoints:
+        web:
+            exposure:
+                include: refresh,health,info,gateway,routes
