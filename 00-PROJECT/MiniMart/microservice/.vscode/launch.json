@@ -2,17 +2,26 @@
     "configurations": [
         {
             "type": "java",
+            "name": "ProfileServiceApplication",
+            "request": "launch",
+            "mainClass": "com.profile_service.ProfileServiceApplication",
+            "projectName": "profile-service"
+        },
+        {
+            "type": "java",
             "name": "GatewayServerApplication",
             "request": "launch",
             "mainClass": "com.gateway_server.GatewayServerApplication",
-            "projectName": "gateway-server"
+            "projectName": "gateway-server",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=64022 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=gateway-server"
         },
         {
             "type": "java",
             "name": "AuthenticationServiceApplication",
             "request": "launch",
             "mainClass": "com.authentication_service.AuthenticationServiceApplication",
-            "projectName": "authentication-service"
+            "projectName": "authentication-service",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=64035 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=authentication-service"
         },
         {
             "type": "java",
@@ -29,6 +38,16 @@
             "env": {
                 "ENCRYPT_KEY": "fjE83Ki8403lod87dne7Yj3ltHueh48jfu09j4U2hf64Lo"
             }
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-ConfigurationServerApplication<configuration-server>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.configuration_server.ConfigurationServerApplication",
+            "projectName": "configuration-server",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
