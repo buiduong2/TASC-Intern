@@ -10,11 +10,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.backend.common.exception.ConflictException;
@@ -84,7 +86,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler({ MethodArgumentNotValidException.class })
     public ResponseEntity<ValidationErrorResponse> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException ex) {
         List<ErrorDetail> errorDetails = new ArrayList<>();
@@ -99,6 +101,37 @@ public class GlobalExceptionHandler {
         });
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ValidationErrorResponse> handleHandlerMethodValidationException(
+            HandlerMethodValidationException ex) {
+
+        List<ValidationErrorResponse.ErrorDetail> errorDetails = new ArrayList<>();
+
+        ex.getParameterValidationResults().forEach(result -> {
+            result.getResolvableErrors().forEach(error -> {
+                ValidationErrorResponse.ErrorDetail detail = new ValidationErrorResponse.ErrorDetail();
+
+                if (error instanceof FieldError fieldError) {
+                    detail.setField(fieldError.getField());
+                    detail.setMessage(fieldError.getDefaultMessage());
+                } else {
+                    detail.setField(result.getMethodParameter().getParameterName());
+                    detail.setMessage(error.getDefaultMessage());
+                }
+
+                errorDetails.add(detail);
+            });
+        });
+
+        ValidationErrorResponse errorResponse = new ValidationErrorResponse();
+        errorResponse.setErrors(errorDetails);
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(errorResponse);
+
     }
 
     @ExceptionHandler(UserInactiveException.class)

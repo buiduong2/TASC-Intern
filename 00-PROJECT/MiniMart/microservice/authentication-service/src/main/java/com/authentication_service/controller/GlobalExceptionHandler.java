@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.authentication_service.exception.GenericErrorResponse;
+import com.authentication_service.exception.GenericException;
 import com.authentication_service.exception.ResourceNotFoundException;
 import com.authentication_service.exception.ValidationErrorResponse;
 import com.authentication_service.exception.ValidationErrorResponse.ErrorDetail;
@@ -64,6 +65,18 @@ public class GlobalExceptionHandler {
                 .builder()
                 .status(HttpStatus.NOT_FOUND.value())
                 .error("Resource Not Found")
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(GenericException.class)
+    public ResponseEntity<?> handleGenericException(GenericException ex) {
+        GenericErrorResponse error = GenericErrorResponse
+                .builder()
+                .status(ex.getStatus())
+                .error(ex.getError())
                 .message(ex.getMessage())
                 .timestamp(LocalDateTime.now())
                 .build();

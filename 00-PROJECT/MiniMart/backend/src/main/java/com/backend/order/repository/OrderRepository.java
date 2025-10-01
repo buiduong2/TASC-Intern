@@ -14,6 +14,8 @@ import jakarta.persistence.LockModeType;
 
 public interface OrderRepository extends JpaRepository<Order, Long>, CustomOrderRepository {
 
+    
+
     @Lock(LockModeType.OPTIMISTIC)
     @Query("FROM Order WHERE id = ?1")
     Optional<Order> findByIdForUpdate(long orderId);

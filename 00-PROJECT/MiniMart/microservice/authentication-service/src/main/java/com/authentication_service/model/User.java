@@ -36,7 +36,7 @@ import lombok.Setter;
 @Table(name = "users")
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "USER_TYPE")
-public class User {
+public abstract class User {
 
     public static final String NamedGraph_Auth = "User.Auth";
 
@@ -59,6 +59,10 @@ public class User {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    public abstract String getUsername();
+
+    public abstract String getEmail();
 
     @Override
     public final boolean equals(Object o) {

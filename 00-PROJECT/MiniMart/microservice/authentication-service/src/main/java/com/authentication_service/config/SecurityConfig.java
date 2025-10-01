@@ -48,16 +48,17 @@ public class SecurityConfig {
     @Bean
     @Order(2)
     SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
-
-        String[] publishUrls = new String[] { "/verify-email" };
         String[] resourceUrls = new String[] { "/img/**", "/css/**", "/js/**" };
-        String[] guestOnlyUrls = new String[] { "/register", "/login" };
+
         http.authorizeHttpRequests((authorize) -> authorize
-                .requestMatchers(publishUrls).permitAll()
-                .requestMatchers(guestOnlyUrls).anonymous()
+                .requestMatchers("/login").permitAll()
+                .requestMatchers("/api/auth/me").authenticated()
+                .requestMatchers("/api/auth/change-password").authenticated()
+                .requestMatchers("/api/auth/register").permitAll()
                 .requestMatchers(resourceUrls).permitAll()
                 .anyRequest().authenticated())
                 .cors(c -> c.configurationSource(configurationSource))
+                .csrf(c -> c.ignoringRequestMatchers("/api/**"))
                 .formLogin(c -> c.loginPage("/login")
                         .failureUrl("/login?error"))
                 .oauth2Login(c -> c.successHandler(federatedIdentityAuthenticationSuccessHandler)

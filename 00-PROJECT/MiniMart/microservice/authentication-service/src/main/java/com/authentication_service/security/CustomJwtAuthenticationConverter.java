@@ -18,7 +18,7 @@ public class CustomJwtAuthenticationConverter implements Converter<Jwt, CustomJw
     @Override
     @Nullable
     public CustomJwtAuthenticationToken convert(@SuppressWarnings("null") Jwt source) {
-        List<String> authorities = source.getClaim("authorities");
+        List<String> authorities = source.getClaim("roles");
         List<String> scopes = source.getClaim("scope");
         Long userId = source.getClaim("userId");
 

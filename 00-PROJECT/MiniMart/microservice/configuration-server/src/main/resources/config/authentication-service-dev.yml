@@ -28,9 +28,15 @@ spring:
                     google:
                         client-id: '{cipher}d29ed4dd4de1a2b8eb8334197429ffa413b09264368ca99f3593c88cc9316f4a92fa5d39dbb7124490dba3ed2f875af66e69afa7d7cf3a31d47f4d15240730cb87871b3114c65fc980fb8de5ba07751660436bc27058512a9181679585b031d2'
                         client-secret: '{cipher}ac3a0c3f852983ad78ad11f6118b5aad38ad487bb418f6862b94368db10af35cd6f89c20a851559a539baece1e0e9d810096577ae685ce8d48236c7131edebff'
+
+logging:
+    level:
+        org:
+            springframework:
+                security: DEBUG
 custom:
     client:
-        origins: http://localhost:5173/
+        origins: http://localhost:5173/,http://127.0.0.1:5500/
 
     security:
         oauth2:

@@ -3,6 +3,7 @@ package com.backend.product.controller;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,7 +50,7 @@ public class AdminProductController {
         return service.findAdminDetailById(id);
     }
 
-    @PostMapping()
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ProductDTO create(
             @RequestPart("product") @Valid ProductUpdateReq dto,
             @RequestPart(name = "image", required = false) @Image MultipartFile image) {

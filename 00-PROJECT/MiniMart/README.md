@@ -4,8 +4,8 @@ ocker-compose cho môi trường dev (DB, Redis, RabbitMQ).
 
 # 2. ✅ Checklist Tiến Độ
 
-- Bắt đầu: 10/9/2025
-- Kết thúc: 18/11/2025 
+-   Bắt đầu: 10/9/2025
+-   Kết thúc: 18/11/2025
 
 | Tuần | Công việc chính                                    | Trạng thái |
 | ---- | -------------------------------------------------- | ---------- |
@@ -22,7 +22,7 @@ ocker-compose cho môi trường dev (DB, Redis, RabbitMQ).
 
 ## 1. Giới thiệu
 
-- Dự án Web bán hàng thương mai điện tử. 
+-   Dự án Web bán hàng thương mai điện tử.
 
 ## 1. Mục tiêu
 
@@ -229,18 +229,3 @@ ocker-compose cho môi trường dev (DB, Redis, RabbitMQ).
 ---
 
 ---
-## Dạo tạo online
-
-CN - 4 - 6
-
-- Tối thứ 4: tìm hiểu kĩ phần nào ?
-
-- Transaction: 
-
-- Lỗi phát phải rollack
-
-- Tuần sau reques tfront end dùng angular 
-
-- Luyen interview
-
-- 
