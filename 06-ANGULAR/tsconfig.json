@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "ES6",
+        "module": "ESNext",
+        "strict": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true,
+        "rootDir": "./01-Javascript/web/assets/ts",
+        "outDir": "./01-Javascript/web/assets/js"
+    },
+    "include": [
+        "01-Javascript/web/assets/ts/**/*"
+    ]
+}
