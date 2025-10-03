@@ -1,5 +1,5 @@
 import { Draggable } from './Draggable.js'
-import { TodoAdd, type TodoAddSelectors } from './TodoAdd.js'
+import { TodoAdd as TodoForm, type TodoAddSelectors } from './TodoForm.js'
 import { type TodoListSelector, TodoList } from './TodoList.js'
 
 type Selectors = {
@@ -10,7 +10,8 @@ type Selectors = {
 App({
 	add: {
 		inputSelector: '.todo-add-input',
-		btnSelector: '.todo-add-btn'
+		btnSelector: '.todo-add-btn',
+		msgSelector: '.todo-add-msg'
 	},
 	list: {
 		clearBtnSelector: '.todo-clear-btn',
@@ -31,7 +32,16 @@ const draggableSelector: Parameters<typeof Draggable>[0] = {
 }
 
 function App(selectors: Selectors): void {
-	TodoAdd({ ...selectors.add }, onSubmitAddTodo)
+	TodoForm({ ...selectors.add }, onSubmitAddTodo, validateAddTodo)
+	TodoForm(
+		{
+			btnSelector: '.todo-search-btn',
+			inputSelector: '.todo-search-input',
+			msgSelector: '.todo-search-msg'
+		},
+		onSubmitSearchTodo,
+		() => null
+	)
 	const todoList = TodoList({ ...selectors.list }, onDeleteTodo)
 
 	function onSubmitAddTodo(newContent: string): void {
@@ -46,5 +56,12 @@ function App(selectors: Selectors): void {
 
 	function onDeleteTodo() {
 		Draggable(draggableSelector)
+	}
+
+	function validateAddTodo(text: string): string | null {
+		if (todoList.getTodos().some(todo => todo.getContent() === text)) {
+			return 'todo exsitsed'
+		}
+		return null
 	}
 }

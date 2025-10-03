@@ -50,6 +50,7 @@ export function TodoList(selectors, onDelete) {
     }
     return {
         addTodo,
-        filterTodo
+        filterTodo,
+        getTodos: () => todos
     };
 }

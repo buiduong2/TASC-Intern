@@ -22,17 +22,33 @@
         <div
             class="prose mx-auto bg-white fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow max-w-xl w-full">
             <div class="flex flex-col p-5 gap-5 h-auto max-h-[calc(100vh-4rem)] ">
-                <div class="rounded">
+                <div class="rounded flex flex-col gap-2">
                     <h1>TODO APP</h1>
-                    <form action="" class="flex gap-2">
-                        <input type="search" class="rounded w-full todo-add-input shadow"
-                            placeholder="Add your new Todo">
-                        <button
-                            class=" shadow p-2  w-10 bg-purple-400 flex items-center justify-center text-white font-medium hover:bg-purple-500 transition-colors rounded todo-add-btn"
-                            type="button">
-                            <i class="fa-solid fa-plus"></i>
+                    <form action="">
+                        <div class="flex gap-2">
+                            <input type="search" class="rounded w-full todo-add-input shadow"
+                                placeholder="Add your new Todo">
+                            <button
+                                class=" shadow p-2  w-10 bg-purple-400 flex items-center justify-center text-white font-medium hover:bg-purple-500 transition-colors rounded todo-add-btn"
+                                type="button">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                        <p class="p-0 m-0 text-red-500 todo-add-msg">hello</p>
+                    </form>
+                    <form action="">
+                        <div class="flex gap-2">
+                            <input type="search" class="rounded w-full todo-search-input shadow"
+                                placeholder="Search todo">
+                            <button
+                                class=" shadow p-2  w-10 bg-purple-400 flex items-center justify-center text-white font-medium hover:bg-purple-500 transition-colors rounded todo-search-btn"
+                                type="button">
+                                <i class="fas fa-search"></i>
 
-                        </button>
+
+                            </button>
+                        </div>
+                        <p class="p-0 m-0 text-red-500 todo-search-msg">hello</p>
                     </form>
                 </div>
 

@@ -5,17 +5,14 @@ export function Draggable(selector) {
     const dragItemEles = Array.from(document.querySelectorAll(selector.item.wrapperSelector));
     const handleItemEles = dragItemEles.map(item => item.querySelector(selector.item.handleSelector));
     containerEle.style.position = 'relative';
-    let dragItems = new Array(dragItemEles.length)
-        .fill(null)
-        .map((_, i) => {
-        const ele = dragItemEles[i];
-        const rect = ele.getBoundingClientRect();
+    let dragItems = dragItemEles.map((ele, i) => {
+        const { top, bottom } = getRelativeBounds(ele);
         return {
-            ele: ele,
+            ele,
             handle: handleItemEles[i],
             translateY: 0,
-            relativeTop: rect.top,
-            relativeBottom: rect.top + ele.offsetHeight,
+            relativeTop: top,
+            relativeBottom: bottom,
             idx: i
         };
     });
@@ -37,17 +34,17 @@ export function Draggable(selector) {
         };
         ele.ondragend = e => {
             stopDragging(ele);
-            // setTimeout(() => {
-            // 	commitOrder()
-            // }, 300)
+            setTimeout(() => {
+                commitOrder();
+            }, 300);
         };
         ele.ondrag = e => {
             if (moving) {
                 return;
             }
-            if (e.clientY === 0)
-                return;
-            const cursor = e.clientY;
+            const cursor = getCursorY(e);
+            if (cursor === 0 && e.clientY === 0)
+                return; // bỏ frame rỗng của drag
             if (cursor >= item.relativeTop && cursor <= item.relativeBottom) {
                 return;
             }
@@ -129,10 +126,10 @@ export function Draggable(selector) {
         });
         for (let i = 0; i < dragItems.length; i++) {
             const item = dragItems[i];
-            const rect = item.ele.getBoundingClientRect();
+            const { top, bottom } = getRelativeBounds(item.ele);
             item.idx = i;
-            item.relativeTop = rect.top;
-            item.relativeBottom = rect.top + item.ele.offsetHeight;
+            item.relativeTop = top;
+            item.relativeBottom = bottom;
         }
     }
     function startDragging(ele) {
@@ -142,5 +139,18 @@ export function Draggable(selector) {
     function stopDragging(ele) {
         ele.draggable = false;
         ele.classList.remove('dragging');
+    }
+    function getRelativeBounds(ele) {
+        const containerRect = containerEle.getBoundingClientRect();
+        const eleRect = ele.getBoundingClientRect();
+        const relativeTop = eleRect.top - containerRect.top + containerEle.scrollTop;
+        return {
+            top: relativeTop,
+            bottom: relativeTop + ele.offsetHeight
+        };
+    }
+    function getCursorY(e) {
+        const r = containerEle.getBoundingClientRect();
+        return (e.clientY || 0) - r.top + containerEle.scrollTop;
     }
 }

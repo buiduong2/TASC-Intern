@@ -1,10 +1,11 @@
 import { Draggable } from './Draggable.js';
-import { TodoAdd } from './TodoAdd.js';
+import { TodoAdd as TodoForm } from './TodoForm.js';
 import { TodoList } from './TodoList.js';
 App({
     add: {
         inputSelector: '.todo-add-input',
-        btnSelector: '.todo-add-btn'
+        btnSelector: '.todo-add-btn',
+        msgSelector: '.todo-add-msg'
     },
     list: {
         clearBtnSelector: '.todo-clear-btn',
@@ -22,7 +23,12 @@ const draggableSelector = {
     }
 };
 function App(selectors) {
-    TodoAdd(Object.assign({}, selectors.add), onSubmitAddTodo);
+    TodoForm(Object.assign({}, selectors.add), onSubmitAddTodo, validateAddTodo);
+    TodoForm({
+        btnSelector: '.todo-search-btn',
+        inputSelector: '.todo-search-input',
+        msgSelector: '.todo-search-msg'
+    }, onSubmitSearchTodo, () => null);
     const todoList = TodoList(Object.assign({}, selectors.list), onDeleteTodo);
     function onSubmitAddTodo(newContent) {
         todoList.addTodo(newContent);
@@ -34,5 +40,11 @@ function App(selectors) {
     }
     function onDeleteTodo() {
         Draggable(draggableSelector);
+    }
+    function validateAddTodo(text) {
+        if (todoList.getTodos().some(todo => todo.getContent() === text)) {
+            return 'todo exsitsed';
+        }
+        return null;
     }
 }

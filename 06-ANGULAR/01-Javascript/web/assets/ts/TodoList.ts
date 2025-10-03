@@ -71,6 +71,7 @@ export function TodoList(selectors: TodoListSelector, onDelete: Function) {
 
 	return {
 		addTodo,
-		filterTodo
+		filterTodo,
+		getTodos: () => todos
 	}
 }
