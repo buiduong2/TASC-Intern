@@ -1,4 +1,4 @@
-package com.profile_service.security;
+package com.common.security;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -13,11 +13,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CustomUserDetails implements UserDetails {
+public class InternalHeaderUserDetails implements UserDetails {
     private Collection<? extends GrantedAuthority> authorities;
     private Long id;
 
-    public CustomUserDetails(String id, String roles) {
+    public InternalHeaderUserDetails(String id, String roles) {
         this.id = Long.parseLong(id);
         this.authorities = Arrays.stream(roles.split(","))
                 .map(role -> new SimpleGrantedAuthority(role))

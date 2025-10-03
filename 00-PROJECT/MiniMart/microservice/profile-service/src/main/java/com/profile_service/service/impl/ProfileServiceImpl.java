@@ -3,11 +3,11 @@ package com.profile_service.service.impl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.common.exception.GenericException;
 import com.profile_service.dto.req.ProfileCreateReq;
 import com.profile_service.dto.req.ProfileUpdateReq;
 import com.profile_service.dto.res.ProfileInfo;
 import com.profile_service.exception.ErrorCode;
-import com.profile_service.exception.GenericException;
 import com.profile_service.mapper.ProfileMapper;
 import com.profile_service.model.Profile;
 import com.profile_service.repository.ProfileRepository;

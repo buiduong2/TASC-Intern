@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.common.security.InternalHeaderUserDetails;
 import com.profile_service.dto.req.AddressCreateReq;
 import com.profile_service.dto.res.AddressInfo;
-import com.profile_service.security.CustomUserDetails;
 import com.profile_service.service.AddressService;
 
 import jakarta.validation.Valid;
@@ -26,24 +26,24 @@ public class AddressController {
     private final AddressService service;
 
     @GetMapping("{id}")
-    public AddressInfo getById(@PathVariable long id, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public AddressInfo getById(@PathVariable long id, @AuthenticationPrincipal InternalHeaderUserDetails userDetails) {
         return service.findByIdAndUserId(id, userDetails.getId());
     }
 
     @PostMapping("profile/{profileId}")
     public AddressInfo create(@PathVariable long profileId, @Valid @RequestBody AddressCreateReq req,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal InternalHeaderUserDetails userDetails) {
         return service.create(profileId, req, userDetails.getId());
     }
 
     @PutMapping("{id}")
     public AddressInfo update(@PathVariable long id, @Valid @RequestBody AddressCreateReq req,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal InternalHeaderUserDetails userDetails) {
         return service.update(id, req, userDetails.getId());
     }
 
     @DeleteMapping("{id}")
-    public void delete(@PathVariable long id, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public void delete(@PathVariable long id, @AuthenticationPrincipal InternalHeaderUserDetails userDetails) {
         service.delete(id, userDetails.getId());
     }
 

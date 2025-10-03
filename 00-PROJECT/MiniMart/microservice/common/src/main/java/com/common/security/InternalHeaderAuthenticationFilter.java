@@ -1,4 +1,4 @@
-package com.profile_service.security;
+package com.common.security;
 
 import java.io.IOException;
 
@@ -6,7 +6,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import jakarta.servlet.FilterChain;
@@ -14,7 +13,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@Component
 public class InternalHeaderAuthenticationFilter extends OncePerRequestFilter {
 
     private final String USER_ID_HEADER = "x-user-id";
@@ -30,7 +28,7 @@ public class InternalHeaderAuthenticationFilter extends OncePerRequestFilter {
         String userRoleHeader = request.getHeader(ROLES_HEADER);
 
         if (isUserIdValid(userIdHeader) && isRoleValid(userRoleHeader)) {
-            UserDetails userDetails = new CustomUserDetails(userIdHeader, userRoleHeader);
+            UserDetails userDetails = new InternalHeaderUserDetails(userIdHeader, userRoleHeader);
 
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities());

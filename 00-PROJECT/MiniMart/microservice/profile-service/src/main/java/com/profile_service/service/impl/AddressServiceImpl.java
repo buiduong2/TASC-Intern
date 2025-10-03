@@ -5,10 +5,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.common.exception.GenericException;
 import com.profile_service.dto.req.AddressCreateReq;
 import com.profile_service.dto.res.AddressInfo;
 import com.profile_service.exception.ErrorCode;
-import com.profile_service.exception.GenericException;
 import com.profile_service.mapper.AddressMapper;
 import com.profile_service.model.Address;
 import com.profile_service.model.Profile;

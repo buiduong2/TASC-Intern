@@ -1,4 +1,4 @@
-package com.authentication_service.exception;
+package com.common.exception;
 
 import java.time.LocalDateTime;
 import java.util.List;

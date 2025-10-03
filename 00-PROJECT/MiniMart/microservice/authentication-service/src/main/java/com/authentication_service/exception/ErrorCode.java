@@ -4,10 +4,7 @@ import java.text.MessageFormat;
 
 import org.springframework.http.HttpStatus;
 
-import lombok.Getter;
-
-@Getter
-public enum ErrorCode {
+public enum ErrorCode implements com.common.exception.ErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User with id = {0} not found"),
     ROLE_NAME_NOT_FOUND(HttpStatus.NOT_FOUND, "Role with name = {0} not found"),
 
@@ -24,5 +21,24 @@ public enum ErrorCode {
 
     public String format(Object... args) {
         return MessageFormat.format(template, args);
+    }
+
+    public int getStatus() {
+        return status.value();
+    }
+
+    @Override
+    public String getError() {
+        return status.getReasonPhrase();
+    }
+
+    @Override
+    public String getTemplate() {
+        return this.template;
+    }
+
+    @Override
+    public String getTemplateFormat(Object[] messageArg) {
+        return MessageFormat.format(template, messageArg);
     }
 }
