@@ -42,6 +42,9 @@ function App(selectors) {
         Draggable(draggableSelector);
     }
     function validateAddTodo(text) {
+        if (!text || !text.trim()) {
+            return 'todo must not be null nor empty';
+        }
         if (todoList.getTodos().some(todo => todo.getContent() === text)) {
             return 'todo exsitsed';
         }

@@ -59,6 +59,9 @@ function App(selectors: Selectors): void {
 	}
 
 	function validateAddTodo(text: string): string | null {
+		if (!text || !text.trim()) {
+			return 'todo must not be null nor empty'
+		}
 		if (todoList.getTodos().some(todo => todo.getContent() === text)) {
 			return 'todo exsitsed'
 		}
