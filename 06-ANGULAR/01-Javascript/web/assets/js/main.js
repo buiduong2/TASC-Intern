@@ -1,3 +1,5 @@
+import { Draggable } from './Draggable.js';
+import { TodoAdd } from './TodoAdd.js';
 import { TodoList } from './TodoList.js';
 App({
     add: {
@@ -10,39 +12,27 @@ App({
         listSelector: '.todo-list'
     }
 });
+const draggableSelector = {
+    container: {
+        wrapperSelector: '.drag-wrapper'
+    },
+    item: {
+        handleSelector: '.drag-item-handle',
+        wrapperSelector: '.drag-wrapper > *'
+    }
+};
 function App(selectors) {
     TodoAdd(Object.assign({}, selectors.add), onSubmitAddTodo);
-    const todoList = TodoList(Object.assign({}, selectors.list));
+    const todoList = TodoList(Object.assign({}, selectors.list), onDeleteTodo);
     function onSubmitAddTodo(newContent) {
         todoList.addTodo(newContent);
+        Draggable(draggableSelector);
     }
     function onSubmitSearchTodo(search) {
         todoList.filterTodo(search);
+        Draggable(draggableSelector);
     }
-}
-function TodoAdd(selectors, onSubmit) {
-    let btnEle;
-    let inputEle;
-    //init
-    btnEle = document.querySelector(selectors.btnSelector);
-    inputEle = document.querySelector(selectors.inputSelector);
-    // add Event
-    inputEle.addEventListener('keydown', e => {
-        if (e.key == 'Enter') {
-            e.preventDefault();
-            submit();
-        }
-    });
-    btnEle.onclick = e => {
-        e.preventDefault();
-        submit();
-    };
-    // Function
-    function submit() {
-        const content = inputEle.value.trim();
-        if (content) {
-            onSubmit(content);
-            inputEle.value = '';
-        }
+    function onDeleteTodo() {
+        Draggable(draggableSelector);
     }
 }

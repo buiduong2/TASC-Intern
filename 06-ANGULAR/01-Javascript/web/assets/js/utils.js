@@ -32,3 +32,10 @@ export function runWithEffectAndDelete(ele, deleteFun) {
         deleteFun();
     }, 400);
 }
+export function swap(arr, i, j) {
+    if (i === j)
+        return;
+    const tmp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = tmp;
+}

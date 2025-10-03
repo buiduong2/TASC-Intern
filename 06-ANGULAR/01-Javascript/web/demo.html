@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        body {
+            background-color: aqua;
+        }
+
+        /* Wrapper */
+        div {
+            padding-top: 50px;
+            max-width: 640px;
+            margin: 16px auto;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+        }
+
+        /* “Bảng” */
+        div>ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        /* Hàng */
+        div>ul>li {
+            display: grid;
+            grid-template-columns: 40px 1fr;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-top: 1px solid #e2e8f0;
+            background: #ffffff;
+            transition: background-color .15s, opacity .15s;
+        }
+
+        div>ul>li:first-child {
+            border-top: 0;
+        }
+
+        /* Tay nắm kéo thả */
+        div>ul>li .handle {
+            font-size: 18px;
+            text-align: center;
+            cursor: grab;
+            user-select: none;
+            color: #475569;
+        }
+
+        /* Hiệu ứng hover + zebrа */
+        div>ul>li:hover {
+            background: #f8fafc;
+        }
+
+        div>ul>li:nth-child(odd) {
+            background: #fcfcff;
+        }
+
+        /* Trạng thái đang kéo: gán class .dragging bằng JS khi dragstart/dragend */
+        div>ul>li.dragging {
+            background: #e2e8f0;
+            cursor: grabbing;
+            opacity: 1 !important;
+            /* Đảm bảo độ rõ ràng tuyệt đối */
+        }
+
+        div>ul:has(li.dragging) li {
+            cursor: grabbing;
+        }
+
+        li.dragging {
+            background-color: aqua !important;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div>
+        <ul>
+            <li>
+                <span class="handle">
+                    =
+                </span>
+
+                Item 1
+            </li>
+            <li>
+                <span class="handle">
+                    =
+                </span>
+
+                Item 2
+            </li>
+            <li>
+                <span class="handle">
+                    =
+                </span>
+
+                Item 3
+            </li>
+            <li>
+                <span class="handle">
+                    =
+                </span>
+
+                Item 4
+            </li>
+            <li>
+                <span class="handle">
+                    =
+                </span>
+
+                Item 5
+            </li>
+        </ul>
+    </div>
+
+    <script src="" type="module"></script>
+    <script type="module">
+        import { Draggable } from "./assets/js/Draggable.js"
+        Draggable({
+            item: {
+                wrapperSelector: "li",
+                handleSelector: ".handle",
+            },
+            container: {
+                wrapperSelector: "ul"
+            }
+        })
+
+    </script>
+</body>
+
+</html>

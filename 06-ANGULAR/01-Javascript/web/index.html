@@ -8,6 +8,12 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 
+    <style>
+        .dragging form div div {
+            background-color: aqua !important;
+        }
+    </style>
+
 </head>
 
 <body class="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 ">
@@ -31,7 +37,7 @@
                 </div>
 
 
-                <div class="flex flex-col gap-2 todo-list flex-1 overflow-y-auto">
+                <div class=" todo-list flex-1 overflow-y-auto drag-wrapper">
 
                 </div>
 
@@ -54,9 +60,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <script src="./assets/js/main.js" type="module"></script>
-    <script>
-
-    </script>
 </body>
 
 </html>

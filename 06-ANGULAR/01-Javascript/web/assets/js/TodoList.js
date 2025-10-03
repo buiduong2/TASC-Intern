@@ -1,6 +1,6 @@
-import { TodoItem } from "./TodoItem.js";
-import { runWithEffectAndAdd, runWithEffectAndDelete } from "./utils.js";
-export function TodoList(selectors) {
+import { TodoItem } from './TodoItem.js';
+import { runWithEffectAndAdd, runWithEffectAndDelete } from './utils.js';
+export function TodoList(selectors, onDelete) {
     let count = 0;
     let countEle;
     let ele;
@@ -38,6 +38,7 @@ export function TodoList(selectors) {
     function onItemRemove(id) {
         updateCountByDelta(-1);
         todos = todos.filter(todo => todo.id != id);
+        onDelete();
     }
     function updateCountByDelta(delta) {
         count += delta;

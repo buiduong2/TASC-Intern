@@ -1,21 +1,6 @@
+import { Draggable } from './Draggable.js'
+import { TodoAdd, type TodoAddSelectors } from './TodoAdd.js'
 import { type TodoListSelector, TodoList } from './TodoList.js'
-import {
-	generatedId,
-	runWithEffectAndAdd,
-	runWithEffectAndDelete
-} from './utils.js'
-
-
-
-
-type TodoData = {
-	id: number
-	content: string
-}
-type TodoAddSelectors = {
-	inputSelector: string
-	btnSelector: string
-}
 
 type Selectors = {
 	add: TodoAddSelectors
@@ -34,50 +19,32 @@ App({
 	}
 })
 
+const draggableSelector: Parameters<typeof Draggable>[0] = {
+	container: {
+		wrapperSelector: '.drag-wrapper'
+	},
+
+	item: {
+		handleSelector: '.drag-item-handle',
+		wrapperSelector: '.drag-wrapper > *'
+	}
+}
+
 function App(selectors: Selectors): void {
 	TodoAdd({ ...selectors.add }, onSubmitAddTodo)
-	const todoList = TodoList({ ...selectors.list })
+	const todoList = TodoList({ ...selectors.list }, onDeleteTodo)
 
 	function onSubmitAddTodo(newContent: string): void {
 		todoList.addTodo(newContent)
+		Draggable(draggableSelector)
 	}
 
 	function onSubmitSearchTodo(search: string): void {
 		todoList.filterTodo(search)
-	}
-}
-
-function TodoAdd(
-	selectors: TodoAddSelectors,
-	onSubmit: (value: string) => void
-) {
-	let btnEle: HTMLButtonElement
-	let inputEle: HTMLInputElement
-
-	//init
-	btnEle = document.querySelector(selectors.btnSelector)!
-	inputEle = document.querySelector(selectors.inputSelector)!
-
-	// add Event
-	inputEle.addEventListener('keydown', e => {
-		if (e.key == 'Enter') {
-			e.preventDefault()
-			submit()
-		}
-	})
-
-	btnEle.onclick = e => {
-		e.preventDefault()
-		submit()
+		Draggable(draggableSelector)
 	}
 
-	// Function
-	function submit() {
-		const content = inputEle.value.trim()
-
-		if (content) {
-			onSubmit(content)
-			inputEle.value = ''
-		}
+	function onDeleteTodo() {
+		Draggable(draggableSelector)
 	}
 }

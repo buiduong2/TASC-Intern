@@ -54,3 +54,10 @@ export function runWithEffectAndDelete(ele: HTMLElement, deleteFun: Function) {
 		deleteFun()
 	}, 400)
 }
+
+export function swap<T>(arr: T[], i: number, j: number): void {
+  if (i === j) return
+  const tmp = arr[i]
+  arr[i] = arr[j]
+  arr[j] = tmp
+}

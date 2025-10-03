@@ -1,5 +1,5 @@
-import { type Todo, TodoItem } from "./TodoItem.js"
-import { runWithEffectAndAdd, runWithEffectAndDelete } from "./utils.js"
+import { type Todo, TodoItem } from './TodoItem.js'
+import { runWithEffectAndAdd, runWithEffectAndDelete } from './utils.js'
 
 export type TodoListSelector = {
 	listSelector: string
@@ -7,7 +7,7 @@ export type TodoListSelector = {
 	clearBtnSelector: string
 }
 
-export function TodoList(selectors: TodoListSelector) {
+export function TodoList(selectors: TodoListSelector, onDelete: Function) {
 	let count = 0
 	let countEle: HTMLElement
 	let ele: HTMLElement
@@ -56,6 +56,7 @@ export function TodoList(selectors: TodoListSelector) {
 	function onItemRemove(id: number) {
 		updateCountByDelta(-1)
 		todos = todos.filter(todo => todo.id != id)
+		onDelete()
 	}
 
 	function updateCountByDelta(delta: number) {
