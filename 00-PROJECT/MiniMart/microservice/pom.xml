@@ -22,6 +22,7 @@
         <module>authentication-service</module>
         <module>product-service</module>
         <module>profile-service</module>
+        <module>admin-bff</module>
     </modules>
 
     <dependencyManagement>

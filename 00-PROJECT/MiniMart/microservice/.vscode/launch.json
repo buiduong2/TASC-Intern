@@ -5,7 +5,8 @@
             "name": "ProfileServiceApplication",
             "request": "launch",
             "mainClass": "com.profile_service.ProfileServiceApplication",
-            "projectName": "profile-service"
+            "projectName": "profile-service",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=50956 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=profile-service"
         },
         {
             "type": "java",
@@ -28,7 +29,8 @@
             "name": "EurekaServerApplication",
             "request": "launch",
             "mainClass": "com.eureka_server.EurekaServerApplication",
-            "projectName": "eureka-server"
+            "projectName": "eureka-server",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=52399 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=eureka-server"
         },
         {
             "type": "java",
@@ -46,6 +48,27 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "com.configuration_server.ConfigurationServerApplication",
             "projectName": "configuration-server",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=60565 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=configuration-server"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-ProductServiceApplication<product-service>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.product_service.ProductServiceApplication",
+            "projectName": "product-service",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-AdminBffApplication<admin-bff>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.admin_bff.AdminBffApplication",
+            "projectName": "admin-bff",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
         }

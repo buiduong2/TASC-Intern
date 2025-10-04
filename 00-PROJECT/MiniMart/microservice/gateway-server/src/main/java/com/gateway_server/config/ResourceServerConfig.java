@@ -35,6 +35,7 @@ public class ResourceServerConfig {
                 .pathMatchers("/api/payments/*/ipn").permitAll()
                 .pathMatchers("/api/categories/**").permitAll()
                 .pathMatchers("/api/products/**").permitAll()
+                .pathMatchers("/v1/admin/users").authenticated()
                 .anyExchange().authenticated());
 
         http.cors(cors -> cors.configurationSource(configurationSource));

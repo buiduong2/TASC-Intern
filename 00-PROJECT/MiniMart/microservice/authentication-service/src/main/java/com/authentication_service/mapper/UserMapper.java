@@ -8,7 +8,9 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
 import com.authentication_service.dto.req.RegisterReq;
+import com.authentication_service.dto.res.UserAuthSummary;
 import com.authentication_service.dto.res.UserDTO;
+import com.authentication_service.model.OAuthUser;
 import com.authentication_service.model.Role;
 import com.authentication_service.model.SystemUser;
 import com.authentication_service.model.User;
@@ -32,4 +34,17 @@ public interface UserMapper {
     @Mapping(target = "avatarUrl", ignore = true)
     @Mapping(target = "tokenVersion", ignore = true)
     SystemUser toSystemUser(RegisterReq req);
+
+    @Mapping(target = "userId", source = "id")
+    @Mapping(target = "authSource", expression = "java( toAuthSource(user) )")
+    UserAuthSummary toSummary(User user);
+
+    default String toAuthSource(User user) {
+        if(user instanceof SystemUser) {
+            return SystemUser.AUTH_SOURCE;
+        }else if(user instanceof OAuthUser) {
+            return OAuthUser.AUTH_SOURCE;
+        }
+        return null;
+    }
 }

@@ -1,0 +1,23 @@
+eureka:
+    client:
+        service-url:
+            defaultZone: http://localhost:8070/eureka/
+
+spring:
+    datasource:
+        url: jdbc:postgresql://localhost:5433/minimart-product?createDatabaseIfNotExist=true
+        username: '{cipher}0c35e06f5f24dfe55d9f62e9599249074db2df82fef2be3709c290083efbc252'
+        password: '{cipher}1ca588545d584f480855460d4de9f8bf7faed630797ada8a8ca764f61b26e6e0'
+
+    jpa:
+        show-sql: true
+        properties:
+            hibernate:
+                format_sql: true
+                highlight_sql: true
+        hibernate:
+            ddl-auto: validate
+
+custom:
+    cloudinary:
+        url: '{cipher}a4998be57ec1e96fd06e225d976183a621a1c7e44b2c23a250ce53ea85ef955dd07c91f6f3c943e63582642636aa1688affcf1eef76368ef51c34b5e68e0dd4c1b12bfb6610e42b8dd859178dcb99e48e1bf6207d19fe53a273317a4429d07c5'

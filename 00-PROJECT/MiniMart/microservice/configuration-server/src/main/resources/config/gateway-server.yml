@@ -33,6 +33,20 @@ spring:
                           uri: lb://profile-service
                           predicates:
                               - Path=/api/profiles/**, /api/addresses/**
+                          filters:
+                              - RemoveRequestHeader=Authorization
+
+                        - id: product-service
+                          uri: lb://product-service
+                          predicates:
+                              - Path=/api/products/**, /api/categories/**, /api/tags/**, /api/admin/products/**, /api/admin/categories/**, /api/admin/tags/**
+                          filters:
+                              - RemoveRequestHeader=Authorization
+
+                        - id: admin-bff
+                          uri: lb://admin-bff
+                          predicates: 
+                            - Path=/v1/admin/users
 management:
     endpoint:
         gateway:

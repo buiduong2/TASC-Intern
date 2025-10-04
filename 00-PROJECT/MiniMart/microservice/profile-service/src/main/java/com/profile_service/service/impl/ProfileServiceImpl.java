@@ -1,11 +1,17 @@
 package com.profile_service.service.impl;
 
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.common.exception.GenericException;
 import com.profile_service.dto.req.ProfileCreateReq;
 import com.profile_service.dto.req.ProfileUpdateReq;
+import com.profile_service.dto.res.ProfileDTO;
 import com.profile_service.dto.res.ProfileInfo;
 import com.profile_service.exception.ErrorCode;
 import com.profile_service.mapper.ProfileMapper;
@@ -54,6 +60,13 @@ public class ProfileServiceImpl implements ProfileService {
         mapper.update(profile, req);
         profile = repository.save(profile);
         return mapper.toDTO(profile);
+    }
+
+    @Override
+    public Map<Long, ProfileDTO> getMapByUserIdFromIdIn(List<Long> ids) {
+        return repository.findByIdIn(ids)
+                .stream()
+                .collect(Collectors.toMap(ProfileDTO::getUserId, Function.identity()));
     }
 
 }

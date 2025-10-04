@@ -52,9 +52,10 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests((authorize) -> authorize
                 .requestMatchers("/login").permitAll()
-                .requestMatchers("/api/auth/me").authenticated()
-                .requestMatchers("/api/auth/change-password").authenticated()
-                .requestMatchers("/api/auth/register").permitAll()
+                .requestMatchers("/v1/auth/me").authenticated()
+                .requestMatchers("/v1/auth/change-password").authenticated()
+                .requestMatchers("/v1/auth/register").permitAll()
+                .requestMatchers("/v1/admin/users/**").hasAuthority("ADMIN")
                 .requestMatchers(resourceUrls).permitAll()
                 .anyRequest().authenticated())
                 .cors(c -> c.configurationSource(configurationSource))

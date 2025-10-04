@@ -19,7 +19,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/addresses")
+@RequestMapping("/v1/addresses")
 @RequiredArgsConstructor
 public class AddressController {
 

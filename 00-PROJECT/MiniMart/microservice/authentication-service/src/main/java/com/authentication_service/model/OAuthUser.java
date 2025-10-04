@@ -14,9 +14,11 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@DiscriminatorValue("OAUTH")
+@DiscriminatorValue(OAuthUser.AUTH_SOURCE)
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = { "providerUserId", "provider" }))
 public class OAuthUser extends User {
+
+    public static final String AUTH_SOURCE = "OAUTH";
 
     private String providerUserId;
 

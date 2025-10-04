@@ -10,9 +10,12 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@DiscriminatorValue("SYS")
+@DiscriminatorValue(SystemUser.AUTH_SOURCE)
 @Table(name = "system_users")
 public class SystemUser extends User {
+
+    public static final String AUTH_SOURCE = "SYS";
+
     @Column(nullable = false, unique = true)
     private String username;
 
