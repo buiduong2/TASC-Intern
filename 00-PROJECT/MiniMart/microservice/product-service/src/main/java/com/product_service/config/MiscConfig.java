@@ -1,15 +1,20 @@
 package com.product_service.config;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
-import org.springframework.data.web.config.EnableSpringDataWebSupport.PageSerializationMode;
 import org.springframework.scheduling.annotation.EnableAsync;
+
+import com.cloudinary.Cloudinary;
 
 @Configuration
 @EnableAsync
-@EnableSpringDataWebSupport(pageSerializationMode = PageSerializationMode.VIA_DTO)
-@EnableJpaAuditing
+@EnableConfigurationProperties(RedisConfig.class)
 public class MiscConfig {
 
+    @Bean
+    Cloudinary cloudinary(@Value("${custom.cloudinary.url}") String url) {
+        return new Cloudinary(url);
+    }
 }

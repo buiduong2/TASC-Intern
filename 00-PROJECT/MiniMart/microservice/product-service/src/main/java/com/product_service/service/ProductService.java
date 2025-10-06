@@ -4,22 +4,22 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.product_service.dto.req.ProductUpdateReq;
-import com.product_service.dto.res.ProductDTO;
+import com.product_service.dto.res.ProductSummaryDTO;
 import com.product_service.dto.res.ProductDetailDTO;
 
 public interface ProductService {
 
     ProductDetailDTO findProductDetailById(long id);
 
-    Page<ProductDTO> findByCategoryId(long categoryId, Pageable pageable);
+    Page<ProductSummaryDTO> findByCategoryId(long categoryId, Pageable pageable);
 
-    Page<ProductDTO> findAdminAll(Pageable pageable);
+    Page<ProductSummaryDTO> findAdminAll(Pageable pageable);
 
     ProductDetailDTO findAdminDetailById(long id);
 
-    ProductDTO create(ProductUpdateReq dto);
+    ProductSummaryDTO create(ProductUpdateReq dto);
 
-    ProductDTO update(long productId, ProductUpdateReq dto);
+    ProductSummaryDTO update(long productId, ProductUpdateReq dto);
 
     Long deleteById(long id);
 

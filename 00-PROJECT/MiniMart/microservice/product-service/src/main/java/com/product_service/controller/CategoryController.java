@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.product_service.dto.res.CategoryDTO;
+import com.product_service.dto.res.CategorySummaryDTO;
 import com.product_service.dto.res.CategoryDetailDTO;
 import com.product_service.service.CategoryService;
 
@@ -20,7 +20,7 @@ public class CategoryController {
     private final CategoryService service;
 
     @GetMapping
-    public List<CategoryDTO> findAll() {
+    public List<CategorySummaryDTO> findAll() {
         return service.findAll();
     }
 

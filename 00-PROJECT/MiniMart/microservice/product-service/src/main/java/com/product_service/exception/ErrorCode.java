@@ -5,7 +5,14 @@ import java.text.MessageFormat;
 import org.springframework.http.HttpStatus;
 
 public enum ErrorCode implements com.common.exception.ErrorCode {
-    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "Product with id = {0} not found");
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "Product with id = {0} not found"),
+    CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "Category with id = {0} not found"),
+    TAG_NOT_FOUND(HttpStatus.NOT_FOUND, "Tag with id = {0} not found"),
+    TAG_SOME_NOT_FOUND(HttpStatus.NOT_FOUND, "Some Tags not found"),
+    CATEGORY_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "Category Image with id = {0} not found"),
+    PRODUCT_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "Product Image with id = {0} not found"),
+
+    ;
 
     private final String template;
 

@@ -9,12 +9,12 @@ import com.product_service.dto.req.CategoryFilter;
 import com.product_service.dto.req.CategoryUpdateReq;
 import com.product_service.dto.res.CategoryAdminDTO;
 import com.product_service.dto.res.CategoryAdminDetailDTO;
-import com.product_service.dto.res.CategoryDTO;
+import com.product_service.dto.res.CategorySummaryDTO;
 import com.product_service.dto.res.CategoryDetailDTO;
 
 public interface CategoryService {
 
-    List<CategoryDTO> findAll();
+    List<CategorySummaryDTO> findAll();
 
     CategoryDetailDTO findById(long id);
 

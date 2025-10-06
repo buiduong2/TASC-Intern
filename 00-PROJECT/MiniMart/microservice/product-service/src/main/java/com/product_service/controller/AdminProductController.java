@@ -16,8 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.common.validation.Image;
 import com.product_service.dto.req.ProductUpdateReq;
-import com.product_service.dto.res.ProductDTO;
 import com.product_service.dto.res.ProductDetailDTO;
+import com.product_service.dto.res.ProductSummaryDTO;
 import com.product_service.service.ImageCloudService;
 import com.product_service.service.ProductImageService;
 import com.product_service.service.ProductService;
@@ -29,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/v1/admin/products")
 @RequiredArgsConstructor
 public class AdminProductController {
+
     private final ProductService service;
 
     private final ImageCloudService imageCloudService;
@@ -36,7 +37,7 @@ public class AdminProductController {
     private final ProductImageService productImageService;
 
     @GetMapping
-    public Page<ProductDTO> findAll(
+    public Page<ProductSummaryDTO> findAll(
             @PageableDefault(size = 10) Pageable pageable) {
         return service.findAdminAll(pageable);
     }
@@ -47,11 +48,11 @@ public class AdminProductController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ProductDTO create(
+    public ProductSummaryDTO create(
             @RequestPart("product") @Valid ProductUpdateReq dto,
             @RequestPart(name = "image", required = false) @Image MultipartFile image) {
 
-        ProductDTO result = service.create(dto);
+        ProductSummaryDTO result = service.create(dto);
         if (image != null && !image.isEmpty()) {
             imageCloudService.updateImage(image, result.getId(), ImageCloudService.PRODUCT_PREFIX)
                     .thenAccept(meta -> productImageService.save(meta, result.getId()));
@@ -60,10 +61,10 @@ public class AdminProductController {
     }
 
     @PutMapping("{id}")
-    public ProductDTO update(@PathVariable long productId,
+    public ProductSummaryDTO update(@PathVariable long productId,
             @RequestPart("product") @Valid ProductUpdateReq dto,
             @RequestPart(name = "image", required = false) @Image MultipartFile image) {
-        ProductDTO result = service.update(productId, dto);
+        ProductSummaryDTO result = service.update(productId, dto);
         if (image != null && !image.isEmpty()) {
             imageCloudService.updateImage(image, result.getId(), ImageCloudService.PRODUCT_PREFIX)
                     .thenAccept(meta -> productImageService.save(meta, result.getId()));

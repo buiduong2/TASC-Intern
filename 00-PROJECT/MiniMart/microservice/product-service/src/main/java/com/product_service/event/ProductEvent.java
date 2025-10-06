@@ -1,4 +1,4 @@
-package com.product_service.dto.res;
+package com.product_service.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,7 +7,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class ImageMetaRes {
-    private String publicId;
-    private String url;
+public class ProductEvent {
+
+    private long id;
+    private Action action;
 }

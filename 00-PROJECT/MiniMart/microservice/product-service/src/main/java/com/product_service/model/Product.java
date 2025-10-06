@@ -25,15 +25,23 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
+
+@NamedEntityGraph(name = Product.NamedGraph_DetailDTO, attributeNodes = {
+        @NamedAttributeNode(value = "image"),
+        @NamedAttributeNode(value = "tags")
+})
 
 @Entity
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
 public class Product {
+    public static final String NamedGraph_DetailDTO = "Product.Client.ProductDetailDTO";
 
     @Id
     @GeneratedValue
@@ -62,6 +70,8 @@ public class Product {
     @ManyToOne(fetch = FetchType.LAZY)
     private Category category;
 
+    private int stock;
+
     @CreatedDate
     private LocalDateTime createdAt;
 
@@ -76,6 +86,7 @@ public class Product {
 
     public void addTag(Tag tag) {
         this.tags.add(tag);
+
     }
 
     public void removeTag(Tag tag) {

@@ -7,7 +7,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class ImageMetaRes {
-    private String publicId;
-    private String url;
+public class CategorySummaryDTO {
+    private long id;
+    private String name;
+    private String imageUrl;
 }

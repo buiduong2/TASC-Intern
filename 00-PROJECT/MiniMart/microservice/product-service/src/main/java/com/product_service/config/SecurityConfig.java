@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
+
     @Bean
     InternalHeaderAuthenticationFilter internalHeaderAuthenticationFilter() {
         return new InternalHeaderAuthenticationFilter();
@@ -35,10 +36,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         authorize -> authorize
-                                .requestMatchers("/api/products/**").permitAll()
-                                .requestMatchers("/api/categories/**").permitAll()
-                                .requestMatchers("/api/tags/**").permitAll()
-                                .requestMatchers("/admin/api/**").hasAnyRole("STAFF", "ADMIN")
+                                .requestMatchers("/v1/products/**").permitAll()
+                                .requestMatchers("/v1/categories/**").permitAll()
+                                .requestMatchers("/v1/tags/**").permitAll()
+                                .requestMatchers("/v1/admin/**").hasAnyRole("STAFF", "ADMIN")
                                 .anyRequest().authenticated());
 
         return http.build();
