@@ -38,39 +38,35 @@ public class UserServiceImpl implements UserService {
     private UserService self;
 
     @Override
-    public CompletableFuture<PageResponseDTO<UserSummaryDTO>> getUsers(MultiValueMap<String, String> params) {
+    public PageResponseDTO<UserSummaryDTO> getUsers(MultiValueMap<String, String> params) {
 
-        CompletableFuture<PageResponseDTO<UserAuthDTO>> authFuture = CompletableFuture.supplyAsync(() -> {
-            return authClient.getUsers(params);
-        }, executor);
+        CompletableFuture<PageResponseDTO<UserAuthDTO>> authFuture = CompletableFuture
+                .supplyAsync(() -> authClient.getUsers(params), executor);
 
-        // 2. Chain the subsequent logic (non-blocking until the next I/O)
-        return authFuture.thenCompose(authRes -> {
+        CompletableFuture<PageResponseDTO<UserSummaryDTO>> resultFuture = authFuture.thenCompose(authRes -> {
 
-            // This logic runs on the same thread that completed authFuture.
             List<Long> userIds = authRes.getContent().stream().map(UserAuthDTO::getUserId).toList();
 
             if (userIds.isEmpty()) {
                 return CompletableFuture.completedFuture(PageResponseDTO.empty(authRes));
             }
 
-            // 3. Run Profile and Order Clients concurrently on the feignExecutor
-            // These calls are also Blocking I/O, so they need the Executor.
-            CompletableFuture<Map<Long, ProfileDTO>> profileFuture = CompletableFuture.supplyAsync(() -> {
-                return profileClient.getProfileByIds(userIds);
-            }, executor);
+            CompletableFuture<Map<Long, ProfileDTO>> profileFuture = CompletableFuture
+                    .supplyAsync(() -> profileClient.getProfileByIds(userIds), executor);
 
-            CompletableFuture<Map<Long, Long>> orderFuture = CompletableFuture.supplyAsync(() -> {
-                return orderClient.getUserOrderCountByIds(userIds);
-            }, executor);
+            CompletableFuture<Map<Long, Long>> orderFuture = CompletableFuture
+                    .supplyAsync(() -> orderClient.getUserOrderCountByIds(userIds), executor);
 
-            // 4. Combine results and map DTOs
             return profileFuture.thenCombine(orderFuture, (profiles, orderCounts) -> {
                 List<UserSummaryDTO> summaryContent = userMapper.toSummaryDTO(
-                        authRes.getContent(), profiles, orderCounts);
+                        authRes.getContent(),
+                        profiles,
+                        orderCounts);
                 return PageResponseDTO.from(authRes, summaryContent);
             });
         });
+
+        return resultFuture.join();
     }
 
 }

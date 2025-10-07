@@ -1,7 +1,5 @@
 package com.admin_bff.controller;
 
-import java.util.concurrent.CompletableFuture;
-
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +24,6 @@ public class UserController {
     @SneakyThrows
     public PageResponseDTO<UserSummaryDTO> getUsers(
             @RequestParam MultiValueMap<String, String> params) {
-        return userService.getUsers(params).get();
+        return userService.getUsers(params);
     }
 }

@@ -17,6 +17,8 @@ public interface ProductMapper {
     ProductSummaryDTO toDTO(Product product);
 
     @Mapping(target = "imageUrl", source = "image.url")
+    @Mapping(target = "relates", ignore = true)
+    @Mapping(target = "categoryId", source = "category.id")
     ProductDetailDTO toDetailDTO(Product product);
 
     @ToEntity
@@ -25,4 +27,5 @@ public interface ProductMapper {
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "image", ignore = true)
     Product toEntity(ProductUpdateReq req);
+
 }

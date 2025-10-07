@@ -4,8 +4,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.product_service.dto.req.ProductUpdateReq;
-import com.product_service.dto.res.ProductSummaryDTO;
 import com.product_service.dto.res.ProductDetailDTO;
+import com.product_service.dto.res.ProductSummaryDTO;
 
 public interface ProductService {
 
@@ -23,4 +23,5 @@ public interface ProductService {
 
     Long deleteById(long id);
 
+    ProductDetailDTO findProductDetailByIdWithOutRelate(long id);
 }

@@ -4,15 +4,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.common.exception.GenericException;
+import com.product_service.cache.utils.CacheKeyUtils;
 import com.product_service.dto.req.ProductUpdateReq;
 import com.product_service.dto.res.ProductDetailDTO;
+import com.product_service.dto.res.ProductDetailDTO.ProductRelateDTO;
 import com.product_service.dto.res.ProductSummaryDTO;
 import com.product_service.enums.ProductStatus;
 import com.product_service.event.Action;
@@ -24,6 +30,7 @@ import com.product_service.model.Tag;
 import com.product_service.repository.CategoryRepository;
 import com.product_service.repository.ProductRepository;
 import com.product_service.repository.TagRepository;
+import com.product_service.service.ProductRelateCacheService;
 import com.product_service.service.ProductService;
 
 import lombok.RequiredArgsConstructor;
@@ -42,13 +49,36 @@ public class ProductServiceImpl implements ProductService {
 
     private final ApplicationEventPublisher eventPublisher;
 
+    @Autowired
+    @Lazy
+    private ObjectProvider<ProductService> selfProfProvider;
+
+    private final ProductRelateCacheService relateCacheService;
+
     @Override
     public Page<ProductSummaryDTO> findByCategoryId(long categoryId, Pageable pageable) {
         return repository.findForDTOByCategoryIdAndStatus(categoryId, ProductStatus.ACTIVE, pageable);
     }
 
+    private ProductService self() {
+        ProductService self = selfProfProvider.getIfAvailable();
+        return self == null ? this : self;
+    }
+
     @Override
     public ProductDetailDTO findProductDetailById(long id) {
+
+        ProductDetailDTO dto = self().findProductDetailByIdWithOutRelate(id);
+        List<ProductRelateDTO> relates = relateCacheService.getRandomRelateByProductIdAndCategoryId(id,
+                dto.getCategoryId());
+
+        dto.setRelates(relates);
+        return dto;
+    }
+
+    @Cacheable(cacheNames = CacheKeyUtils.PRODUCT_DETAIL, key = "#id")
+    @Override
+    public ProductDetailDTO findProductDetailByIdWithOutRelate(long id) {
         return repository.findClientDTOByIdAndStatus(id, ProductStatus.ACTIVE)
                 .map(mapper::toDetailDTO)
                 .orElseThrow(() -> new GenericException(ErrorCode.PRODUCT_NOT_FOUND, id));
