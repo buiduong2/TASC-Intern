@@ -1,5 +1,7 @@
 package com.product_service.service.impl;
 
+import java.util.List;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +18,7 @@ import com.product_service.event.TagEvent;
 import com.product_service.exception.ErrorCode;
 import com.product_service.mapper.TagMapper;
 import com.product_service.model.Tag;
+import com.product_service.repository.ProductRepository;
 import com.product_service.repository.TagRepository;
 import com.product_service.service.TagService;
 
@@ -28,6 +31,8 @@ public class TagServiceImpl implements TagService {
     private final TagRepository repository;
     private final TagMapper mapper;
     private final ApplicationEventPublisher eventPublisher;
+
+    private final ProductRepository productRepository;
 
     @Override
     public Page<TagAdminDTO> findAdminAll(TagFilter filter, Pageable pageable) {
@@ -46,10 +51,11 @@ public class TagServiceImpl implements TagService {
     public TagAdminDetailDTO create(TagUpdateReq dto) {
         Tag tag = mapper.toEntity(dto);
         tag = repository.save(tag);
-        eventPublisher.publishEvent(new TagEvent(tag.getId(), Action.CREATED));
+        eventPublisher.publishEvent(new TagEvent(tag.getId(), null, Action.CREATED));
         return mapper.toDetailDTO(tag);
     }
 
+    @Transactional
     @Override
     public TagAdminDetailDTO update(long id, TagUpdateReq dto) {
         Tag tag = repository.findById(id)
@@ -57,7 +63,9 @@ public class TagServiceImpl implements TagService {
 
         mapper.updateEntity(tag, dto);
         repository.save(tag);
-        eventPublisher.publishEvent(new TagEvent(tag.getId(), Action.UPDATED));
+
+        eventPublisher
+                .publishEvent(new TagEvent(tag.getId(), productRepository.findProductIdByTagId(id), Action.UPDATED));
 
         return mapper.toDetailDTO(tag);
     }
@@ -65,9 +73,10 @@ public class TagServiceImpl implements TagService {
     @Transactional
     @Override
     public void delete(long id) {
+        List<Long> productIds = productRepository.findProductIdByTagId(id);
         repository.deleteProductTagByTagId(id);
         repository.deleteById(id);
-        eventPublisher.publishEvent(new TagEvent(id, Action.DELETED));
+        eventPublisher.publishEvent(new TagEvent(id, productIds, Action.DELETED));
     }
 
 }

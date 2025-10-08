@@ -18,8 +18,8 @@ public class ProductDetailDTO {
     private BigDecimal salePrice;
     private BigDecimal compareAtPrice;
     private int stock;
-    private List<TagDTO> tags;
     private long categoryId;
+    private List<TagDTO> tags;
 
     private List<ProductRelateDTO> relates;
 

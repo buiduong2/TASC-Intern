@@ -12,7 +12,8 @@ public enum ErrorCode implements com.common.exception.ErrorCode {
     CATEGORY_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "Category Image with id = {0} not found"),
     PRODUCT_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "Product Image with id = {0} not found"),
 
-    ;
+    //
+    CATEGORY_HAS_PRODUCTS(HttpStatus.CONFLICT, "Cannot delete category {0} because it contains existing products");
 
     private final String template;
 

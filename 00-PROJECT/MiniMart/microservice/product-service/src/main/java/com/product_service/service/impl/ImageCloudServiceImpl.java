@@ -27,9 +27,6 @@ public class ImageCloudServiceImpl implements ImageCloudService {
     private final String PUBLIC_ID = "public_id";
     private final String URL = "url";
 
-    public static final String PRODUCT_PREFIX = "product";
-    public static final String CATEGORY_PREFIX = "category";
-
     private static final String CATEGORY_FOLDER = "/categries/";
     private static final String PRODUCT_FOLDER = "/products/";
 

@@ -39,7 +39,7 @@ spring:
                         - id: product-service
                           uri: lb://product-service
                           predicates:
-                              - Path=/api/products/**, /api/categories/**, /api/tags/**, /api/admin/products/**, /api/admin/categories/**, /api/admin/tags/**
+                              - Path=/v1/products/**, /v1/categories/**, /v1/tags/**, /v1/admin/products/**, /v1/admin/categories/**, /v1/admin/tags/**
                           filters:
                               - RemoveRequestHeader=Authorization
 

@@ -138,7 +138,7 @@
     -   Order Service
     -   Payment Service
 
--   **BFF (Backend for Frontend) & Composition Services**: Khi đọc/tổng hợp dữ liệu
+-   **BFF & Composition Services**: Khi đọc/tổng hợp dữ liệu
 
     -   Customer-BFF
     -   Admin-BFF

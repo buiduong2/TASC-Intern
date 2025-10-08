@@ -1,5 +1,7 @@
 package com.product_service.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -24,4 +26,6 @@ public interface ProductService {
     Long deleteById(long id);
 
     ProductDetailDTO findProductDetailByIdWithOutRelate(long id);
+
+    List<ProductDetailDTO> findProductDetailByIdInWithOutRelateNonCache(List<Long> ids);
 }

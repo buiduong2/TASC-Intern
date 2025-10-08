@@ -29,12 +29,12 @@ public class ResourceServerConfig {
                 .jwtAuthenticationConverter(new ReactiveJwtAuthenticationConverterAdapter(converter))));
 
         http.authorizeExchange(exchanges -> exchanges
-                .pathMatchers("/api/auth/**").permitAll()
+                .pathMatchers("/v1/auth/**").permitAll()
                 .pathMatchers("/login").permitAll()
-                .pathMatchers("/api/payments/*/return").permitAll()
-                .pathMatchers("/api/payments/*/ipn").permitAll()
-                .pathMatchers("/api/categories/**").permitAll()
-                .pathMatchers("/api/products/**").permitAll()
+                .pathMatchers("/v1/payments/*/return").permitAll()
+                .pathMatchers("/v1/payments/*/ipn").permitAll()
+                .pathMatchers("/v1/categories/**").permitAll()
+                .pathMatchers("/v1/products/**").permitAll()
                 .pathMatchers("/v1/admin/users").authenticated()
                 .anyExchange().authenticated());
 

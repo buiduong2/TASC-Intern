@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.common.exception.GenericException;
-import com.product_service.cache.utils.CacheKeyUtils;
 import com.product_service.dto.req.ProductUpdateReq;
 import com.product_service.dto.res.ProductDetailDTO;
 import com.product_service.dto.res.ProductDetailDTO.ProductRelateDTO;
@@ -32,6 +31,7 @@ import com.product_service.repository.ProductRepository;
 import com.product_service.repository.TagRepository;
 import com.product_service.service.ProductRelateCacheService;
 import com.product_service.service.ProductService;
+import com.product_service.utils.CacheUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -76,12 +76,20 @@ public class ProductServiceImpl implements ProductService {
         return dto;
     }
 
-    @Cacheable(cacheNames = CacheKeyUtils.PRODUCT_DETAIL, key = "#id")
+    @Cacheable(cacheNames = CacheUtils.PRODUCT_DETAIL, key = "#id")
     @Override
     public ProductDetailDTO findProductDetailByIdWithOutRelate(long id) {
         return repository.findClientDTOByIdAndStatus(id, ProductStatus.ACTIVE)
                 .map(mapper::toDetailDTO)
                 .orElseThrow(() -> new GenericException(ErrorCode.PRODUCT_NOT_FOUND, id));
+    }
+
+    @Override
+    public List<ProductDetailDTO> findProductDetailByIdInWithOutRelateNonCache(List<Long> ids) {
+        return repository.findClientDTOByIdInAndStatus(ids, ProductStatus.ACTIVE)
+                .stream()
+                .map(mapper::toDetailDTO)
+                .toList();
     }
 
     @Override
@@ -107,10 +115,12 @@ public class ProductServiceImpl implements ProductService {
         }
 
         product.setCategory(categoryRepository.getReferenceById(dto.getCategoryId()));
+
         tags.forEach(product::addTag);
 
+        eventPublisher
+                .publishEvent(new ProductEvent(product.getId(), product.getCategory().getId(), null, Action.CREATED));
         product = repository.save(product);
-        eventPublisher.publishEvent(new ProductEvent(product.getId(), Action.CREATED));
         return mapper.toDTO(product);
     }
 
@@ -119,6 +129,12 @@ public class ProductServiceImpl implements ProductService {
         Product product = repository.findForUpdateById(productId)
                 .orElseThrow(() -> new GenericException(ErrorCode.PRODUCT_NOT_FOUND, productId));
 
+        // Category
+        long oldCategoryId = product.getCategory().getId();
+        if (oldCategoryId != dto.getCategoryId()) {
+            product.setCategory(categoryRepository.getReferenceById(dto.getCategoryId()));
+        }
+        // Tag
         Set<Long> newTagIds = new HashSet<>(dto.getTagIds());
         Set<Tag> oldTags = new HashSet<>(product.getTags());
         Set<Long> requiredTagIds = dto.getTagIds();
@@ -138,7 +154,8 @@ public class ProductServiceImpl implements ProductService {
         toAddTags.forEach(product::addTag);
         product = repository.save(product);
 
-        eventPublisher.publishEvent(new ProductEvent(productId, Action.UPDATED));
+        eventPublisher.publishEvent(
+                new ProductEvent(product.getId(), product.getCategory().getId(), oldCategoryId, Action.UPDATED));
 
         return mapper.toDTO(product);
 
@@ -147,6 +164,13 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Long deleteById(long id) {
         // TODO Auto-generated method stub
+
+        Product product = repository.findById(id)
+                .orElseThrow(() -> new GenericException(ErrorCode.PRODUCT_NOT_FOUND, id));
+
+        Long categoryId = product.getCategory().getId();
+        eventPublisher.publishEvent(
+                new ProductEvent(product.getId(), categoryId, categoryId, Action.DELETED));
         throw new UnsupportedOperationException("Unimplemented method 'deleteById'");
     }
 

@@ -1,5 +1,16 @@
 package com.product_service.config;
 
+import static com.product_service.utils.CacheUtils.CATEGORY_DETAIL;
+import static com.product_service.utils.CacheUtils.CATEGORY_DETAIL_TTL;
+import static com.product_service.utils.CacheUtils.CATEGORY_SUMMARY;
+import static com.product_service.utils.CacheUtils.CATEGORY_SUMMARY_TTL;
+import static com.product_service.utils.CacheUtils.PRODUCT_DETAIL;
+import static com.product_service.utils.CacheUtils.PRODUCT_DETAIL_TTL;
+import static com.product_service.utils.CacheUtils.PRODUCT_ID_BY_CATEGORY;
+import static com.product_service.utils.CacheUtils.PRODUCT_ID_BY_CATEGORY_TTL;
+import static com.product_service.utils.CacheUtils.PRODUCT_RELATE_ID_BY_PRODUCT;
+import static com.product_service.utils.CacheUtils.PRODUCT_RELATE_ID_BY_PRODUCT_TTL;
+
 import java.time.Duration;
 import java.util.Map;
 
@@ -23,7 +34,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
-import com.product_service.cache.utils.CacheKeyUtils;
+import com.product_service.utils.CacheUtils;
 
 @Configuration
 @EnableCaching
@@ -48,12 +59,16 @@ public class CacheConfig {
                 .serializeKeysWith(
                         RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(valueSerializer))
-                .computePrefixWith(CacheKeyUtils.cacheKeyPrefix);
+                .computePrefixWith(CacheUtils.cacheKeyPrefix);
 
         Map<String, RedisCacheConfiguration> singletonMap = Map.of(
-                CacheKeyUtils.PRODUCT_DETAIL, defaultConfig.entryTtl(Duration.ofHours(12)),
-                CacheKeyUtils.PRODUCT_ID_BY_CATEGORY, defaultConfig.entryTtl(Duration.ofDays(1)),
-                CacheKeyUtils.PRODUCT_RELATE_ID_BY_PRODUCT, defaultConfig.entryTtl(Duration.ofDays(1)));
+                PRODUCT_DETAIL, defaultConfig.entryTtl(PRODUCT_DETAIL_TTL),
+                PRODUCT_ID_BY_CATEGORY, defaultConfig.entryTtl(PRODUCT_ID_BY_CATEGORY_TTL),
+                PRODUCT_RELATE_ID_BY_PRODUCT, defaultConfig.entryTtl(PRODUCT_RELATE_ID_BY_PRODUCT_TTL),
+                CATEGORY_SUMMARY, defaultConfig.entryTtl(CATEGORY_SUMMARY_TTL),
+                CATEGORY_DETAIL, defaultConfig.entryTtl(CATEGORY_DETAIL_TTL)
+
+        );
         return RedisCacheManager
                 .builder(RedisCacheWriter.nonLockingRedisCacheWriter(connectionFactory, BatchStrategies.scan(1000)))
                 .cacheDefaults(defaultConfig)

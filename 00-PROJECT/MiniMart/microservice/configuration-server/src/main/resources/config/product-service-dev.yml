@@ -2,6 +2,9 @@ eureka:
     client:
         service-url:
             defaultZone: http://localhost:8070/eureka/
+        enabled: false
+        register-with-eureka: false
+        fetch-registry: false
 
 spring:
     datasource:
@@ -23,5 +26,10 @@ custom:
         url: '{cipher}a4998be57ec1e96fd06e225d976183a621a1c7e44b2c23a250ce53ea85ef955dd07c91f6f3c943e63582642636aa1688affcf1eef76368ef51c34b5e68e0dd4c1b12bfb6610e42b8dd859178dcb99e48e1bf6207d19fe53a273317a4429d07c5'
 
     redis:
-      host-name: localhost
-      port: 6379
+        host-name: localhost
+        port: 6379
+
+    schedule:
+        product:
+            dirty-cache-evict:
+                delay: 30000

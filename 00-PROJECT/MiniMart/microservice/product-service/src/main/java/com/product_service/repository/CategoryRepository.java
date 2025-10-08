@@ -14,14 +14,14 @@ import com.product_service.model.Category;
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     @Query("""
-            SELECT c.id AS id, c.name AS name, i.url AS imageUrl 
+            SELECT new com.product_service.dto.res.CategorySummaryDTO( c.id , c.name , i.url )
             FROM Category AS c LEFT JOIN c.image AS i
             WHERE c.status = ?1
             """)
     List<CategorySummaryDTO> findClientDTOByStatus(ProductStatus status);
 
     @Query("""
-            SELECT c.id AS id, c.name AS name, i.url AS imageUrl , c.description AS description
+            SELECT new com.product_service.dto.res.CategoryDetailDTO ( c.id , c.name , i.url  , c.description )
             FROM Category AS c LEFT JOIN c.image AS i
             WHERE c.id = ?1 AND c.status = ?2
             """)

@@ -10,5 +10,7 @@ import lombok.Setter;
 public class ProductEvent {
 
     private long id;
+    private Long categoryId;
+    private Long oldCategoryId;
     private Action action;
 }

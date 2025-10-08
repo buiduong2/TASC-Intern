@@ -11,8 +11,8 @@ import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import com.product_service.dto.res.ProductSummaryDTO;
 import com.product_service.dto.res.ProductDetailDTO.ProductRelateDTO;
+import com.product_service.dto.res.ProductSummaryDTO;
 import com.product_service.enums.ProductStatus;
 import com.product_service.model.Product;
 
@@ -28,6 +28,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @EntityGraph(value = Product.NamedGraph_DetailDTO, type = EntityGraphType.FETCH)
     Optional<Product> findClientDTOByIdAndStatus(long productId, ProductStatus status);
+
+    @EntityGraph(value = Product.NamedGraph_DetailDTO, type = EntityGraphType.FETCH)
+    List<Product> findClientDTOByIdInAndStatus(List<Long> ids, ProductStatus active);
 
     @Query("""
             FROM Product AS p
@@ -56,5 +59,21 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             FROM Product AS p
             WHERE p.category.id = ?1 AND p.status = ?2
             """)
-    List<Long> findProductIdByCategoryId(long categoryId,ProductStatus status);
+    List<Long> findProductIdByCategoryId(long categoryId, ProductStatus status);
+
+    @Query("""
+            SELECT DISTINCT p.id
+            FROM Product AS p
+            JOIN p.tags AS t
+            WHERE t.id = ?1
+            """)
+    List<Long> findProductIdByTagId(long tagId);
+
+    @Query("""
+            SELECT EXISTS 1
+            FROM Product  AS p
+            WHERE p.category.id = ?1
+            """)
+    boolean existsByCategoryId(long categoryId);
+
 }

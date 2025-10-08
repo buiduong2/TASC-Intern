@@ -39,7 +39,7 @@ public class SecurityConfig {
                                 .requestMatchers("/v1/products/**").permitAll()
                                 .requestMatchers("/v1/categories/**").permitAll()
                                 .requestMatchers("/v1/tags/**").permitAll()
-                                .requestMatchers("/v1/admin/**").hasAnyRole("STAFF", "ADMIN")
+                                .requestMatchers("/v1/admin/**").hasAnyAuthority("STAFF", "ADMIN")
                                 .anyRequest().authenticated());
 
         return http.build();

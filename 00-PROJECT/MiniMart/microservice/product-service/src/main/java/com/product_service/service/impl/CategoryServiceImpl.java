@@ -2,6 +2,7 @@ package com.product_service.service.impl;
 
 import java.util.List;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +23,9 @@ import com.product_service.exception.ErrorCode;
 import com.product_service.mapper.CategoryMapper;
 import com.product_service.model.Category;
 import com.product_service.repository.CategoryRepository;
+import com.product_service.repository.ProductRepository;
 import com.product_service.service.CategoryService;
+import com.product_service.utils.CacheUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,15 +35,19 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository repository;
 
+    private final ProductRepository productRepository;
+
     private final CategoryMapper mapper;
 
     private final ApplicationEventPublisher eventPublisher;
 
+    @Cacheable(cacheNames = CacheUtils.CATEGORY_SUMMARY,key = "'ACTIVE'")
     @Override
     public List<CategorySummaryDTO> findAll() {
         return repository.findClientDTOByStatus(ProductStatus.ACTIVE);
     }
 
+    @Cacheable(cacheNames = CacheUtils.CATEGORY_DETAIL, key = "#id")
     @Override
     public CategoryDetailDTO findById(long id) {
         return repository.findClientDTOByIdAndStatus(id, ProductStatus.ACTIVE)
@@ -82,10 +89,15 @@ public class CategoryServiceImpl implements CategoryService {
         return mapper.toDTO(existed);
     }
 
+    @Transactional
     @Override
     public void deleteById(long id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'deleteById'");
+        if (productRepository.existsByCategoryId(id)) {
+            throw new GenericException(ErrorCode.CATEGORY_HAS_PRODUCTS, id);
+        }
+
+        repository.deleteById(id);
+        eventPublisher.publishEvent(new CategoryEvent(id, Action.DELETED));
     }
 
 }
