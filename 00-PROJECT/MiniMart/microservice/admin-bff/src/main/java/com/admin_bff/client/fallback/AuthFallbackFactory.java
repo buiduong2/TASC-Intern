@@ -21,20 +21,6 @@ public class AuthFallbackFactory implements FallbackFactory<AuthClient> {
         log.error("FALLBACK Kích hoạt: Auth Service không khả dụng: ", cause);
         return new AuthClient() {
 
-            // @Override
-            // public CompletableFuture<PageResponseDTO<UserAuthDTO>> getUsers(Map<String,
-            // ?> params) {
-            // Object pageObject = params.get("page");
-            // Object sizeObject = params.get("size");
-
-            // String pageStr = pageObject != null ? pageObject.toString() : "0";
-            // String sizeStr = sizeObject != null ? sizeObject.toString() : "20";
-
-            // int page = Integer.parseInt(pageStr);
-            // int size = Integer.parseInt(sizeStr);
-            // return CompletableFuture.completedFuture(PageResponseDTO.empty(page, size));
-            // }
-
             @Override
             public PageResponseDTO<UserAuthDTO> getUsers(Map<String, ?> params) {
                 Object pageObject = params.get("page");

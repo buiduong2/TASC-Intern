@@ -13,7 +13,5 @@ import com.admin_bff.dto.res.ProfileDTO;
 public interface ProfileClient {
 
     @PostMapping("/v1/admin/profiles/by-ids")
-    // CompletableFuture<Map<Long, ProfileDTO>> getProfileByIds(@RequestBody
-    // List<Long> ids);
     Map<Long, ProfileDTO> getProfileByIds(@RequestBody List<Long> ids);
 }

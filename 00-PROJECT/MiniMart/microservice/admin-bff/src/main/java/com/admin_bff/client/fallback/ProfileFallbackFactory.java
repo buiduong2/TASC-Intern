@@ -27,12 +27,6 @@ public class ProfileFallbackFactory implements FallbackFactory<ProfileClient> {
                 return Collections.emptyMap();
             }
 
-            // @Override
-            // public CompletableFuture<Map<Long, ProfileDTO>> getProfileByIds(List<Long>
-            // ids) {
-            // return CompletableFuture.completedFuture(Collections.emptyMap());
-            // }
-
         };
     }
 

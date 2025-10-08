@@ -18,7 +18,5 @@ public interface AuthClient {
 
     @Bulkhead(name = "authentication-service")
     @GetMapping("/v1/admin/users/summary")
-    // CompletableFuture<PageResponseDTO<UserAuthDTO>> getUsers(@RequestParam
-    // Map<String, ?> params);
     PageResponseDTO<UserAuthDTO> getUsers(@RequestParam Map<String, ?> params);
 }
