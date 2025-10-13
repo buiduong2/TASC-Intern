@@ -5,8 +5,9 @@ import java.util.List;
 
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import com.common.exception.ErrorDetail;
 import com.common.exception.ValidationErrorResponse;
-import com.common.exception.ValidationErrorResponse.ErrorDetail;
+import com.common.exception.ValidationException;
 
 import jakarta.validation.ConstraintViolationException;
 
@@ -46,6 +47,13 @@ public final class ValidationErrorResponseFactory {
 
             errorDetails.add(errorDetail);
         });
+        return errorResponse;
+    }
+
+    public static ValidationErrorResponse from(ValidationException ex) {
+        ValidationErrorResponse errorResponse = new ValidationErrorResponse();
+        errorResponse.setErrors(ex.getErrors());
+
         return errorResponse;
     }
 }

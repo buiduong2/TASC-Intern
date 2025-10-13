@@ -17,6 +17,8 @@ public @interface EnumValue {
 
     Class<? extends Enum<?>> value();
 
+    String[] exclude() default {};
+
     String message() default "String not match enum";
 
     Class<?>[] groups() default {};

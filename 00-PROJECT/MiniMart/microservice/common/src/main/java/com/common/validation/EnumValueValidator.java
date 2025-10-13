@@ -2,6 +2,8 @@ package com.common.validation;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -13,8 +15,11 @@ public class EnumValueValidator implements ConstraintValidator<EnumValue, String
 
     @Override
     public void initialize(EnumValue constraintAnnotation) {
+        Set<String> excludes = Arrays.stream(constraintAnnotation.exclude()).collect(Collectors.toSet());
+
         this.enumConstants = Arrays.stream(constraintAnnotation.value().getEnumConstants())
                 .map(e -> e.toString())
+                .filter(e -> !excludes.contains(e))
                 .toList();
 
         this.message = "String must be matches " + String.join("|", this.enumConstants);

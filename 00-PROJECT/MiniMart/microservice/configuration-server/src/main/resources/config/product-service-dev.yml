@@ -33,3 +33,12 @@ custom:
         product:
             dirty-cache-evict:
                 delay: 30000
+
+    cache:
+        batch:
+            product-size: 100
+            product-id-by-category-size: 5
+# logging:
+#     level:
+#         org.hibernate.SQL: DEBUG
+#         org.hibernate.orm.jdbc.bind: TRACE

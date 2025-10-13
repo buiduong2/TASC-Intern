@@ -1,0 +1,43 @@
+spring:
+    application:
+        name: inventory-service-test
+
+    # tắt hoàn toàn Spring Cloud khi test
+    cloud:
+        config:
+            enabled: false
+        discovery:
+            enabled: false
+        openfeign:
+            circuitbreaker:
+                enabled: false
+
+    jpa:
+        show-sql: false
+        properties:
+            hibernate:
+                format_sql: true
+                highlight_sql: true
+        hibernate:
+            ddl-auto: create
+
+    datasource:
+        driver-class-name: org.h2.Driver
+        url: jdbc:h2:file:./data/testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
+        username: sa
+        password:
+
+server:
+    port: 0
+
+eureka:
+    client:
+        enabled: false
+        register-with-eureka: false
+        fetch-registry: false
+
+logging:
+    level:
+        root: WARN
+        org.springframework.test: INFO
+        org.hibernate.SQL: DEBUG

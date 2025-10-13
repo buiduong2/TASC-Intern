@@ -15,11 +15,4 @@ public class ValidationErrorResponse {
     private LocalDateTime timestamp = LocalDateTime.now();
     private List<ErrorDetail> errors;
 
-    @Getter
-    @Setter
-    public static class ErrorDetail {
-        private String field;
-        private String message;
-
-    }
 }
