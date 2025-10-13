@@ -11,8 +11,7 @@ import com.product_service.event.Action;
 import com.product_service.event.CategoryEvent;
 import com.product_service.event.ProductEvent;
 import com.product_service.event.TagEvent;
-import com.product_service.utils.CacheEvictor;
-import com.product_service.utils.ProductCacheEvictor;
+import com.product_service.utils.ProductCacheManager;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,9 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CacheListener {
 
-    private final ProductCacheEvictor productCacheEvictor;
-
-    private final CacheEvictor cacheEvictor;
+    private final ProductCacheManager productCacheManager;
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -31,25 +28,13 @@ public class CacheListener {
         long categoryId = event.getCategoryId();
         Action action = event.getAction();
         if (action == Action.CREATED) {
-            return;
-        }
+            productCacheManager.evictProduct(productId, categoryId);
 
-        if (action == Action.DELETED) {
-            cacheEvictor.evictProductDetail(productId);
-            cacheEvictor.evictRelateIdsByProduct(productId);
-            cacheEvictor.evictProductIdByCategory(categoryId);
-            cacheEvictor.evictProductRelateDTO(productId);
             return;
         }
 
         if (action == Action.UPDATED) {
-            cacheEvictor.evictProductDetail(productId);
-
-            cacheEvictor.evictProductRelateDTO(productId);
-            if (event.getCategoryId() != event.getOldCategoryId()) {
-                cacheEvictor.evictProductIdByCategory(categoryId);
-                cacheEvictor.evictRelateIdsByProduct(productId);
-            }
+            productCacheManager.putProductById(productId, categoryId);
         }
 
     }
@@ -58,18 +43,17 @@ public class CacheListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void sendNotificationCategoryChange(CategoryEvent event) {
         Action action = event.getAction();
-        cacheEvictor.evictCategorySummaryList();
         if (action == Action.CREATED) {
             return;
         }
 
         if (action == Action.UPDATED) {
-            cacheEvictor.evictCategoryDetail(event.getId());
+            productCacheManager.putCategoryId(event.getId());
             return;
         }
 
         if (action == Action.DELETED) {
-            cacheEvictor.evictProductIdByCategory(event.getId());
+            productCacheManager.evictCategory(event.getId());
         }
     }
 
@@ -85,7 +69,7 @@ public class CacheListener {
             return;
         }
 
-        productCacheEvictor.addDirtyProductIdByTagChange(productIds);
+        productCacheManager.addDirtyProductIdByTagChange(productIds);
     }
 
 }

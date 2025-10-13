@@ -36,12 +36,17 @@ import lombok.Setter;
         @NamedAttributeNode(value = "tags")
 })
 
+@NamedEntityGraph(name = Product.NamedGraph_SummaryDTO, attributeNodes = {
+        @NamedAttributeNode(value = "image"),
+})
+
 @Entity
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
 public class Product {
     public static final String NamedGraph_DetailDTO = "Product.Client.ProductDetailDTO";
+    public static final String NamedGraph_SummaryDTO = "Product.Client.ProductSummary";
 
     @Id
     @GeneratedValue

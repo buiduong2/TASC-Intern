@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.common.exception.GenericException;
 import com.common.exception.ValidationErrorResponse;
+import com.common.exception.ValidationException;
 import com.common.utils.ErrorResponseFactory;
 import com.common.utils.ValidationErrorResponseFactory;
 
@@ -30,5 +31,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(GenericException.class)
     public ResponseEntity<?> handleGenericException(GenericException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponseFactory.from(ex));
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ValidationErrorResponse> handleValidationException(ValidationException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ValidationErrorResponseFactory.from(ex));
     }
 }

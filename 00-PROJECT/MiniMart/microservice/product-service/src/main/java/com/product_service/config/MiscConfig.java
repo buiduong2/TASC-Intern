@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import com.cloudinary.Cloudinary;
@@ -29,6 +30,19 @@ public class MiscConfig {
         scheduler.setThreadNamePrefix("cache-cleaner-");
         scheduler.initialize();
         return scheduler;
+    }
+
+    @Bean(name = "asyncTaskExecutor")
+    ThreadPoolTaskExecutor asyncTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(0);
+        executor.setMaxPoolSize(5);
+        executor.setQueueCapacity(100);
+        executor.setKeepAliveSeconds(60);
+        executor.setThreadNamePrefix("bg-task-job-");
+        executor.initialize();
+        return executor;
+
     }
 
 }

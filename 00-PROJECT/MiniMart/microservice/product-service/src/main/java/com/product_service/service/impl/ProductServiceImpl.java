@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
@@ -15,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.common.exception.GenericException;
+import com.product_service.dto.req.ProductCheckExistsReq;
 import com.product_service.dto.req.ProductUpdateReq;
+import com.product_service.dto.res.ProductCheckExistsRes;
 import com.product_service.dto.res.ProductDetailDTO;
 import com.product_service.dto.res.ProductDetailDTO.ProductRelateDTO;
 import com.product_service.dto.res.ProductSummaryDTO;
@@ -31,7 +32,7 @@ import com.product_service.repository.ProductRepository;
 import com.product_service.repository.TagRepository;
 import com.product_service.service.ProductRelateCacheService;
 import com.product_service.service.ProductService;
-import com.product_service.utils.CacheUtils;
+import com.product_service.utils.ProductCacheManager;
 
 import lombok.RequiredArgsConstructor;
 
@@ -49,6 +50,8 @@ public class ProductServiceImpl implements ProductService {
 
     private final ApplicationEventPublisher eventPublisher;
 
+    private final ProductCacheManager productCacheManager;
+
     @Autowired
     @Lazy
     private ObjectProvider<ProductService> selfProfProvider;
@@ -60,23 +63,21 @@ public class ProductServiceImpl implements ProductService {
         return repository.findForDTOByCategoryIdAndStatus(categoryId, ProductStatus.ACTIVE, pageable);
     }
 
-    private ProductService self() {
-        ProductService self = selfProfProvider.getIfAvailable();
-        return self == null ? this : self;
-    }
-
     @Override
     public ProductDetailDTO findProductDetailById(long id) {
+        ProductDetailDTO dto = productCacheManager.getProductDetailDTO(id);
+        long relateCount = 5;
+        if (dto == null) {
+            dto = findProductDetailByIdWithOutRelate(id);
+            productCacheManager.putProductDetailDTO(dto);
+        }
 
-        ProductDetailDTO dto = self().findProductDetailByIdWithOutRelate(id);
         List<ProductRelateDTO> relates = relateCacheService.getRandomRelateByProductIdAndCategoryId(id,
-                dto.getCategoryId());
-
+                dto.getCategoryId(), relateCount);
         dto.setRelates(relates);
         return dto;
     }
 
-    @Cacheable(cacheNames = CacheUtils.PRODUCT_DETAIL, key = "#id")
     @Override
     public ProductDetailDTO findProductDetailByIdWithOutRelate(long id) {
         return repository.findClientDTOByIdAndStatus(id, ProductStatus.ACTIVE)
@@ -85,7 +86,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductDetailDTO> findProductDetailByIdInWithOutRelateNonCache(List<Long> ids) {
+    public List<ProductDetailDTO> findProductDetailByIdInWithOutRelate(List<Long> ids) {
         return repository.findClientDTOByIdInAndStatus(ids, ProductStatus.ACTIVE)
                 .stream()
                 .map(mapper::toDetailDTO)
@@ -163,7 +164,6 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Long deleteById(long id) {
-        // TODO Auto-generated method stub
 
         Product product = repository.findById(id)
                 .orElseThrow(() -> new GenericException(ErrorCode.PRODUCT_NOT_FOUND, id));
@@ -172,6 +172,17 @@ public class ProductServiceImpl implements ProductService {
         eventPublisher.publishEvent(
                 new ProductEvent(product.getId(), categoryId, categoryId, Action.DELETED));
         throw new UnsupportedOperationException("Unimplemented method 'deleteById'");
+    }
+
+    @Override
+    public ProductCheckExistsRes validateExistsByIdsForInternal(ProductCheckExistsReq req) {
+        List<Long> existsedProductIds = repository.getProductIdByIdnAndStatusIn(req.getProductIds(),
+                ProductStatus.getTransactableStatuses());
+        Set<Long> requiredIds = new HashSet<>(req.getProductIds());
+
+        requiredIds.removeAll(existsedProductIds);
+
+        return new ProductCheckExistsRes(requiredIds.isEmpty(), requiredIds);
     }
 
 }

@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -21,7 +23,9 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class ImageCloudServiceImpl implements ImageCloudService {
-    private final ThreadPoolTaskExecutor executor;
+    @Autowired
+    @Qualifier("asyncTaskExecutor")
+    private ThreadPoolTaskExecutor executor;
     private final Cloudinary cloudinary;
 
     private final String PUBLIC_ID = "public_id";

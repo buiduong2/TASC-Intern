@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,6 +32,21 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @EntityGraph(value = Product.NamedGraph_DetailDTO, type = EntityGraphType.FETCH)
     List<Product> findClientDTOByIdInAndStatus(List<Long> ids, ProductStatus active);
+
+    // Cache
+    @EntityGraph(value = Product.NamedGraph_SummaryDTO, type = EntityGraphType.FETCH)
+    Slice<Product> findSummaryByStatus(ProductStatus active, Pageable pageable);
+
+    @EntityGraph(value = Product.NamedGraph_SummaryDTO, type = EntityGraphType.FETCH)
+    List<Product> findSummaryByIdInAndStatus(Collection<Long> ids, ProductStatus status);
+
+    @Query("""
+            SELECT p.id, new com.product_service.model.Tag(t.id,t.name)
+            FROM Product AS p
+            JOIN p.tags AS t
+            WHERE p.id IN ?1
+            """)
+    List<Object[]> getTagsByIdIn(List<Long> ids);
 
     @Query("""
             FROM Product AS p
@@ -75,5 +91,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             WHERE p.category.id = ?1
             """)
     boolean existsByCategoryId(long categoryId);
+
+    @Query("""
+            SELECT p.id
+            FROM Product AS p
+            WHERE
+                p.id IN ?1 AND p.status IN ?2
+            """)
+    List<Long> getProductIdByIdnAndStatusIn(List<Long> productIds, Collection<ProductStatus> status);
 
 }

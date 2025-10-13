@@ -1,5 +1,7 @@
 package com.product_service.mapper;
 
+import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -7,6 +9,7 @@ import org.mapstruct.MappingConstants;
 import com.common.mapper.ToEntity;
 import com.product_service.dto.req.ProductUpdateReq;
 import com.product_service.dto.res.ProductDetailDTO;
+import com.product_service.dto.res.ProductDetailDTO.ProductRelateDTO;
 import com.product_service.dto.res.ProductSummaryDTO;
 import com.product_service.model.Product;
 
@@ -20,6 +23,13 @@ public interface ProductMapper {
     @Mapping(target = "relates", ignore = true)
     @Mapping(target = "categoryId", source = "category.id")
     ProductDetailDTO toDetailDTO(Product product);
+
+    List<ProductDetailDTO> toDetailDTOs(List<Product> products);
+
+    @Mapping(target = "imageUrl", source = "image.url")
+    ProductRelateDTO toRelateDTO(Product product);
+
+    List<ProductRelateDTO> toRelateDTOs(List<Product> products);
 
     @ToEntity
     @Mapping(target = "stock", ignore = true)

@@ -26,4 +26,11 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
             WHERE c.id = ?1 AND c.status = ?2
             """)
     Optional<CategoryDetailDTO> findClientDTOByIdAndStatus(long id, ProductStatus status);
+
+    @Query("""
+            SELECT c.id
+            FROM Category AS c
+            WHERE c.status = ?1
+            """)
+    List<Long> getIdByStatus(ProductStatus status);
 }

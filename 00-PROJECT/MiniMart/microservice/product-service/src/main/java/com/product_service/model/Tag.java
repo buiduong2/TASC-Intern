@@ -17,12 +17,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor
 public class Tag {
     @Id
     @GeneratedValue
@@ -46,6 +48,11 @@ public class Tag {
 
     @LastModifiedBy
     private Long updatedById;
+
+    public Tag(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
     @Override
     public final boolean equals(Object o) {
