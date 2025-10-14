@@ -23,6 +23,7 @@
         <module>product-service</module>
         <module>profile-service</module>
         <module>inventory-service</module>
+        <module>order-service</module>
         <module>admin-bff</module>
     </modules>
 
