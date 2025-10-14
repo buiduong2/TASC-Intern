@@ -22,8 +22,9 @@ public enum ErrorCode implements com.common.exception.ErrorCode {
 
     PRODUCTS_NOT_FOUND(HttpStatus.NOT_FOUND, "Some product not found"),
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "Product with id = {0} not found"),
-    
-    
+
+    PURCHASE_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "Purchase Item with id = {0} not found"),
+
     ;
 
     private final String template;

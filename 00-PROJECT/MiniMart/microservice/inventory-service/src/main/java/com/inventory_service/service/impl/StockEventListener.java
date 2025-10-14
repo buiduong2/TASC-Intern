@@ -1,22 +1,23 @@
 package com.inventory_service.service.impl;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+import com.common.event.DomainEvent;
+import com.inventory_service.enums.PurchaseStatus;
 import com.inventory_service.event.OrderCompletedEvent;
 import com.inventory_service.event.PurchaseActiveEvent;
-import com.inventory_service.event.PurchaseArchivedEvent;
 import com.inventory_service.event.PurchaseAddedItemEvent;
+import com.inventory_service.event.PurchaseArchivedEvent;
+import com.inventory_service.event.PurchaseItemDeleteEvent;
+import com.inventory_service.event.PurchaseItemUpdateEvent;
 import com.inventory_service.model.Purchase;
 import com.inventory_service.model.PurchaseItem;
-import com.inventory_service.model.Stock;
-import com.inventory_service.repository.StockRepository;
+import com.inventory_service.service.StockService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,16 +25,26 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class StockEventListener {
 
-    private final StockRepository stockRepository;
+    private final StockService stockService;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePurchaseConfirmed(PurchaseActiveEvent event) {
-        syncQunatity(toProductIds(event.getEntity()));
+        stockService.syncQuantity(toProductIds(event));
     }
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handlePurchaseArchive(PurchaseArchivedEvent event) {
-        syncQunatity(toProductIds(event.getEntity()));
+        stockService.syncQuantity(toProductIds(event));
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    public void handlePurchaseItemUpdate(PurchaseItemUpdateEvent event) {
+        stockService.syncQuantity(event.getEntity().getProductId());
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    public void handlePurchaseItemDelete(PurchaseItemDeleteEvent event) {
+        stockService.syncQuantity(event.getEntity().getProductId());
     }
 
     @EventListener
@@ -43,34 +54,16 @@ public class StockEventListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePurchaseItemAdded(PurchaseAddedItemEvent event) {
-        syncQunatity(List.of(event.getNewPurchaseItem().getProductId()));
-    }
-
-    private void syncQunatity(List<Long> productIds) {
-        insertIfNotExists(productIds);
-        stockRepository.syncQuantityByProductIdIn(productIds);
-    }
-
-    private List<Long> toProductIds(Purchase purchase) {
-        return purchase.getPurchaseItems().stream().map(PurchaseItem::getProductId).toList();
-    }
-
-    private void insertIfNotExists(List<Long> productIds) {
-        Set<Long> requiredIds = new HashSet<>(productIds);
-        List<Long> eixstedProductIds = stockRepository.getProductIdByProductIdIn(productIds);
-
-        requiredIds.removeAll(eixstedProductIds);
-        if (requiredIds.isEmpty()) {
+        if (event.getEntity().getStatus() == PurchaseStatus.DRAFT) {
             return;
+        } else {
+            throw new RuntimeException("System may not allow add item on Purchase when status does not equal DRAFT");
         }
 
-        List<Stock> stocks = requiredIds.stream().map(productId -> {
-            Stock stock = new Stock();
-            stock.setProductId(productId);
-            return stock;
-        }).toList();
-        stockRepository.saveAll(stocks);
+    }
 
+    private List<Long> toProductIds(DomainEvent<Purchase, Long> event) {
+        return event.getEntity().getPurchaseItems().stream().map(PurchaseItem::getProductId).toList();
     }
 
 }

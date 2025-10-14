@@ -15,4 +15,6 @@ public interface StockAllocationRepository extends JpaRepository<StockAllocation
             WHERE sa.purchaseItem.purchase.id = :purchaseId
             """)
     List<Long> getAllocationPurchaseItemIdByPurchaseId(Long purchaseId);
+
+    boolean existsByPurchaseItemId(long id);
 }

@@ -1,9 +1,9 @@
 package com.inventory_service.controller;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,7 +27,7 @@ public class PurchaseItemController {
     /**
      * Điều chỉnh do nhập liệu sai
      */
-    @PutMapping("{id}")
+    @PatchMapping("{id}")
     public PurchaseItemDTO update(@PathVariable long id, @Valid @RequestBody UpdatePurchaseItemReq req) {
         return service.update(id, req);
     }

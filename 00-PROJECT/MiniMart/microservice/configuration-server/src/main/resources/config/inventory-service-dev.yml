@@ -2,9 +2,9 @@ eureka:
     client:
         service-url:
             defaultZone: http://localhost:8070/eureka/
-        # enabled: false
-        # register-with-eureka: false
-        # fetch-registry: false
+        enabled: false
+        register-with-eureka: false
+        fetch-registry: false
 
 spring:
     datasource:
