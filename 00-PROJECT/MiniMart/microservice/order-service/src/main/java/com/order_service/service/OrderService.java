@@ -15,6 +15,7 @@ import com.order_service.dto.req.OrderUpdateReq;
 import com.order_service.dto.res.OrderAdminDTO;
 import com.order_service.dto.res.OrderDTO;
 import com.order_service.dto.res.OrderDetailDTO;
+import com.order_service.model.Order;
 
 public interface OrderService {
 
@@ -34,16 +35,16 @@ public interface OrderService {
 
     OrderDTO updateStatus(long id, OrderUpdateReq req);
 
-    void processProductValidationPassedEvent(ProductValidationPassedEvent event);
+    Order processProductValidationPassedEvent(ProductValidationPassedEvent event);
 
-    void processProductValidationFailed(ProductValidationFailedEvent event);
+    Order processProductValidationFailed(ProductValidationFailedEvent event);
 
-    void processInventoryReservedConfirmed(InventoryReservedConfirmedEvent event);
+    Order processInventoryReservedConfirmed(InventoryReservedConfirmedEvent event);
 
-    void processInventoryReservationFailed(InventoryReservationFailedEvent event);
+    Order processInventoryReservationFailed(InventoryReservationFailedEvent event);
 
-    void processPaymentRecordCreated(PaymentRecordPreparedEvent event);
+    Order processPaymentRecordCreated(PaymentRecordPreparedEvent event);
 
-    void processInventoryAllocationConfirmed(InventoryAllocationConfirmedEvent event);
+    Order processInventoryAllocationConfirmed(InventoryAllocationConfirmedEvent event);
 
 }

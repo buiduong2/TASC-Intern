@@ -11,24 +11,22 @@ import com.common_kafka.event.sales.order.OrderCreationRequestedEvent;
 import com.common_kafka.event.sales.order.OrderInitialPaymentRequestedEvent;
 import com.common_kafka.event.sales.order.OrderStockAllocationRequestedEvent;
 import com.common_kafka.event.shared.dto.OrderItemData;
-import com.order_service.enums.SagaStepType;
 import com.order_service.model.Order;
 import com.order_service.service.OrderSagaTrackerService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderSagaManager {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    private final OrderSagaTrackerService sagaTrackerService;
+    private final OrderSagaTrackerService trackerService;
 
     public void publishOrderCreationRequestedEvent(Order order) {
-        sagaTrackerService.startStep(order.getId(), SagaStepType.UNIT_PRICE_CONFIRMED);
-        sagaTrackerService.startStep(order.getId(), SagaStepType.STOCK_RESERVED);
-
         kafkaTemplate.send(
                 KafkaTopics.SALES_ORDER_COMMAND,
                 order.getId().toString(),
@@ -41,12 +39,17 @@ public class OrderSagaManager {
                                 .collect(Collectors.toCollection(LinkedHashSet::new))));
     }
 
-    public void publishOrderPriceCommittedEvent(Order order) {
+    public void tryPublishOrderInitialPaymentEventOrCancel(Order order) {
+        checkAndAdvanceOrder(order);
+    }
+
+    public void tryPublishCancellationEvent(Order order) {
+
         checkAndAdvanceOrder(order);
     }
 
     public void checkAndAdvanceOrder(Order order) {
-        Boolean isReady = sagaTrackerService.checkPrePaymentReadiness(order.getId(), order.getUserId());
+        Boolean isReady = trackerService.checkPrePaymentReadinessOrCancelReadiness(order.getId(), order.getUserId());
         if (Boolean.TRUE.equals(isReady)) {
             publishOrderInitialPaymentRequestedEvent(order);
         } else if (Boolean.FALSE.equals(isReady)) {
@@ -56,6 +59,9 @@ public class OrderSagaManager {
     }
 
     private void publishOrderInitialPaymentRequestedEvent(Order order) {
+        log.info("[SAGA][OrderId={}][ACTION=publishPaymentRequested] ✅ Published OrderInitialPaymentRequestedEvent",
+                order.getId());
+
         OrderInitialPaymentRequestedEvent event = new OrderInitialPaymentRequestedEvent(
                 order.getId(),
                 order.getUserId(),
@@ -69,6 +75,8 @@ public class OrderSagaManager {
     }
 
     private void publishCancellationEvent(Order order) {
+        log.warn("[SAGA][OrderId={}][ACTION=publishCancellation] ❌ Saga canceled", order.getId());
+
         // ... logic tạo và gửi OrderCanceledEvent
     }
 

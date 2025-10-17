@@ -11,11 +11,12 @@ import com.order_service.service.OrderSagaTrackerService;
 import com.order_service.service.OrderService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
-
 @KafkaListener(topics = KafkaTopics.SUPPLY_INVENTORY_ALLOCATION, groupId = "order-inventory-success-group")
+@Slf4j
 public class InventoryAllocationHandler {
 
     private final OrderService orderService;
@@ -24,8 +25,14 @@ public class InventoryAllocationHandler {
 
     @KafkaHandler
     public void handleAllocatioConfirmed(InventoryAllocationConfirmedEvent event) {
-        orderSagaTrackerService.markSuccessStep(event.getOrderId(), SagaStepType.STOCK_FULFILLED);
         orderService.processInventoryAllocationConfirmed(event);
+        orderSagaTrackerService.markSuccessStep(event.getOrderId(), SagaStepType.STOCK_FULFILLED);
+
+        log.info(
+                "[SAGA][OrderId={}][STEP=STOCK_FULFILLED][EVENT=InventoryAllocationConfirmed] ✅ Stock allocation confirmed",
+                event.getOrderId());
+        log.info("[SAGA][OrderId={}] 🎯 Saga completed successfully", event.getOrderId());
+
     }
 
 }

@@ -2,10 +2,10 @@ package com.order_service.service.impl;
 
 import java.math.BigDecimal;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,14 +27,12 @@ import com.order_service.dto.res.OrderDTO;
 import com.order_service.dto.res.OrderDetailDTO;
 import com.order_service.enums.OrderStatus;
 import com.order_service.enums.PaymentStatus;
-import com.order_service.enums.SagaStepType;
+import com.order_service.event.OrderPreparedDomainEvent;
 import com.order_service.exception.OrderEventNotFoundException;
 import com.order_service.mapper.OrderMapper;
 import com.order_service.model.Order;
 import com.order_service.model.OrderItem;
 import com.order_service.repository.OrderRepository;
-import com.order_service.saga.OrderSagaManager;
-import com.order_service.service.OrderSagaTrackerService;
 import com.order_service.service.OrderService;
 
 import lombok.RequiredArgsConstructor;
@@ -47,9 +45,7 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderMapper mapper;
 
-    private final OrderSagaManager sagaManager;
-
-    private final OrderSagaTrackerService sagaTrackerService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public Page<OrderDTO> findPage(Pageable pageable, Long id) {
@@ -72,8 +68,8 @@ public class OrderServiceImpl implements OrderService {
         order.setUserId(userId);
         repository.save(order);
 
-        sagaTrackerService.create(order.getId());
-        sagaManager.publishOrderCreationRequestedEvent(order);
+        eventPublisher.publishEvent(new OrderPreparedDomainEvent(order));
+
         return mapper.toClientSummaryDTO(order);
     }
 
@@ -109,11 +105,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional
     @Override
-    public void processProductValidationFailed(ProductValidationFailedEvent event) {
+    public Order processProductValidationFailed(ProductValidationFailedEvent event) {
         long orderId = event.getOrderId();
         long userId = event.getUserId();
 
-        sagaTrackerService.markFailedStep(orderId, SagaStepType.UNIT_PRICE_CONFIRMED, event.getReason());
         Order order = repository.findWithItemsByIdAndUserIdForUpdate(orderId, userId)
                 .orElseThrow(() -> new OrderEventNotFoundException(orderId, userId));
 
@@ -121,26 +116,19 @@ public class OrderServiceImpl implements OrderService {
 
         repository.save(order);
 
-        sagaManager.checkAndAdvanceOrder(order);
+        return order;
     }
 
     @Transactional
-    public void processProductValidationPassedEvent(ProductValidationPassedEvent event) {
+    public Order processProductValidationPassedEvent(ProductValidationPassedEvent event) {
         long orderId = event.getOrderId();
         long userId = event.getUserId();
 
         Order order = repository.findWithItemsByIdAndUserIdForUpdate(orderId, userId)
                 .orElseThrow(() -> new OrderEventNotFoundException(orderId, userId));
 
-        commitPriceAndItems(order, event.getValidatedItems());
-
-        sagaTrackerService.markSuccessStep(orderId, SagaStepType.UNIT_PRICE_CONFIRMED);
-
-        sagaManager.publishOrderPriceCommittedEvent(order);
-    }
-
-    private void commitPriceAndItems(Order order, Set<ValidatedItemSnapshot> validatedItems) {
-        Map<Long, ValidatedItemSnapshot> mapUnitPriceByProductId = validatedItems.stream()
+        Map<Long, ValidatedItemSnapshot> mapUnitPriceByProductId = event.getValidatedItems()
+                .stream()
                 .collect(Collectors.toMap(ValidatedItemSnapshot::getProductId, Function.identity()));
 
         BigDecimal total = BigDecimal.ZERO;
@@ -158,26 +146,25 @@ public class OrderServiceImpl implements OrderService {
 
         order.setTotal(total);
         repository.save(order);
-
+        return order;
     }
 
     @Transactional
     @Override
-    public void processInventoryReservedConfirmed(InventoryReservedConfirmedEvent event) {
+    public Order processInventoryReservedConfirmed(InventoryReservedConfirmedEvent event) {
         long orderId = event.getOrderId();
         long userId = event.getUserId();
 
         Order order = repository.findById(orderId)
                 .orElseThrow(() -> new OrderEventNotFoundException(orderId, userId));
 
-        sagaTrackerService.markSuccessStep(orderId, SagaStepType.STOCK_RESERVED);
-        sagaManager.checkAndAdvanceOrder(order);
+        return order;
 
     }
 
     @Transactional
     @Override
-    public void processInventoryReservationFailed(InventoryReservationFailedEvent event) {
+    public Order processInventoryReservationFailed(InventoryReservationFailedEvent event) {
         long orderId = event.getOrderId();
         long userId = event.getUserId();
         Order order = repository.findById(orderId)
@@ -187,11 +174,11 @@ public class OrderServiceImpl implements OrderService {
 
         repository.save(order);
 
-        sagaManager.checkAndAdvanceOrder(order);
+        return order;
     }
 
     @Override
-    public void processPaymentRecordCreated(PaymentRecordPreparedEvent event) {
+    public Order processPaymentRecordCreated(PaymentRecordPreparedEvent event) {
         long userId = event.getUserId();
         long orderId = event.getOrderId();
         long paymentId = event.getPaymentId();
@@ -204,16 +191,16 @@ public class OrderServiceImpl implements OrderService {
             order.setStatus(OrderStatus.CONFIRMED);
             order.setPaymentStatus(PaymentStatus.PENDING);
             order.setPaymentId(paymentId);
-
-            sagaManager.publishOrderStockAllocationRequestedEvent(order);
         } else {
             throw new IllegalStateException("Order total Amount has changed");
         }
+
+        return order;
     }
 
     @Transactional
     @Override
-    public void processInventoryAllocationConfirmed(InventoryAllocationConfirmedEvent event) {
+    public Order processInventoryAllocationConfirmed(InventoryAllocationConfirmedEvent event) {
 
         long userId = event.getUserId();
         long orderId = event.getOrderId();
@@ -234,6 +221,7 @@ public class OrderServiceImpl implements OrderService {
 
         }
 
+        return order;
     }
 
 }

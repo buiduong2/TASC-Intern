@@ -8,31 +8,47 @@ import com.common_kafka.config.KafkaTopics;
 import com.common_kafka.event.catalog.product.ProductValidationFailedEvent;
 import com.common_kafka.event.catalog.product.ProductValidationPassedEvent;
 import com.order_service.enums.SagaStepType;
+import com.order_service.model.Order;
+import com.order_service.saga.OrderSagaManager;
 import com.order_service.service.OrderSagaTrackerService;
 import com.order_service.service.OrderService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
 @KafkaListener(topics = KafkaTopics.CATALOG_PRODUCT_EVENTS, groupId = "order-validation-group")
+@Slf4j
 public class ProductValidationHandler {
 
     private final OrderService orderService;
     private final OrderSagaTrackerService orderSagaTrackerService;
+    private final OrderSagaManager orderSagaManager;
 
     @KafkaHandler
     public void handleValidationPassed(ProductValidationPassedEvent event) {
+        log.info(
+                "[SAGA][OrderId={}][STEP=UNIT_PRICE_CONFIRMED][EVENT=ProductValidationPassed] ✅ Product validated successfully",
+                event.getOrderId());
+        log.info("[SAGA][OrderId={}] Marked step SUCCESS, checking pre-payment readiness...", event.getOrderId());
+
+        Order order = orderService.processProductValidationPassedEvent(event);
         orderSagaTrackerService.markSuccessStep(event.getOrderId(), SagaStepType.UNIT_PRICE_CONFIRMED);
-        orderService.processProductValidationPassedEvent(event);
+        orderSagaManager.tryPublishOrderInitialPaymentEventOrCancel(order);
+
     }
 
     @KafkaHandler
     public void handleValidationFailed(ProductValidationFailedEvent event) {
-        orderSagaTrackerService.markFailedStep(
-                event.getOrderId(),
-                SagaStepType.UNIT_PRICE_CONFIRMED,
+        orderSagaTrackerService.markFailedStep(event.getOrderId(), SagaStepType.UNIT_PRICE_CONFIRMED,
                 event.getReason());
-        orderService.processProductValidationFailed(event);
+        Order order = orderService.processProductValidationFailed(event);
+        orderSagaManager.tryPublishCancellationEvent(order);
+
+        log.warn(
+                "[SAGA][OrderId={}][STEP=UNIT_PRICE_CONFIRMED][EVENT=ProductValidationFailed] ❌ Product validation failed: {}",
+                event.getOrderId(), event.getReason());
+
     }
 }

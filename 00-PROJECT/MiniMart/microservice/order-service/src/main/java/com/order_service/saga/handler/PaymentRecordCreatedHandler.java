@@ -7,21 +7,33 @@ import org.springframework.stereotype.Component;
 import com.common_kafka.config.KafkaTopics;
 import com.common_kafka.event.finance.payment.PaymentRecordPreparedEvent;
 import com.order_service.enums.SagaStepType;
+import com.order_service.model.Order;
+import com.order_service.saga.OrderSagaManager;
 import com.order_service.service.OrderSagaTrackerService;
 import com.order_service.service.OrderService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
 @KafkaListener(topics = KafkaTopics.FINANCE_PAYMENT_EVENTS, groupId = "order-payment-record-group")
+@Slf4j
 public class PaymentRecordCreatedHandler {
     private final OrderService orderService;
     private final OrderSagaTrackerService orderSagaTrackerService;
+    private final OrderSagaManager orderSagaManager;
 
     @KafkaHandler
     public void handlePaymentRecordCreated(PaymentRecordPreparedEvent event) {
-        orderService.processPaymentRecordCreated(event);
+        Order order = orderService.processPaymentRecordCreated(event);
+
         orderSagaTrackerService.startStep(event.getOrderId(), SagaStepType.STOCK_FULFILLED);
+        orderSagaManager.publishOrderStockAllocationRequestedEvent(order);
+
+        log.info("[SAGA][OrderId={}][STEP=PAYMENT_PROCESSED][EVENT=PaymentRecordPrepared] ✅ Payment record prepared",
+                event.getOrderId());
+        log.info("[SAGA][OrderId={}] ▶️ Published OrderStockAllocationRequestedEvent", event.getOrderId());
+
     }
 }

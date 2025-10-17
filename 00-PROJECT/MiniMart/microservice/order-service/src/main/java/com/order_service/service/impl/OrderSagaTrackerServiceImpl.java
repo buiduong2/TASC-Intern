@@ -24,7 +24,7 @@ public class OrderSagaTrackerServiceImpl implements OrderSagaTrackerService {
 
         orderSagaProgress.setOrderId(orderId);
 
-        orderSagaProgress.setUnitPriceConfirmed(SagaStepStatus.PENDING);
+        orderSagaProgress.setUnitPriceConfirmed(SagaStepStatus.NOT_STARTED);
         orderSagaProgress.setStockReserved(SagaStepStatus.NOT_STARTED);
         orderSagaProgress.setPaymentProcessed(SagaStepStatus.NOT_STARTED);
         orderSagaProgress.setStockFulfilled(SagaStepStatus.NOT_STARTED);
@@ -34,7 +34,6 @@ public class OrderSagaTrackerServiceImpl implements OrderSagaTrackerService {
         repository.save(orderSagaProgress);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void startStep(long orderId, SagaStepType stepType) {
         switch (stepType) {
@@ -46,7 +45,6 @@ public class OrderSagaTrackerServiceImpl implements OrderSagaTrackerService {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void completeStep(long orderId, SagaStepType stepType, boolean success, String reason) {
         if (success) {
@@ -103,7 +101,7 @@ public class OrderSagaTrackerServiceImpl implements OrderSagaTrackerService {
 
     @Transactional
     @Override
-    public Boolean checkPrePaymentReadiness(Long orderId, long userId) {
+    public Boolean checkPrePaymentReadinessOrCancelReadiness(Long orderId, long userId) {
         OrderSagaTracker ops = repository.findByOrderIdForUpdate(orderId)
                 .orElseThrow(() -> new IllegalStateException("OrderSagaProgress not found for orderId=" + orderId));
 
