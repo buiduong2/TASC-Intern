@@ -14,12 +14,15 @@ import org.springframework.transaction.annotation.Transactional;
 import com.common.exception.GenericException;
 import com.common_kafka.event.sales.order.OrderCreationRequestedEvent;
 import com.common_kafka.event.shared.dto.OrderItemData;
+import com.common_kafka.event.shared.helper.SagaResultUtils;
+import com.common_kafka.event.shared.res.SagaResult;
 import com.product_service.dto.req.ProductCheckExistsReq;
 import com.product_service.dto.req.ProductUpdateReq;
 import com.product_service.dto.res.ProductCheckExistsRes;
 import com.product_service.dto.res.ProductDetailDTO;
 import com.product_service.dto.res.ProductDetailDTO.ProductRelateDTO;
 import com.product_service.dto.res.ProductSummaryDTO;
+import com.product_service.dto.res.ProductValidationResult;
 import com.product_service.enums.ProductStatus;
 import com.product_service.event.Action;
 import com.product_service.event.ProductEvent;
@@ -30,7 +33,6 @@ import com.product_service.model.Tag;
 import com.product_service.repository.CategoryRepository;
 import com.product_service.repository.ProductRepository;
 import com.product_service.repository.TagRepository;
-import com.product_service.saga.ProductSagaManager;
 import com.product_service.service.ProductRelateCacheService;
 import com.product_service.service.ProductService;
 import com.product_service.utils.ProductCacheManager;
@@ -54,8 +56,6 @@ public class ProductServiceImpl implements ProductService {
     private final ProductCacheManager productCacheManager;
 
     private final ProductRelateCacheService relateCacheService;
-
-    private final ProductSagaManager sagaManager;
 
     @Override
     public Page<ProductSummaryDTO> findByCategoryId(long categoryId, Pageable pageable) {
@@ -185,17 +185,15 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void processOrderCreationRequested(OrderCreationRequestedEvent event) {
-        Set<Long> requestIds = event.getItems().stream().map(OrderItemData::getProductId)
-                .collect(Collectors.toCollection(HashSet::new));
+    public SagaResult<ProductValidationResult> processOrderCreationRequested(OrderCreationRequestedEvent event) {
+        return SagaResultUtils.execute(() -> {
+            Set<Long> requestIds = event.getItems().stream().map(OrderItemData::getProductId)
+                    .collect(Collectors.toCollection(HashSet::new));
 
-        List<Product> products = repository.findByIdInAndStatusIn(requestIds, List.of(ProductStatus.ACTIVE));
-
-        if (products.size() == requestIds.size()) {
-            sagaManager.publishProductValidationPassedEvent(event, products);
-        } else {
-            sagaManager.publishProductValidationFailedEvent(event, products);
-        }
+            List<Product> products = repository.findByIdInAndStatusIn(requestIds, List.of(ProductStatus.ACTIVE));
+            boolean allValid = products.size() == requestIds.size();
+            return ProductValidationResult.of(allValid, products);
+        });
 
     }
 

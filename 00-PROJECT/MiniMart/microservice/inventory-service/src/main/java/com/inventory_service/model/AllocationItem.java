@@ -18,6 +18,8 @@ public class AllocationItem {
 
     private int totalAllocatedQuantity;
 
+    private Long orderItemId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private PurchaseItem purchaseItem;
 

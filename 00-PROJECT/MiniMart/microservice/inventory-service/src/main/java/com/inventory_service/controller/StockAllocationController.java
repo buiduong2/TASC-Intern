@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.inventory_service.dto.req.StockAllocationFilter;
 import com.inventory_service.dto.res.StockAllocationSummaryDTO;
-import com.inventory_service.service.StockAllocationService;
+import com.inventory_service.service.AllocationService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/admin/allocations")
 @RequiredArgsConstructor
 public class StockAllocationController {
-    private final StockAllocationService service;
+    private final AllocationService service;
 
     @GetMapping
     public Page<StockAllocationSummaryDTO> findAll(@Valid StockAllocationFilter filter,

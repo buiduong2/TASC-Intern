@@ -30,6 +30,8 @@ public class Payment {
     @Column(unique = true)
     private Long orderId;
 
+    private Long userId;
+
     @Enumerated(EnumType.STRING)
     private PaymentMethod name;
 

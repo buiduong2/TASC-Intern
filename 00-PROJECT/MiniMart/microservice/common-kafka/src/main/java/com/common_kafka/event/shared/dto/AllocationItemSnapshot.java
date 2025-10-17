@@ -2,15 +2,15 @@ package com.common_kafka.event.shared.dto;
 
 import java.math.BigDecimal;
 
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
 @EqualsAndHashCode(of = "productId")
+@AllArgsConstructor(staticName = "of")
 public class AllocationItemSnapshot {
-    private long productId;
-    private long quantity;
-    private BigDecimal avgCostPrice;
+    private final long productId;
+    private final long quantity;
+    private final BigDecimal avgCostPrice;
 }

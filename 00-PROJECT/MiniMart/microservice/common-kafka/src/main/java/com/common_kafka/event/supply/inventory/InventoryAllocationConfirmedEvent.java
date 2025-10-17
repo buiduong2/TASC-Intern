@@ -1,6 +1,6 @@
 package com.common_kafka.event.supply.inventory;
 
-import java.util.Set;
+import java.util.Collection;
 
 import com.common_kafka.event.shared.AbstractSagaEvent;
 import com.common_kafka.event.shared.dto.AllocationItemSnapshot;
@@ -14,10 +14,14 @@ import lombok.Setter;
 @NoArgsConstructor
 public class InventoryAllocationConfirmedEvent extends AbstractSagaEvent {
     private Long allocationId;
-    private Set<AllocationItemSnapshot> allocatedItems;
+    private Collection<AllocationItemSnapshot> allocatedItems;
 
-    public InventoryAllocationConfirmedEvent(long orderId, long userId, Long allocationId,
-            Set<AllocationItemSnapshot> allocatedItems) {
+    public InventoryAllocationConfirmedEvent(
+            long orderId,
+            long userId,
+            Long allocationId,
+            Collection<AllocationItemSnapshot> allocatedItems) {
+
         super(orderId, userId);
         this.allocationId = allocationId;
         this.allocatedItems = allocatedItems;

@@ -9,13 +9,15 @@ import org.springframework.stereotype.Service;
 
 import com.common_kafka.event.catalog.product.ProductValidationPassedEvent;
 import com.common_kafka.event.shared.dto.ValidatedItemSnapshot;
+import com.common_kafka.event.shared.res.SagaResult;
+import com.inventory_service.dto.res.ReservateStockResult;
 import com.inventory_service.enums.AllocationStatus;
+import com.inventory_service.exception.StockReservationException;
 import com.inventory_service.model.Allocation;
 import com.inventory_service.model.OrderReservationLog;
 import com.inventory_service.model.Stock;
 import com.inventory_service.repository.AllocationRepository;
 import com.inventory_service.repository.StockRepository;
-import com.inventory_service.saga.StockSagaManager;
 import com.inventory_service.service.StockService;
 import com.inventory_service.service.StockTransactionService;
 
@@ -30,8 +32,6 @@ public class StockServiceImpl implements StockService {
     private final StockTransactionService transactionService;
 
     private final AllocationRepository allocationRepository;
-
-    private final StockSagaManager sagaManager;
 
     @Override
     public void create(List<Long> productIds) {
@@ -62,7 +62,7 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public void processProductValidationEvent(ProductValidationPassedEvent event) {
+    public SagaResult<ReservateStockResult> processProductValidationEvent(ProductValidationPassedEvent event) {
         long orderId = event.getOrderId();
         long userId = event.getUserId();
 
@@ -76,13 +76,15 @@ public class StockServiceImpl implements StockService {
         try {
             List<OrderReservationLog> logs = new ArrayList<>();
             for (ValidatedItemSnapshot vi : event.getValidatedItems()) {
-                OrderReservationLog log = transactionService.reserveSingleProduct(orderId, userId, vi.getQuantity());
+                OrderReservationLog log = transactionService.reserveSingleProduct(orderId, userId, vi);
                 logs.add(log);
             }
 
-            sagaManager.publishInventoryReservedConfirmedEvent(event, logs, allocation);
+            return SagaResult.success(ReservateStockResult.of(logs, allocation));
+        } catch (StockReservationException e) {
+            return SagaResult.failure(e.getMessage());
         } catch (Exception e) {
-            sagaManager.publishInventoryReservedFailedEvent(event);
+            return SagaResult.failure("Server Error");
         }
 
     }

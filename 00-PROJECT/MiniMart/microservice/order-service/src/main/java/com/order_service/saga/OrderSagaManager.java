@@ -35,7 +35,7 @@ public class OrderSagaManager {
                         order.getUserId(),
                         order.getOrderItems()
                                 .stream()
-                                .map(oi -> new OrderItemData(oi.getProductId(), oi.getQuantity()))
+                                .map(oi -> new OrderItemData(oi.getId(), oi.getProductId(), oi.getQuantity()))
                                 .collect(Collectors.toCollection(LinkedHashSet::new))));
     }
 
@@ -84,7 +84,12 @@ public class OrderSagaManager {
 
         OrderStockAllocationRequestedEvent event = new OrderStockAllocationRequestedEvent(
                 order.getId(),
-                order.getUserId());
+                order.getUserId(),
+                order.getOrderItems()
+                        .stream()
+                        .map(oi -> new OrderItemData(oi.getId(), oi.getProductId(), oi.getQuantity()))
+                        .collect(Collectors.toCollection(LinkedHashSet::new)));
+
         kafkaTemplate.send(
                 KafkaTopics.SALES_ORDER_COMMAND,
                 String.valueOf(event.getOrderId()),

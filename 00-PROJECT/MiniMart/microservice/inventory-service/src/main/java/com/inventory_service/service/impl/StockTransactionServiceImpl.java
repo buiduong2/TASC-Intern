@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.common_kafka.event.shared.dto.ValidatedItemSnapshot;
 import com.inventory_service.enums.OrderReservationLogStatus;
 import com.inventory_service.exception.ErrorCode;
 import com.inventory_service.exception.StockReservationException;
@@ -24,7 +25,7 @@ public class StockTransactionServiceImpl implements StockTransactionService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
-    public OrderReservationLog reserveSingleProduct(long orderId, long productId, int quantity) {
+    public OrderReservationLog reserveSingleProduct(long orderId, long productId, ValidatedItemSnapshot vi) {
         Stock stock = stockRepository.findByProductIdForUpdate(productId)
                 .orElseThrow(
                         () -> new StockReservationException(
@@ -32,21 +33,23 @@ public class StockTransactionServiceImpl implements StockTransactionService {
                                 productId));
 
         int availableQuantity = stock.getAvaiableQuantity();
+        int requestedQuantity = vi.getQuantity();
 
-        if (availableQuantity < quantity) {
+        if (availableQuantity < requestedQuantity) {
             throw new StockReservationException(
                     ErrorCode.STOCK_RESERVATION_INSUFFICIENT,
                     productId);
         }
 
-        stock.setPendingReservation(stock.getPendingReservation() + quantity);
+        stock.setPendingReservation(stock.getPendingReservation() + requestedQuantity);
         stockRepository.save(stock);
 
         // Log
         OrderReservationLog log = new OrderReservationLog();
         log.setOrderId(orderId);
         log.setProductId(productId);
-        log.setQuantityReserved(quantity);
+        log.setQuantityReserved(requestedQuantity);
+        log.setOrderItemId(vi.getOrderItemId());
         log.setStatus(OrderReservationLogStatus.RESERVED);
         logRepository.save(log);
         return log;

@@ -63,7 +63,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDTO create(OrderCreateReq req, Long userId) {
         Order order = mapper.toEntity(req);
-        order.setStatus(OrderStatus.PENDING_VALIDATION);
+        order.setStatus(OrderStatus.VALIDATING);
         order.setPaymentStatus(PaymentStatus.PREPARING);
         order.setUserId(userId);
         repository.save(order);
@@ -112,7 +112,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = repository.findWithItemsByIdAndUserIdForUpdate(orderId, userId)
                 .orElseThrow(() -> new OrderEventNotFoundException(orderId, userId));
 
-        order.setStatus(OrderStatus.PENDING_COMPENSATION_CREATION);
+        order.setStatus(OrderStatus.COMPENSATING);
 
         repository.save(order);
 
@@ -138,7 +138,7 @@ public class OrderServiceImpl implements OrderService {
             if (vi != null && vi.getQuantity() == orderItem.getQuantity()) {
                 BigDecimal unitPrice = vi.getUnitPrice();
                 orderItem.setUnitPrice(unitPrice);
-                total = total.add(unitPrice);
+                total = total.add(unitPrice.multiply(BigDecimal.valueOf(orderItem.getQuantity())));
             }
         }
 
@@ -158,6 +158,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = repository.findById(orderId)
                 .orElseThrow(() -> new OrderEventNotFoundException(orderId, userId));
 
+        order.setStatus(OrderStatus.VALIDATED);
         return order;
 
     }
@@ -170,7 +171,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = repository.findById(orderId)
                 .orElseThrow(() -> new OrderEventNotFoundException(orderId, userId));
 
-        order.setStatus(OrderStatus.PENDING_COMPENSATION_CREATION);
+        order.setStatus(OrderStatus.COMPENSATING);
 
         repository.save(order);
 
@@ -191,6 +192,8 @@ public class OrderServiceImpl implements OrderService {
             order.setStatus(OrderStatus.CONFIRMED);
             order.setPaymentStatus(PaymentStatus.PENDING);
             order.setPaymentId(paymentId);
+
+            repository.save(order);
         } else {
             throw new IllegalStateException("Order total Amount has changed");
         }
@@ -220,6 +223,7 @@ public class OrderServiceImpl implements OrderService {
             }
 
         }
+        repository.save(order);
 
         return order;
     }

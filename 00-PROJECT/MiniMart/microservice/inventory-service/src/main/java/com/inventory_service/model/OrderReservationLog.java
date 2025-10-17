@@ -24,6 +24,8 @@ public class OrderReservationLog {
 
     private Long orderId;
 
+    private Long orderItemId;
+
     private int quantityReserved;
 
     private OrderReservationLogStatus status;

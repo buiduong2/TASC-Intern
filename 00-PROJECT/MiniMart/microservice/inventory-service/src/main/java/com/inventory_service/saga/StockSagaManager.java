@@ -53,7 +53,7 @@ public class StockSagaManager {
 
     }
 
-    public void publishInventoryReservedFailedEvent(ProductValidationPassedEvent event) {
+    public void publishInventoryReservedFailedEvent(ProductValidationPassedEvent event, String reason) {
 
         Set<FailedItemInfo> failedItems = new HashSet<>();
 
@@ -80,7 +80,7 @@ public class StockSagaManager {
         InventoryReservationFailedEvent failedEvent = new InventoryReservationFailedEvent(
                 event.getOrderId(),
                 event.getUserId(),
-                "Some of stock not item not enough stock",
+                reason,
                 failedItems);
 
         kafkaTemplate.send(

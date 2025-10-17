@@ -37,6 +37,4 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Long>, Custo
             """)
     Optional<Purchase> findWithItemByIdAndLock(long id);
 
-
-    
 }

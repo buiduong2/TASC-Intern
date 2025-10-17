@@ -1,6 +1,8 @@
 package com.inventory_service.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.annotation.CreatedDate;
@@ -8,6 +10,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.inventory_service.enums.AllocationStatus;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -37,7 +40,7 @@ public class Allocation {
 
     private int totalAllocatedQuantity;
 
-    @OneToMany(mappedBy = "allocation")
+    @OneToMany(mappedBy = "allocation", cascade = CascadeType.ALL)
     private List<AllocationItem> allocationItems;
 
     @Enumerated(EnumType.STRING)
@@ -45,4 +48,24 @@ public class Allocation {
 
     @CreatedDate
     private LocalDateTime createdAt;
+
+    public void addAllocationItem(AllocationItem allocationItem) {
+        if (allocationItems == null) {
+            allocationItems = new ArrayList<>();
+        }
+
+        allocationItems.add(allocationItem);
+        allocationItem.setAllocation(this);
+    }
+
+    public void addAllocationItems(Collection<AllocationItem> allocationItems) {
+        if (allocationItems == null) {
+            allocationItems = new ArrayList<>();
+        }
+
+        for (AllocationItem allocationItem : allocationItems) {
+            allocationItems.add(allocationItem);
+            allocationItem.setAllocation(this);
+        }
+    }
 }

@@ -12,6 +12,7 @@ import lombok.Setter;
 @EqualsAndHashCode(of = "productId")
 @AllArgsConstructor
 public class OrderItemData {
+    private Long orderItemId;
     private Long productId;
     private int quantity;
 }

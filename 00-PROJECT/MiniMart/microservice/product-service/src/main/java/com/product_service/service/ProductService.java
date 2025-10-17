@@ -6,11 +6,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.common_kafka.event.sales.order.OrderCreationRequestedEvent;
+import com.common_kafka.event.shared.res.SagaResult;
 import com.product_service.dto.req.ProductCheckExistsReq;
 import com.product_service.dto.req.ProductUpdateReq;
 import com.product_service.dto.res.ProductCheckExistsRes;
 import com.product_service.dto.res.ProductDetailDTO;
 import com.product_service.dto.res.ProductSummaryDTO;
+import com.product_service.dto.res.ProductValidationResult;
 
 public interface ProductService {
 
@@ -34,5 +36,5 @@ public interface ProductService {
 
     ProductCheckExistsRes validateExistsByIdsForInternal(ProductCheckExistsReq req);
 
-    void processOrderCreationRequested(OrderCreationRequestedEvent event);
+    SagaResult<ProductValidationResult> processOrderCreationRequested(OrderCreationRequestedEvent event);
 }
