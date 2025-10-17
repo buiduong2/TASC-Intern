@@ -76,7 +76,7 @@ public class StockServiceImpl implements StockService {
         try {
             List<OrderReservationLog> logs = new ArrayList<>();
             for (ValidatedItemSnapshot vi : event.getValidatedItems()) {
-                OrderReservationLog log = transactionService.reserveSingleProduct(orderId, userId, vi);
+                OrderReservationLog log = transactionService.reserveSingleProduct(orderId, vi);
                 logs.add(log);
             }
 

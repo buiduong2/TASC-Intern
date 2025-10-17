@@ -18,6 +18,7 @@ public class OrderSagaTrackerServiceImpl implements OrderSagaTrackerService {
 
     private final OrderSagaTrackerRepository repository;
 
+    @Transactional
     @Override
     public void create(Long orderId) {
         OrderSagaTracker orderSagaProgress = new OrderSagaTracker();
@@ -34,6 +35,7 @@ public class OrderSagaTrackerServiceImpl implements OrderSagaTrackerService {
         repository.save(orderSagaProgress);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void startStep(long orderId, SagaStepType stepType) {
         switch (stepType) {
@@ -99,7 +101,7 @@ public class OrderSagaTrackerServiceImpl implements OrderSagaTrackerService {
         }
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public Boolean checkPrePaymentReadinessOrCancelReadiness(Long orderId, long userId) {
         OrderSagaTracker ops = repository.findByOrderIdForUpdate(orderId)

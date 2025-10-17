@@ -2,6 +2,7 @@ package com.inventory_service.saga.handler;
 
 import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import com.common_kafka.config.KafkaTopics;
@@ -37,5 +38,11 @@ public class OrderStockAllocationRequestedHandler {
         } else {
             log.warn("[SAGA][InventoryService][OrderId={}] ❌ Allocation failed: {}", orderId, result.getReason());
         }
+    }
+
+    @KafkaHandler(isDefault = true)
+    public void handleOther(Object other, @Header(name = "__TypeId__", required = false) String typeId) {
+        log.info("[KAFKA] Received message ingored , typeId={}", typeId);
+
     }
 }

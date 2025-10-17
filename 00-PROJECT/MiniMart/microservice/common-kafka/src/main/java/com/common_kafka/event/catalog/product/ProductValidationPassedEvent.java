@@ -6,10 +6,12 @@ import com.common_kafka.event.shared.AbstractSagaEvent;
 import com.common_kafka.event.shared.dto.ValidatedItemSnapshot;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class ProductValidationPassedEvent extends AbstractSagaEvent {
 
     private Set<ValidatedItemSnapshot> validatedItems;

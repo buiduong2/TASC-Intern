@@ -5,12 +5,12 @@ import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 @Getter
-@Setter
 @EqualsAndHashCode(of = "productId")
 @AllArgsConstructor
+@NoArgsConstructor
 public class ValidatedItemSnapshot {
     private Long orderItemId;
     private Long productId;

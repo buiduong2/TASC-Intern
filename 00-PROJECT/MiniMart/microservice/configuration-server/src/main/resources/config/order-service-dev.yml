@@ -20,3 +20,8 @@ spring:
                 highlight_sql: true
         hibernate:
             ddl-auto: validate
+
+logging:
+    level:
+        org.apache.kafka.clients: WARN
+        org.springframework.kafka.listener: INFO

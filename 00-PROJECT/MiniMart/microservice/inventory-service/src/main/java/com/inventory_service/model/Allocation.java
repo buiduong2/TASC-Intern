@@ -59,12 +59,12 @@ public class Allocation {
     }
 
     public void addAllocationItems(Collection<AllocationItem> allocationItems) {
-        if (allocationItems == null) {
-            allocationItems = new ArrayList<>();
+        if (this.allocationItems == null) {
+            this.allocationItems = new ArrayList<>();
         }
 
         for (AllocationItem allocationItem : allocationItems) {
-            allocationItems.add(allocationItem);
+            this.allocationItems.add(allocationItem);
             allocationItem.setAllocation(this);
         }
     }

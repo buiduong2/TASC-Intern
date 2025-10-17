@@ -2,6 +2,7 @@ package com.order_service.saga.handler;
 
 import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import com.common_kafka.config.KafkaTopics;
@@ -46,10 +47,16 @@ public class InventoryReservedHandler {
         Order order = orderService.processInventoryReservationFailed(event);
 
         orderSagaManager.tryPublishCancellationEvent(order);
-        
+
         log.warn(
                 "[SAGA][OrderId={}][STEP=STOCK_RESERVED][EVENT=InventoryReservationFailed] ❌ Stock reservation failed: {}",
                 event.getOrderId(), event.getReason());
+
+    }
+
+    @KafkaHandler(isDefault = true)
+    public void handleOther(Object other, @Header(name = "__TypeId__", required = false) String typeId) {
+        log.info("[KAFKA] Received message ingored , typeId={}", typeId);
 
     }
 

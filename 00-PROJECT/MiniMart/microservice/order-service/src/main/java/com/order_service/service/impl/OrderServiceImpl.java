@@ -33,6 +33,7 @@ import com.order_service.mapper.OrderMapper;
 import com.order_service.model.Order;
 import com.order_service.model.OrderItem;
 import com.order_service.repository.OrderRepository;
+import com.order_service.repository.ShippingMethodRepository;
 import com.order_service.service.OrderService;
 
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,8 @@ import lombok.RequiredArgsConstructor;
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository repository;
+
+    private final ShippingMethodRepository shippingMethodRepository;
 
     private final OrderMapper mapper;
 
@@ -66,6 +69,7 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.VALIDATING);
         order.setPaymentStatus(PaymentStatus.PREPARING);
         order.setUserId(userId);
+        order.setShippingMethod(shippingMethodRepository.getReferenceById(req.getShippingMethodId()));
         repository.save(order);
 
         eventPublisher.publishEvent(new OrderPreparedDomainEvent(order));
@@ -185,7 +189,7 @@ public class OrderServiceImpl implements OrderService {
         long paymentId = event.getPaymentId();
         BigDecimal amountToPay = event.getAmountToPay();
 
-        Order order = repository.findById(orderId)
+        Order order = repository.findWithItemsByIdAndUserIdForUpdate(orderId, userId)
                 .orElseThrow(() -> new OrderEventNotFoundException(orderId, userId));
 
         if (order.getTotal().equals(amountToPay)) {

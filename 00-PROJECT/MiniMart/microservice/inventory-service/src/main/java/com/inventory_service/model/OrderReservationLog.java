@@ -3,6 +3,8 @@ package com.inventory_service.model;
 import com.inventory_service.enums.OrderReservationLogStatus;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -12,7 +14,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "product_id", "orer_id" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "product_id", "order_id" }) })
 @Entity
 public class OrderReservationLog {
 
@@ -28,5 +30,6 @@ public class OrderReservationLog {
 
     private int quantityReserved;
 
+    @Enumerated(EnumType.STRING)
     private OrderReservationLogStatus status;
 }

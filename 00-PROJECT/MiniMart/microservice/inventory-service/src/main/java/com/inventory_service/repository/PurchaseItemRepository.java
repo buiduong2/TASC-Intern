@@ -23,9 +23,9 @@ public interface PurchaseItemRepository extends JpaRepository<PurchaseItem, Long
             DELETE FROM PurchaseItem AS pi
             WHERE pi.purchase.id =?1
                 AND pi.quantity = pi.remainingQuantity
-                AND SIZE(pi.stockAllocations) = 0
+                AND SIZE(pi.allocationItems) = 0
             """)
-    int deleteByPurchaseIdAndStockAllocationsIsEmpty(long purchaseId);
+    int deleteByPurchaseIdAndAllocationItemsIsEmpty(long purchaseId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""

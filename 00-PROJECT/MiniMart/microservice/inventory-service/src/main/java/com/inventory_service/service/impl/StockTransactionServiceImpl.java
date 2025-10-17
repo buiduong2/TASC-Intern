@@ -25,7 +25,8 @@ public class StockTransactionServiceImpl implements StockTransactionService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
-    public OrderReservationLog reserveSingleProduct(long orderId, long productId, ValidatedItemSnapshot vi) {
+    public OrderReservationLog reserveSingleProduct(long orderId, ValidatedItemSnapshot vi) {
+        long productId = vi.getProductId();
         Stock stock = stockRepository.findByProductIdForUpdate(productId)
                 .orElseThrow(
                         () -> new StockReservationException(

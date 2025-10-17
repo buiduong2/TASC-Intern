@@ -5,7 +5,7 @@ import com.inventory_service.model.OrderReservationLog;
 
 public interface StockTransactionService {
 
-    OrderReservationLog reserveSingleProduct(long orderId, long productId, ValidatedItemSnapshot vi);
+    OrderReservationLog reserveSingleProduct(long orderId, ValidatedItemSnapshot vi);
 
     void compensateSingleReservation(long orderId, long productId);
 

@@ -84,6 +84,8 @@ public class AllocationServiceImpl implements AllocationService {
         });
     }
 
+    
+
     private List<AllocationItem> allocationForOrder(
             List<PurchaseItem> purchaseItems,
             List<OrderReservationLog> logs) {
