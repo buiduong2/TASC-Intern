@@ -15,7 +15,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,6 +27,9 @@ public class Payment {
     @GeneratedValue
     private Long id;
 
+    @Column(unique = true)
+    private Long orderId;
+
     @Enumerated(EnumType.STRING)
     private PaymentMethod name;
 
@@ -36,16 +38,12 @@ public class Payment {
 
     private LocalDateTime completedAt;
 
-    /** Snap shot */
     @Column(precision = 19, scale = 2)
     private BigDecimal amountTotal;
 
     /** Snapshot */
     @Column(precision = 19, scale = 2)
     private BigDecimal amountPaid = BigDecimal.ZERO;
-
-    @OneToOne(mappedBy = "payment")
-    private Order order;
 
     @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL)
     private List<PaymentTransaction> transactions;

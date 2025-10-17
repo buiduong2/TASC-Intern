@@ -37,5 +37,4 @@ public interface ProductMapper {
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "image", ignore = true)
     Product toEntity(ProductUpdateReq req);
-
 }

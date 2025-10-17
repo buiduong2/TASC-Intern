@@ -15,16 +15,25 @@
 
 
     <modules>
-        <module>common</module>
+        <!-- Infrastructure Services -->
         <module>configuration-server</module>
         <module>eureka-server</module>
         <module>gateway-server</module>
+
+        <!--Base
+        Services  -->
         <module>authentication-service</module>
         <module>product-service</module>
         <module>profile-service</module>
         <module>inventory-service</module>
         <module>order-service</module>
+
+        <!-- Composition Services -->
         <module>admin-bff</module>
+
+        <!-- Common -->
+        <module>common</module>
+        <module>common-kafka</module>
     </modules>
 
     <dependencyManagement>

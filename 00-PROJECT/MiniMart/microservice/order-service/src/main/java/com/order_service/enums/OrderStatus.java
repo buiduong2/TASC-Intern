@@ -1,9 +1,12 @@
 package com.order_service.enums;
 
 public enum OrderStatus {
-    PENDING,
+    PENDING_VALIDATION,
     CONFIRMED,
-    SHIPPED,
+    SHIPPING,
     COMPLETED,
-    CANCELED;
+
+    PENDING_COMPENSATION_CREATION,
+
+    CANCELED,
 }

@@ -20,6 +20,7 @@ import com.order_service.dto.res.OrderDTO;
 import com.order_service.dto.res.OrderDetailDTO;
 import com.order_service.service.OrderService;
 
+import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -44,7 +45,7 @@ public class OrderController {
 
     @PostMapping
     public OrderDTO create(
-            @Validated(FromReqGroup.class) @RequestBody OrderCreateReq req,
+            @Validated({ FromReqGroup.class, Default.class }) @RequestBody OrderCreateReq req,
             @AuthenticationPrincipal InternalHeaderUserDetails userDetail
 
     ) {
@@ -53,7 +54,7 @@ public class OrderController {
 
     @PostMapping("from-cart")
     public OrderDTO createFromCart(
-            @Validated(FromCartGroup.class) @RequestBody OrderCreateReq req,
+            @Validated({ FromCartGroup.class, Default.class }) @RequestBody OrderCreateReq req,
             @AuthenticationPrincipal InternalHeaderUserDetails userDetail) {
         return service.createFromCart(req, userDetail.getId());
     }

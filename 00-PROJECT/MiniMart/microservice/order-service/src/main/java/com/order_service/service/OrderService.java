@@ -3,6 +3,12 @@ package com.order_service.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.common_kafka.event.catalog.product.ProductValidationFailedEvent;
+import com.common_kafka.event.catalog.product.ProductValidationPassedEvent;
+import com.common_kafka.event.finance.payment.PaymentRecordPreparedEvent;
+import com.common_kafka.event.supply.inventory.InventoryAllocationConfirmedEvent;
+import com.common_kafka.event.supply.inventory.InventoryReservationFailedEvent;
+import com.common_kafka.event.supply.inventory.InventoryReservedConfirmedEvent;
 import com.order_service.dto.req.OrderCreateReq;
 import com.order_service.dto.req.OrderFilter;
 import com.order_service.dto.req.OrderUpdateReq;
@@ -14,18 +20,30 @@ public interface OrderService {
 
     Page<OrderDTO> findPage(Pageable pageable, Long id);
 
-    OrderDetailDTO findByIdAndUserId(long id, Long id2);
+    OrderDetailDTO findByIdAndUserId(long id, Long userId);
 
-    OrderDTO create(OrderCreateReq req, Long id);
+    OrderDTO create(OrderCreateReq req, Long userId);
 
-    OrderDTO createFromCart(OrderCreateReq req, Long id);
+    OrderDTO createFromCart(OrderCreateReq req, Long userId);
 
-    void cancel(Long orderId, Long id);
+    void cancel(Long orderId, Long userId);
 
     Page<OrderAdminDTO> findAdminAll(OrderFilter filter, Pageable pageable);
 
     OrderDTO cancelAdmin(long id);
 
     OrderDTO updateStatus(long id, OrderUpdateReq req);
+
+    void processProductValidationPassedEvent(ProductValidationPassedEvent event);
+
+    void processProductValidationFailed(ProductValidationFailedEvent event);
+
+    void processInventoryReservedConfirmed(InventoryReservedConfirmedEvent event);
+
+    void processInventoryReservationFailed(InventoryReservationFailedEvent event);
+
+    void processPaymentRecordCreated(PaymentRecordPreparedEvent event);
+
+    void processInventoryAllocationConfirmed(InventoryAllocationConfirmedEvent event);
 
 }

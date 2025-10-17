@@ -56,6 +56,9 @@ public class ProductCacheScheduler {
 
     private final RedisUtils redisUtils;
 
+    @Value("${custom.cache.enable}")
+    private boolean enableCache;
+
     @Autowired
     @Qualifier("backgroundCacheJobExecutor")
     private Executor cacheExecutor;
@@ -72,11 +75,15 @@ public class ProductCacheScheduler {
 
     @EventListener(ApplicationReadyEvent.class)
     public void onStartupPrewarm() {
+        if (!enableCache) {
+            log.info("[CacheJob] Application started: Skipped warn");
+            return;
+        }
         log.info("[CacheJob] Application started — triggering initial prewarm...");
         prewarmCache();
     }
 
-    @Scheduled(fixedDelayString = "${custom.schedule.product.dirty-cache-evict.delay:300000}")
+    @Scheduled(fixedDelayString = "${custom.cache.schedule.product.dirty-cache-evict.delay:300000}")
     public void processDirtyProductQueue() {
         final String DIRTY_KEY = CacheUtils.getTagDirtyProductIdsKey();
         final int BATCH_SIZE = 50;

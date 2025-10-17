@@ -1,41 +1,47 @@
 package com.inventory_service.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.inventory_service.enums.StockAllocationStatus;
+import com.inventory_service.enums.AllocationStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
-public class StockAllocation {
+@EntityListeners(AuditingEntityListener.class)
+public class Allocation {
 
     @Id
     @GeneratedValue
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private PurchaseItem purchaseItem;
-
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private Long orderId;
 
-    private int allocatedQuantity;
+    @Column(nullable = false)
+    private Long userId;
+
+    private int totalAllocatedQuantity;
+
+    @OneToMany(mappedBy = "allocation")
+    private List<AllocationItem> allocationItems;
 
     @Enumerated(EnumType.STRING)
-    private StockAllocationStatus status;
+    private AllocationStatus status;
 
     @CreatedDate
     private LocalDateTime createdAt;

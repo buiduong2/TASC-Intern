@@ -19,6 +19,7 @@ import lombok.Setter;
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = { "product_id", "order_id" }))
 public class OrderItem {
+    
     @Id
     @GeneratedValue
     private Long id;

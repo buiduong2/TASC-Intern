@@ -15,7 +15,7 @@ public interface PurchaseItemMapper {
     @Mapping(target = "remainingQuantity", source = "quantity")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "purchase", ignore = true)
-    @Mapping(target = "stockAllocations", ignore = true)
+    @Mapping(target = "allocationItems", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     PurchaseItem toEntity(PurchaseItemReq itemReqs);
 

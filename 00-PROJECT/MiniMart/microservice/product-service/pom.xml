@@ -34,6 +34,21 @@
     </properties>
     <dependencies>
 
+        <!-- Common -->
+
+        <dependency>
+            <groupId>com</groupId>
+            <artifactId>common</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com</groupId>
+            <artifactId>common-kafka</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+        <!-- SPring -->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -121,11 +136,6 @@
             <version>2.0.0</version>
         </dependency>
 
-        <dependency>
-            <groupId>com</groupId>
-            <artifactId>common</artifactId>
-            <version>1.0.0</version>
-        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>

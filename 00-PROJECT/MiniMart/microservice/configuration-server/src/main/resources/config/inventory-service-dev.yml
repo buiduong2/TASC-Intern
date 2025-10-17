@@ -19,5 +19,5 @@ spring:
                 format_sql: true
                 highlight_sql: true
         hibernate:
-            ddl-auto: validate
+            ddl-auto: create
 

@@ -44,13 +44,12 @@ import com.inventory_service.enums.PurchaseStatus;
 import com.inventory_service.event.PurchaseActiveEvent;
 import com.inventory_service.mapper.PurchaseItemMapper;
 import com.inventory_service.mapper.PurchaseMapper;
-import com.inventory_service.mapper.PurchaseMapperImpl;
 import com.inventory_service.model.Purchase;
 import com.inventory_service.model.PurchaseItem;
+import com.inventory_service.repository.AllocationItemRepository;
 import com.inventory_service.repository.CustomPurchaseRepositoryImpl;
 import com.inventory_service.repository.PurchaseItemRepository;
 import com.inventory_service.repository.PurchaseRepository;
-import com.inventory_service.repository.StockAllocationRepository;
 import com.inventory_service.utils.PurchaseOrderConverter;
 
 @DataJpaTest
@@ -64,7 +63,7 @@ public class PurchaseServiceImplTest {
     private PurchaseServiceImpl purchaseService;
 
     @Autowired
-    private StockAllocationRepository stockAllocationRepository;
+    private AllocationItemRepository allocationItemRepository;
 
     @Mock
     private ApplicationEventPublisher eventPublisher;
@@ -92,7 +91,7 @@ public class PurchaseServiceImplTest {
     @BeforeAll
     static void setupBean() throws Exception {
         itemMapper = Mappers.getMapper(PurchaseItemMapper.class);
-        PurchaseMapperImpl impl = (PurchaseMapperImpl) Mappers.getMapper(PurchaseMapper.class);
+        PurchaseMapper impl = Mappers.getMapper(PurchaseMapper.class);
         ReflectionTestUtils.setField(impl, "purchaseItemMapper", itemMapper);
         mapper = spy(impl);
     }
@@ -114,7 +113,7 @@ public class PurchaseServiceImplTest {
 
         req.setPurchaseItems(List.of(item1, item2));
 
-        purchaseService = new PurchaseServiceImpl(productClient, purchaseRepository, stockAllocationRepository,
+        purchaseService = new PurchaseServiceImpl(productClient, purchaseRepository, allocationItemRepository,
                 purchaseItemRepository, mapper, itemMapper, eventPublisher);
     }
 

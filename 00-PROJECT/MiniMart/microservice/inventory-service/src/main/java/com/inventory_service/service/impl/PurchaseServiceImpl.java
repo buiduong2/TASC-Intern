@@ -30,9 +30,9 @@ import com.inventory_service.mapper.PurchaseItemMapper;
 import com.inventory_service.mapper.PurchaseMapper;
 import com.inventory_service.model.Purchase;
 import com.inventory_service.model.PurchaseItem;
+import com.inventory_service.repository.AllocationItemRepository;
 import com.inventory_service.repository.PurchaseItemRepository;
 import com.inventory_service.repository.PurchaseRepository;
-import com.inventory_service.repository.StockAllocationRepository;
 import com.inventory_service.service.PurchaseService;
 import com.inventory_service.utils.ErrorDetails;
 
@@ -46,7 +46,7 @@ public class PurchaseServiceImpl implements PurchaseService {
 
     private final PurchaseRepository repository;
 
-    private final StockAllocationRepository stockAllocationRepository;
+    private final AllocationItemRepository allocationItemRepository;
 
     private final PurchaseItemRepository itemRepository;
 
@@ -189,7 +189,7 @@ public class PurchaseServiceImpl implements PurchaseService {
     }
 
     private void validateNoReference(long purchaseId) {
-        List<Long> allocatedPurchaseItemIds = stockAllocationRepository
+        List<Long> allocatedPurchaseItemIds = allocationItemRepository
                 .getAllocationPurchaseItemIdByPurchaseId(purchaseId);
 
         if (!allocatedPurchaseItemIds.isEmpty()) {

@@ -1,6 +1,8 @@
 package com.inventory_service.enums;
 
-public enum StockAllocationStatus {
+public enum AllocationStatus {
+    RESERVE,
+    STOCKING,
     ACTIVE,
     RELEASED
 }

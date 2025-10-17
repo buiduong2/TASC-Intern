@@ -18,8 +18,8 @@ import com.inventory_service.event.PurchaseItemUpdateEvent;
 import com.inventory_service.exception.ErrorCode;
 import com.inventory_service.mapper.PurchaseItemMapper;
 import com.inventory_service.model.PurchaseItem;
+import com.inventory_service.repository.AllocationItemRepository;
 import com.inventory_service.repository.PurchaseItemRepository;
-import com.inventory_service.repository.StockAllocationRepository;
 import com.inventory_service.service.PurchaseItemService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ public class PurchaseItemServiceImpl implements PurchaseItemService {
 
     private final PurchaseItemRepository repository;
 
-    private final StockAllocationRepository stockAllocationRepository;
+    private final AllocationItemRepository stockAllocationRepository;
 
     private final PurchaseItemMapper mapper;
 

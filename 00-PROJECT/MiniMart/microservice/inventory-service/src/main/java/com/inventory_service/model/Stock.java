@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,6 +25,12 @@ public class Stock {
 
     @Column(nullable = false, unique = true)
     private Long productId;
+
+    @Transient
+    public int getAvaiableQuantity() {
+        return totalQuantity - committedAllocation - pendingReservation;
+
+    }
 
     @Override
     public boolean equals(Object obj) {

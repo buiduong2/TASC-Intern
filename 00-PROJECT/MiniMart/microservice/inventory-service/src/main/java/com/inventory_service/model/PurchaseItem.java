@@ -45,7 +45,7 @@ public class PurchaseItem {
     private Long productId;
 
     @OneToMany(mappedBy = "purchaseItem")
-    private List<StockAllocation> stockAllocations;
+    private List<AllocationItem> allocationItems;
 
     @CreatedDate
     private LocalDateTime createdAt;

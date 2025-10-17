@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class StockAllocationServiceImpl implements StockAllocationService {
+public class AllocationServiceImpl implements StockAllocationService {
 
     @Override
     public Page<StockAllocationSummaryDTO> findAll(StockAllocationFilter filter, Pageable pageable) {

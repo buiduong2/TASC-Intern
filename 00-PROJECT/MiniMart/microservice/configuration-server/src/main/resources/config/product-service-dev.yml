@@ -29,15 +29,18 @@ custom:
         host-name: localhost
         port: 6379
 
-    schedule:
-        product:
-            dirty-cache-evict:
-                delay: 30000
+    
 
     cache:
+        enable: false
         batch:
             product-size: 100
             product-id-by-category-size: 5
+
+        schedule:
+            product:
+                dirty-cache-evict:
+                    delay: 30000
 # logging:
 #     level:
 #         org.hibernate.SQL: DEBUG

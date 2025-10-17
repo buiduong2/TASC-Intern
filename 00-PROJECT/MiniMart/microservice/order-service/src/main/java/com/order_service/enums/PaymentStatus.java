@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum PaymentStatus {
+    PREPARING(true),
     PENDING(true),
     PARTIAL(true),
     PAID(false),

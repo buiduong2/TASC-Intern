@@ -25,3 +25,26 @@ spring:
                     default:
                         connectTimeout: 5000
                         readTimeout: 10000
+
+    kafka:
+        bootstrap-servers: localhost:9092
+        consumer:
+            group-id: order-service
+            auto-offset-reset: earliest
+            enable-auto-commit: false
+            key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+            properties:
+                spring:
+                    json:
+                        trusted:
+                            packages: '*'
+        producer:
+            key-serializer: org.apache.kafka.common.serialization.StringSerializer
+            value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+            properties:
+                spring:
+                    json:
+                        add:
+                            type:
+                                headers: true

@@ -2,14 +2,12 @@ package com.inventory_service.service.impl;
 
 import java.util.List;
 
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import com.common.event.DomainEvent;
 import com.inventory_service.enums.PurchaseStatus;
-import com.inventory_service.event.OrderCompletedEvent;
 import com.inventory_service.event.PurchaseActiveEvent;
 import com.inventory_service.event.PurchaseAddedItemEvent;
 import com.inventory_service.event.PurchaseArchivedEvent;
@@ -45,11 +43,6 @@ public class StockEventListener {
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handlePurchaseItemDelete(PurchaseItemDeleteEvent event) {
         stockService.syncQuantity(event.getEntity().getProductId());
-    }
-
-    @EventListener
-    public void handleOrderCompleted(OrderCompletedEvent event) {
-
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)

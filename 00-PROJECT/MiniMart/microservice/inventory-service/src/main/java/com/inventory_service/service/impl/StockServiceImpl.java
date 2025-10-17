@@ -1,14 +1,23 @@
 package com.inventory_service.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
+import com.common_kafka.event.catalog.product.ProductValidationPassedEvent;
+import com.common_kafka.event.shared.dto.ValidatedItemSnapshot;
+import com.inventory_service.enums.AllocationStatus;
+import com.inventory_service.model.Allocation;
+import com.inventory_service.model.OrderReservationLog;
 import com.inventory_service.model.Stock;
+import com.inventory_service.repository.AllocationRepository;
 import com.inventory_service.repository.StockRepository;
+import com.inventory_service.saga.StockSagaManager;
 import com.inventory_service.service.StockService;
+import com.inventory_service.service.StockTransactionService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,12 +25,18 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class StockServiceImpl implements StockService {
 
-    private final StockRepository stockRepository;
+    private final StockRepository service;
+
+    private final StockTransactionService transactionService;
+
+    private final AllocationRepository allocationRepository;
+
+    private final StockSagaManager sagaManager;
 
     @Override
     public void create(List<Long> productIds) {
         Set<Long> requiredIds = new HashSet<>(productIds);
-        List<Long> eixstedProductIds = stockRepository.getProductIdByProductIdIn(productIds);
+        List<Long> eixstedProductIds = service.getProductIdByProductIdIn(productIds);
 
         requiredIds.removeAll(eixstedProductIds);
         if (requiredIds.isEmpty()) {
@@ -33,7 +48,7 @@ public class StockServiceImpl implements StockService {
             stock.setProductId(productId);
             return stock;
         }).toList();
-        stockRepository.saveAll(stocks);
+        service.saveAll(stocks);
     }
 
     @Override
@@ -43,7 +58,33 @@ public class StockServiceImpl implements StockService {
 
     @Override
     public void syncQuantity(List<Long> productIds) {
-        stockRepository.syncQuantityByProductIdIn(productIds);
+        service.syncQuantityByProductIdIn(productIds);
+    }
+
+    @Override
+    public void processProductValidationEvent(ProductValidationPassedEvent event) {
+        long orderId = event.getOrderId();
+        long userId = event.getUserId();
+
+        Allocation allocation = new Allocation();
+        allocation.setStatus(AllocationStatus.RESERVE);
+        allocation.setUserId(userId);
+        allocation.setOrderId(orderId);
+
+        allocationRepository.save(allocation);
+
+        try {
+            List<OrderReservationLog> logs = new ArrayList<>();
+            for (ValidatedItemSnapshot vi : event.getValidatedItems()) {
+                OrderReservationLog log = transactionService.reserveSingleProduct(orderId, userId, vi.getQuantity());
+                logs.add(log);
+            }
+
+            sagaManager.publishInventoryReservedConfirmedEvent(event, logs, allocation);
+        } catch (Exception e) {
+            sagaManager.publishInventoryReservedFailedEvent(event);
+        }
+
     }
 
 }

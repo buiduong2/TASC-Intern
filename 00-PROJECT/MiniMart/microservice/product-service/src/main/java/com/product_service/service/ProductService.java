@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.common_kafka.event.sales.order.OrderCreationRequestedEvent;
 import com.product_service.dto.req.ProductCheckExistsReq;
 import com.product_service.dto.req.ProductUpdateReq;
 import com.product_service.dto.res.ProductCheckExistsRes;
@@ -32,4 +33,6 @@ public interface ProductService {
     List<ProductDetailDTO> findProductDetailByIdInWithOutRelate(List<Long> ids);
 
     ProductCheckExistsRes validateExistsByIdsForInternal(ProductCheckExistsReq req);
+
+    void processOrderCreationRequested(OrderCreationRequestedEvent event);
 }

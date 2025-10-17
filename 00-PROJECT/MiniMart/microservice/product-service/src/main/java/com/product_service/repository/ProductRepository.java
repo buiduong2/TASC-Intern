@@ -100,4 +100,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             """)
     List<Long> getProductIdByIdnAndStatusIn(List<Long> productIds, Collection<ProductStatus> status);
 
+    List<Product> findByIdInAndStatusIn(Collection<Long> ids, Collection<ProductStatus> status);
+
 }

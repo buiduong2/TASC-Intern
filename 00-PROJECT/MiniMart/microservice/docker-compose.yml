@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+    # --- ZOOKEEPER ---
+    zookeeper:
+        image: wurstmeister/zookeeper:latest
+        container_name: zookeeper
+        ports:
+            - '2181:2181'
+        networks:
+            - backend
+        restart: unless-stopped
+        healthcheck:
+            test: ['CMD', 'nc', '-z', 'localhost', '2181']
+            interval: 5s
+            timeout: 10s
+            retries: 5
+
+    # --- KAFKA ---
+    kafka:
+        image: wurstmeister/kafka:latest
+        container_name: kafka
+        ports:
+            - '9092:9092' # cho host (app local)
+            - '9093:9093' # cho container nội bộ
+        environment:
+            # Lắng nghe cả hai cổng: cho host và cho container
+            KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_DOCKER://0.0.0.0:9093
+            # Khai báo endpoint cho từng môi trường
+            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_DOCKER://kafka:9093
+            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_DOCKER:PLAINTEXT
+            # Broker nội bộ dùng listener docker
+            KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_DOCKER
+            KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+            KAFKA_BROKER_ID: 1
+            # Tạo sẵn topic mẫu (tuỳ chọn)
+            KAFKA_CREATE_TOPICS: 'orgChangeTopic:1:1'
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+        depends_on:
+            zookeeper:
+                condition: service_healthy
+        networks:
+            - backend
+        restart: unless-stopped
+        healthcheck:
+            test: ['CMD', 'nc', '-z', 'localhost', '9092']
+            interval: 10s
+            timeout: 10s
+            retries: 5
+
+    # --- KAFKA UI ---
+    kafka-ui:
+        image: provectuslabs/kafka-ui:latest
+        container_name: kafka-ui
+        ports:
+            - '8060:8080'
+        environment:
+            - KAFKA_CLUSTERS_0_NAME=local
+            # UI thấy Kafka qua network nội bộ -> kafka:9093
+            - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9093
+            - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+        depends_on:
+            kafka:
+                condition: service_healthy
+            zookeeper:
+                condition: service_healthy
+        networks:
+            - backend
+        restart: unless-stopped
+
+    # --- REDIS ---
+    redis:
+        image: redis:alpine
+        container_name: redis
+        ports:
+            - '6379:6379'
+        volumes:
+            - redis_data:/data # 🔹 Lưu dữ liệu redis (dump.rdb)
+        networks:
+            - backend
+        restart: unless-stopped
+
+    # --- REDIS INSIGHT (UI) ---
+    redisinsight:
+        image: redis/redisinsight:latest
+        container_name: redisinsight
+        ports:
+            - '5540:5540'
+        depends_on:
+            - redis
+        networks:
+            - backend
+        restart: unless-stopped
+
+# --- NETWORK & VOLUME ---
+networks:
+    backend:
+        driver: bridge
+
+volumes:
+    redis_data:

@@ -10,6 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PurchaseItemReq {
+
     @NotNull
     @Positive
     private Long productId;

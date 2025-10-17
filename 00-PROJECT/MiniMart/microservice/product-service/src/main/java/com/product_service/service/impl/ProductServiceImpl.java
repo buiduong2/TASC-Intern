@@ -3,17 +3,17 @@ package com.product_service.service.impl;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.common.exception.GenericException;
+import com.common_kafka.event.sales.order.OrderCreationRequestedEvent;
+import com.common_kafka.event.shared.dto.OrderItemData;
 import com.product_service.dto.req.ProductCheckExistsReq;
 import com.product_service.dto.req.ProductUpdateReq;
 import com.product_service.dto.res.ProductCheckExistsRes;
@@ -30,6 +30,7 @@ import com.product_service.model.Tag;
 import com.product_service.repository.CategoryRepository;
 import com.product_service.repository.ProductRepository;
 import com.product_service.repository.TagRepository;
+import com.product_service.saga.ProductSagaManager;
 import com.product_service.service.ProductRelateCacheService;
 import com.product_service.service.ProductService;
 import com.product_service.utils.ProductCacheManager;
@@ -52,11 +53,9 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductCacheManager productCacheManager;
 
-    @Autowired
-    @Lazy
-    private ObjectProvider<ProductService> selfProfProvider;
-
     private final ProductRelateCacheService relateCacheService;
+
+    private final ProductSagaManager sagaManager;
 
     @Override
     public Page<ProductSummaryDTO> findByCategoryId(long categoryId, Pageable pageable) {
@@ -183,6 +182,21 @@ public class ProductServiceImpl implements ProductService {
         requiredIds.removeAll(existsedProductIds);
 
         return new ProductCheckExistsRes(requiredIds.isEmpty(), requiredIds);
+    }
+
+    @Override
+    public void processOrderCreationRequested(OrderCreationRequestedEvent event) {
+        Set<Long> requestIds = event.getItems().stream().map(OrderItemData::getProductId)
+                .collect(Collectors.toCollection(HashSet::new));
+
+        List<Product> products = repository.findByIdInAndStatusIn(requestIds, List.of(ProductStatus.ACTIVE));
+
+        if (products.size() == requestIds.size()) {
+            sagaManager.publishProductValidationPassedEvent(event, products);
+        } else {
+            sagaManager.publishProductValidationFailedEvent(event, products);
+        }
+
     }
 
 }

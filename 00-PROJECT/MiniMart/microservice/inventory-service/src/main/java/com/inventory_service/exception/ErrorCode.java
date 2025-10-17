@@ -25,7 +25,9 @@ public enum ErrorCode implements com.common.exception.ErrorCode {
 
     PURCHASE_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "Purchase Item with id = {0} not found"),
 
-    ;
+    STOCK_RESERVATION_PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "Stock With product id = {0} not found"),
+
+    STOCK_RESERVATION_INSUFFICIENT(HttpStatus.INSUFFICIENT_STORAGE, "Insufficient stock for ProductId = {0}");
 
     private final String template;
 

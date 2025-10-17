@@ -2,12 +2,16 @@ package com.inventory_service.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import com.inventory_service.model.Stock;
+
+import jakarta.persistence.LockModeType;
 
 public interface StockRepository extends JpaRepository<Stock, Long> {
 
@@ -35,5 +39,18 @@ public interface StockRepository extends JpaRepository<Stock, Long> {
             WHERE productId IN ?1
             """)
     List<Long> getProductIdByProductIdIn(List<Long> productIds);
+
+    @Query("""
+            FROM Stock
+            WHERE productId IN ?1
+            """)
+    List<Stock> findByProductIdIn(List<Long> productIds);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            FROM Stock AS t
+            WHERE t.productId = ?1
+            """)
+    Optional<Stock> findByProductIdForUpdate(long productId);
 
 }
