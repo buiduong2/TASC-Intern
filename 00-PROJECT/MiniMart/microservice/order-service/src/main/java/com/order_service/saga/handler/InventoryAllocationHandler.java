@@ -39,6 +39,5 @@ public class InventoryAllocationHandler {
     @KafkaHandler(isDefault = true)
     public void handleOther(Object other, @Header(name = "__TypeId__", required = false) String typeId) {
         log.info("[KAFKA] Received message ingored , typeId={}", typeId);
-
     }
 }

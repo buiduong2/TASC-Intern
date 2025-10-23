@@ -59,4 +59,6 @@ public final class KafkaTopics {
      * PaymentFailedEvent).
      */
     public static final String FINANCE_PAYMENT_EVENTS = "finance.payment-events";
+
+    public static final String GLOBAL_COMPENSATION_EVENTS = "global.compensation-events";
 }

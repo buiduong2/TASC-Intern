@@ -1,6 +1,7 @@
 package com.order_service.service;
 
 import com.order_service.enums.SagaStepType;
+import com.order_service.model.OrderSagaTracker;
 
 public interface OrderSagaTrackerService {
 
@@ -13,6 +14,10 @@ public interface OrderSagaTrackerService {
     void markSuccessStep(long orderId, SagaStepType stepType);
 
     void markFailedStep(long orderId, SagaStepType stepType, String reason);
+
+    
+
+    OrderSagaTracker findById(long orderId);
 
     Boolean checkPrePaymentReadinessOrCancelReadiness(Long orderId, long userId);
 

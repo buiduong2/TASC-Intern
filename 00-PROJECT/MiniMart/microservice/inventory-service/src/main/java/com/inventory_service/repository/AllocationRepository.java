@@ -19,4 +19,11 @@ public interface AllocationRepository extends JpaRepository<Allocation, Long> {
             WHERE a.orderId = ?1 AND status = ?2
             """)
     Optional<Allocation> findByOrderIdAndStatusForUpdate(long orderId, AllocationStatus status);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            FROM Allocation AS a
+            WHERE a.orderId = ?1 AND status = ?2
+            """)
+    Optional<Allocation> findByOrderIdAndStatusForCompenstate(long orderId, AllocationStatus status);
 }

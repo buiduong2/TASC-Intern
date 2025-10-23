@@ -1,6 +1,7 @@
 package com.inventory_service.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -19,5 +20,12 @@ public interface OrderReservationLogRepository extends JpaRepository<OrderReserv
             WHERE l.orderId = ?1 AND l.status = ?2
             """)
     List<OrderReservationLog> findByOrderIdAndStatusForAllocation(long orderId, OrderReservationLogStatus status);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            FROM OrderReservationLog AS l
+            WHERE l.orderId = ?1 AND l.productId = ?2
+            """)
+    Optional<OrderReservationLog> findByOrderIdAndProductIdAndStatusForCompenstate(long orderId, long productId);
 
 }

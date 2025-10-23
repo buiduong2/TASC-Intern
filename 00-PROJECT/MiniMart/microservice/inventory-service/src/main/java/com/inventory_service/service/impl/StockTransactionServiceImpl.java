@@ -5,6 +5,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.common_kafka.event.shared.dto.ValidatedItemSnapshot;
+import com.common_kafka.exception.EventEntityNotFoundException;
+import com.common_kafka.exception.UnhandledEventException;
 import com.inventory_service.enums.OrderReservationLogStatus;
 import com.inventory_service.exception.ErrorCode;
 import com.inventory_service.exception.StockReservationException;
@@ -60,6 +62,84 @@ public class StockTransactionServiceImpl implements StockTransactionService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void compensateSingleReservation(long orderId, long productId) {
+        OrderReservationLog log = logRepository.findByOrderIdAndProductIdAndStatusForCompenstate(orderId, productId)
+                .orElseGet(() -> null);
+        if (log == null || log.getStatus() != OrderReservationLogStatus.RESERVED) {
+            return;
+        }
 
+        Stock stock = stockRepository.findByProductIdForUpdate(productId)
+                .orElseThrow(() -> new EventEntityNotFoundException("compensateSingleReservation", productId, "Stock"));
+
+        int reserveQuantity = log.getQuantityReserved();
+
+        stock.setPendingReservation(stock.getPendingReservation() - reserveQuantity);
+        if (stock.getPendingReservation() < 0) {
+            throw new UnhandledEventException("COMPENSATE_ORDER", stock.getId(), "Stock quantity < 0");
+        }
+
+        stockRepository.save(stock);
+
+        log.setStatus(OrderReservationLogStatus.COMPENSATED);
+        logRepository.save(log);
+
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void commitSingleProduct(OrderReservationLog log) {
+        Long productId = log.getProductId();
+        Stock stock = stockRepository.findByProductIdForUpdate(productId)
+                .orElseThrow(
+                        () -> new StockReservationException(ErrorCode.STOCK_RESERVATION_PRODUCT_NOT_FOUND, productId));
+
+        int totalQuantity = stock.getTotalQuantity();
+        int reserveQuantity = log.getQuantityReserved();
+
+        stock.setPendingReservation(stock.getPendingReservation() - reserveQuantity);
+        stock.setCommittedAllocation(stock.getCommittedAllocation() + reserveQuantity);
+
+        if (stock.getPendingReservation() < 0) {
+            throw new StockReservationException(
+                    ErrorCode.STOCK_RESERVATION_INSUFFICIENT,
+                    productId);
+        }
+
+        if (stock.getCommittedAllocation() + stock.getPendingReservation() > totalQuantity) {
+            throw new StockReservationException(
+                    ErrorCode.STOCK_RESERVATION_INSUFFICIENT,
+                    productId);
+        }
+
+        stockRepository.save(stock);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void compensateSingleCommitProduct(long orderId, long productId) {
+        OrderReservationLog log = logRepository.findByOrderIdAndProductIdAndStatusForCompenstate(orderId, productId)
+                .orElseThrow(() -> new EventEntityNotFoundException("compensateSingleReservation", productId,
+                        "OrderReservationLog"));
+
+        if (log.getStatus() != OrderReservationLogStatus.COMMITTED) {
+            // Skip
+            return;
+        }
+
+        Stock stock = stockRepository.findByProductIdForUpdate(productId)
+                .orElseThrow(() -> new EventEntityNotFoundException("compensateSingleReservation", productId, "Stock"));
+
+        int reserveQuantity = log.getQuantityReserved();
+
+        stock.setCommittedAllocation(stock.getCommittedAllocation() - reserveQuantity);
+
+        if (stock.getCommittedAllocation() < 0) {
+            throw new UnhandledEventException("COMPENSATE_ORDER", stock.getId(), "Stock committedAllocation < 0");
+        }
+
+        stockRepository.save(stock);
+
+        log.setStatus(OrderReservationLogStatus.COMPENSATED);
+        logRepository.save(log);
     }
 }

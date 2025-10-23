@@ -7,11 +7,14 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.common_kafka.config.KafkaTopics;
+import com.common_kafka.event.sales.order.OrderCreationCompensatedEvent;
 import com.common_kafka.event.sales.order.OrderCreationRequestedEvent;
 import com.common_kafka.event.sales.order.OrderInitialPaymentRequestedEvent;
 import com.common_kafka.event.sales.order.OrderStockAllocationRequestedEvent;
 import com.common_kafka.event.shared.dto.OrderItemData;
 import com.order_service.model.Order;
+import com.order_service.model.OrderSagaTracker;
+import com.order_service.repository.OrderRepository;
 import com.order_service.service.OrderSagaTrackerService;
 
 import lombok.RequiredArgsConstructor;
@@ -25,6 +28,8 @@ public class OrderSagaManager {
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     private final OrderSagaTrackerService trackerService;
+
+    private final OrderRepository orderRepository;
 
     public void publishOrderCreationRequestedEvent(Order order) {
         kafkaTemplate.send(
@@ -43,8 +48,8 @@ public class OrderSagaManager {
         checkAndAdvanceOrder(order);
     }
 
-    public void tryPublishCancellationEvent(Order order) {
-
+    public void tryPublishCreationCompensatedEvent(long orderId, long userId) {
+        Order order = orderRepository.findByIdAndUserIdWithItem(orderId, userId).orElseThrow();
         checkAndAdvanceOrder(order);
     }
 
@@ -53,7 +58,8 @@ public class OrderSagaManager {
         if (Boolean.TRUE.equals(isReady)) {
             publishOrderInitialPaymentRequestedEvent(order);
         } else if (Boolean.FALSE.equals(isReady)) {
-            publishCancellationEvent(order);
+            OrderSagaTracker tracker = trackerService.findById(order.getId());
+            publishCreationCompensatedEvent(order, tracker);
         }
 
     }
@@ -74,10 +80,22 @@ public class OrderSagaManager {
                 event);
     }
 
-    private void publishCancellationEvent(Order order) {
+    private void publishCreationCompensatedEvent(Order order, OrderSagaTracker ost) {
         log.warn("[SAGA][OrderId={}][ACTION=publishCancellation] ❌ Saga canceled", order.getId());
 
-        // ... logic tạo và gửi OrderCanceledEvent
+        OrderCreationCompensatedEvent event = new OrderCreationCompensatedEvent(
+                order.getId(),
+                order.getUserId(),
+                order.getOrderItems().stream()
+                        .map(oi -> new OrderItemData(oi.getId(), oi.getProductId(), oi.getQuantity()))
+                        .collect(Collectors.toCollection(LinkedHashSet::new)),
+                ost.getFailureReason());
+
+        kafkaTemplate.send(
+                KafkaTopics.GLOBAL_COMPENSATION_EVENTS,
+                String.valueOf(event.getOrderId()),
+                event);
+
     }
 
     public void publishOrderStockAllocationRequestedEvent(Order order) {

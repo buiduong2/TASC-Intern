@@ -3,11 +3,10 @@ package com.order_service.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.common_kafka.event.catalog.product.ProductValidationFailedEvent;
 import com.common_kafka.event.catalog.product.ProductValidationPassedEvent;
 import com.common_kafka.event.finance.payment.PaymentRecordPreparedEvent;
+import com.common_kafka.event.sales.order.OrderCreationCompensatedEvent;
 import com.common_kafka.event.supply.inventory.InventoryAllocationConfirmedEvent;
-import com.common_kafka.event.supply.inventory.InventoryReservationFailedEvent;
 import com.common_kafka.event.supply.inventory.InventoryReservedConfirmedEvent;
 import com.order_service.dto.req.OrderCreateReq;
 import com.order_service.dto.req.OrderFilter;
@@ -37,14 +36,12 @@ public interface OrderService {
 
     Order processProductValidationPassedEvent(ProductValidationPassedEvent event);
 
-    Order processProductValidationFailed(ProductValidationFailedEvent event);
-
     Order processInventoryReservedConfirmed(InventoryReservedConfirmedEvent event);
-
-    Order processInventoryReservationFailed(InventoryReservationFailedEvent event);
 
     Order processPaymentRecordCreated(PaymentRecordPreparedEvent event);
 
     Order processInventoryAllocationConfirmed(InventoryAllocationConfirmedEvent event);
+
+    Order processOrderCreationCompensated(OrderCreationCompensatedEvent event);
 
 }

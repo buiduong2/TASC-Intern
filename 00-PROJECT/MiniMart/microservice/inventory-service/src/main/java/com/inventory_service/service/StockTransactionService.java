@@ -7,6 +7,10 @@ public interface StockTransactionService {
 
     OrderReservationLog reserveSingleProduct(long orderId, ValidatedItemSnapshot vi);
 
+    void commitSingleProduct(OrderReservationLog log);
+
     void compensateSingleReservation(long orderId, long productId);
+
+    void compensateSingleCommitProduct(long orderId, long productId);
 
 }

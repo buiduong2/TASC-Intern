@@ -2,8 +2,10 @@ package com.inventory_service.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -11,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.common_kafka.event.sales.order.OrderCreationCompensatedEvent;
 import com.common_kafka.event.sales.order.OrderStockAllocationRequestedEvent;
 import com.common_kafka.event.shared.dto.OrderItemData;
 import com.common_kafka.event.shared.helper.SagaResultUtils;
@@ -27,10 +30,12 @@ import com.inventory_service.model.Allocation;
 import com.inventory_service.model.AllocationItem;
 import com.inventory_service.model.OrderReservationLog;
 import com.inventory_service.model.PurchaseItem;
+import com.inventory_service.repository.AllocationItemRepository;
 import com.inventory_service.repository.AllocationRepository;
 import com.inventory_service.repository.OrderReservationLogRepository;
 import com.inventory_service.repository.PurchaseItemRepository;
 import com.inventory_service.service.AllocationService;
+import com.inventory_service.service.StockTransactionService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -43,6 +48,10 @@ public class AllocationServiceImpl implements AllocationService {
     private final PurchaseItemRepository purchaseItemRepository;
 
     private final OrderReservationLogRepository orderReservationLogRepository;
+
+    private final StockTransactionService stockTransactionService;
+
+    private final AllocationItemRepository allocationItemRepository;
 
     @Override
     public Page<StockAllocationSummaryDTO> findAll(StockAllocationFilter filter, Pageable pageable) {
@@ -71,8 +80,11 @@ public class AllocationServiceImpl implements AllocationService {
                     orderId,
                     OrderReservationLogStatus.RESERVED);
 
+            // Process
             List<AllocationItem> allocationItems = allocationForOrder(pis, logs);
+            commitAllocationForOrder(logs);
 
+            // Update Allocation
             allocation.addAllocationItems(allocationItems);
             allocation.setStatus(AllocationStatus.ALLOCATED);
             repository.save(allocation);
@@ -84,7 +96,12 @@ public class AllocationServiceImpl implements AllocationService {
         });
     }
 
-    
+    private void commitAllocationForOrder(List<OrderReservationLog> logs) {
+        for (OrderReservationLog log : logs) {
+            stockTransactionService.commitSingleProduct(log);
+            log.setStatus(OrderReservationLogStatus.COMMITTED);
+        }
+    }
 
     private List<AllocationItem> allocationForOrder(
             List<PurchaseItem> purchaseItems,
@@ -145,9 +162,39 @@ public class AllocationServiceImpl implements AllocationService {
                     .build();
         }
 
-        log.setStatus(OrderReservationLogStatus.COMMITTED);
-
         return allocationItems;
+    }
+
+    /**
+     * Method sẽ tiến hành đảo ngược quá trình AllocationItem
+     */
+
+    @Transactional
+    @Override
+    public Allocation processOrderCreationCompensated(OrderCreationCompensatedEvent event) {
+        Optional<Allocation> opt = repository
+                .findByOrderIdAndStatusForCompenstate(event.getOrderId(), AllocationStatus.ALLOCATED);
+        if (opt.isEmpty()) {
+            return null;
+        }
+
+        Allocation allocation = opt.get();
+
+        List<AllocationItem> allocationItems = allocationItemRepository
+                .findByAllocationIdForCompensate(allocation.getId())
+                .stream()
+                .sorted(Comparator.comparingLong(ai -> ai.getPurchaseItem().getProductId()))
+                .toList();
+
+        for (AllocationItem allocationItem : allocationItems) {
+            PurchaseItem pi = allocationItem.getPurchaseItem();
+            stockTransactionService.compensateSingleCommitProduct(event.getOrderId(), pi.getProductId());
+        }
+
+        allocation.setStatus(AllocationStatus.RELEASED);
+        repository.save(allocation);
+
+        return allocation;
     }
 
 }

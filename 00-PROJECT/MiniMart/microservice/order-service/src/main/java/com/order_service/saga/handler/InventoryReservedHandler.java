@@ -44,9 +44,7 @@ public class InventoryReservedHandler {
     @KafkaHandler
     public void handleReservationFailed(InventoryReservationFailedEvent event) {
         orderSagaTrackerService.markFailedStep(event.getOrderId(), SagaStepType.STOCK_RESERVED, event.getReason());
-        Order order = orderService.processInventoryReservationFailed(event);
-
-        orderSagaManager.tryPublishCancellationEvent(order);
+        orderSagaManager.tryPublishCreationCompensatedEvent(event.getOrderId(), event.getUserId());
 
         log.warn(
                 "[SAGA][OrderId={}][STEP=STOCK_RESERVED][EVENT=InventoryReservationFailed] ❌ Stock reservation failed: {}",
@@ -57,7 +55,6 @@ public class InventoryReservedHandler {
     @KafkaHandler(isDefault = true)
     public void handleOther(Object other, @Header(name = "__TypeId__", required = false) String typeId) {
         log.info("[KAFKA] Received message ingored , typeId={}", typeId);
-
     }
 
 }

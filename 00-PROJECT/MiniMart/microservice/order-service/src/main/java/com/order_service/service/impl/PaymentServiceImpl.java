@@ -3,6 +3,7 @@ package com.order_service.service.impl;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.common_kafka.event.sales.order.OrderCreationCompensatedEvent;
 import com.common_kafka.event.sales.order.OrderInitialPaymentRequestedEvent;
 import com.common_kafka.event.shared.helper.SagaResultUtils;
 import com.common_kafka.event.shared.res.SagaResult;
@@ -37,6 +38,21 @@ public class PaymentServiceImpl implements PaymentService {
 
             return payment;
         });
+    }
+
+    @Transactional
+    @Override
+    public void processOrderCreationCompensated(OrderCreationCompensatedEvent event) {
+        Payment payment = repository.findByOrderIdAndUserId(event.getOrderId(), event.getUserId())
+                .orElseGet(() -> null);
+
+        if (payment == null || payment.getStatus().equals(PaymentStatus.CANCELLED)) {
+            return;
+        }
+
+        payment.setStatus(PaymentStatus.CANCELLED);
+
+        return;
     }
 
 }

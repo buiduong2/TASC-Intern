@@ -42,10 +42,12 @@ public class ProductValidationHandler {
 
     @KafkaHandler
     public void handleValidationFailed(ProductValidationFailedEvent event) {
-        orderSagaTrackerService.markFailedStep(event.getOrderId(), SagaStepType.UNIT_PRICE_CONFIRMED,
+        orderSagaTrackerService.markFailedStep(
+                event.getOrderId(),
+                SagaStepType.UNIT_PRICE_CONFIRMED,
                 event.getReason());
-        Order order = orderService.processProductValidationFailed(event);
-        orderSagaManager.tryPublishCancellationEvent(order);
+
+        orderSagaManager.tryPublishCreationCompensatedEvent(event.getOrderId(), event.getUserId());
 
         log.warn(
                 "[SAGA][OrderId={}][STEP=UNIT_PRICE_CONFIRMED][EVENT=ProductValidationFailed] ❌ Product validation failed: {}",

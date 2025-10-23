@@ -1,13 +1,18 @@
 package com.inventory_service.service.impl;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.common_kafka.event.catalog.product.ProductValidationPassedEvent;
+import com.common_kafka.event.sales.order.OrderCreationCompensatedEvent;
+import com.common_kafka.event.shared.dto.OrderItemData;
 import com.common_kafka.event.shared.dto.ValidatedItemSnapshot;
 import com.common_kafka.event.shared.res.SagaResult;
 import com.inventory_service.dto.res.ReservateStockResult;
@@ -73,9 +78,14 @@ public class StockServiceImpl implements StockService {
 
         allocationRepository.save(allocation);
 
+        List<ValidatedItemSnapshot> vis = event.getValidatedItems()
+                .stream()
+                .sorted(Comparator.comparingLong(ValidatedItemSnapshot::getProductId))
+                .toList();
+
         try {
             List<OrderReservationLog> logs = new ArrayList<>();
-            for (ValidatedItemSnapshot vi : event.getValidatedItems()) {
+            for (ValidatedItemSnapshot vi : vis) {
                 OrderReservationLog log = transactionService.reserveSingleProduct(orderId, vi);
                 logs.add(log);
             }
@@ -86,6 +96,32 @@ public class StockServiceImpl implements StockService {
         } catch (Exception e) {
             return SagaResult.failure("Server Error");
         }
+
+    }
+
+    /**
+     * Method sẽ tiến hành đảo ngược quá trình reservation của OrderReservationLog
+     */
+    @Transactional
+    @Override
+    public void processOrderCreationCompensated(OrderCreationCompensatedEvent event) {
+        Optional<Allocation> opt = allocationRepository
+                .findByOrderIdAndStatusForUpdate(event.getOrderId(), AllocationStatus.RESERVE);
+        if (opt.isEmpty()) {
+            return;
+        }
+
+        List<OrderItemData> items = event.getItems().stream()
+                .sorted(Comparator.comparing(OrderItemData::getProductId))
+                .toList();
+
+        for (OrderItemData orderItemData : items) {
+            transactionService.compensateSingleReservation(event.getOrderId(), orderItemData.getProductId());
+        }
+
+        Allocation allocation = opt.get();
+        allocation.setStatus(AllocationStatus.RELEASED);
+        allocationRepository.save(allocation);
 
     }
 

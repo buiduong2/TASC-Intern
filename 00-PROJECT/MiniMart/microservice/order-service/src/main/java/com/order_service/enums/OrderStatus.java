@@ -8,6 +8,6 @@ public enum OrderStatus {
     PAYMENT_CONFIRMED, // Thanh toán thành công
     SHIPPING, // Muốn SHIP phải PAID + CONFIRMED
     COMPLETED, // Giao hàng thành công
-    COMPENSATING, // Saga bù trừ đang diễn ra
+    CREATION_FAILED, // Saga bù trừ đang diễn ra
     CANCELED // Hủy hoàn toàn
 }

@@ -121,4 +121,11 @@ public class OrderSagaTrackerServiceImpl implements OrderSagaTrackerService {
 
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public OrderSagaTracker findById(long orderId) {
+        return repository.findById(orderId)
+                .orElseThrow(() -> new IllegalStateException("OrderSagaProgress not found for orderId=" + orderId));
+    }
+
 }

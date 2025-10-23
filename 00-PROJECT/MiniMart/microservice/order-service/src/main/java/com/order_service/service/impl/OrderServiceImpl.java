@@ -11,13 +11,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.common_kafka.event.catalog.product.ProductValidationFailedEvent;
 import com.common_kafka.event.catalog.product.ProductValidationPassedEvent;
 import com.common_kafka.event.finance.payment.PaymentRecordPreparedEvent;
+import com.common_kafka.event.sales.order.OrderCreationCompensatedEvent;
 import com.common_kafka.event.shared.dto.AllocationItemSnapshot;
 import com.common_kafka.event.shared.dto.ValidatedItemSnapshot;
 import com.common_kafka.event.supply.inventory.InventoryAllocationConfirmedEvent;
-import com.common_kafka.event.supply.inventory.InventoryReservationFailedEvent;
 import com.common_kafka.event.supply.inventory.InventoryReservedConfirmedEvent;
 import com.order_service.dto.req.OrderCreateReq;
 import com.order_service.dto.req.OrderFilter;
@@ -108,22 +107,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Transactional
-    @Override
-    public Order processProductValidationFailed(ProductValidationFailedEvent event) {
-        long orderId = event.getOrderId();
-        long userId = event.getUserId();
-
-        Order order = repository.findWithItemsByIdAndUserIdForUpdate(orderId, userId)
-                .orElseThrow(() -> new OrderEventNotFoundException(orderId, userId));
-
-        order.setStatus(OrderStatus.COMPENSATING);
-
-        repository.save(order);
-
-        return order;
-    }
-
-    @Transactional
     public Order processProductValidationPassedEvent(ProductValidationPassedEvent event) {
         long orderId = event.getOrderId();
         long userId = event.getUserId();
@@ -165,21 +148,6 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.VALIDATED);
         return order;
 
-    }
-
-    @Transactional
-    @Override
-    public Order processInventoryReservationFailed(InventoryReservationFailedEvent event) {
-        long orderId = event.getOrderId();
-        long userId = event.getUserId();
-        Order order = repository.findById(orderId)
-                .orElseThrow(() -> new OrderEventNotFoundException(orderId, userId));
-
-        order.setStatus(OrderStatus.COMPENSATING);
-
-        repository.save(order);
-
-        return order;
     }
 
     @Override
@@ -229,6 +197,21 @@ public class OrderServiceImpl implements OrderService {
         }
         repository.save(order);
 
+        return order;
+    }
+
+    @Transactional
+    @Override
+    public Order processOrderCreationCompensated(OrderCreationCompensatedEvent event) {
+        long orderId = event.getOrderId();
+        long userId = event.getUserId();
+
+        Order order = repository.findWithItemsByIdAndUserIdForUpdate(orderId, userId)
+                .orElseThrow(() -> new OrderEventNotFoundException(orderId, userId));
+
+        order.setStatus(OrderStatus.CREATION_FAILED);
+
+        repository.save(order);
         return order;
     }
 
