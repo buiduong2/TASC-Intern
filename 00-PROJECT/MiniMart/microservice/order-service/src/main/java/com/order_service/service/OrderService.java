@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 
 import com.common_kafka.event.catalog.product.ProductValidationPassedEvent;
 import com.common_kafka.event.finance.payment.PaymentRecordPreparedEvent;
+import com.common_kafka.event.finance.payment.PaymentSucceededEvent;
 import com.common_kafka.event.sales.order.OrderCreationCompensatedEvent;
 import com.common_kafka.event.supply.inventory.InventoryAllocationConfirmedEvent;
 import com.common_kafka.event.supply.inventory.InventoryReservedConfirmedEvent;
@@ -43,5 +44,7 @@ public interface OrderService {
     Order processInventoryAllocationConfirmed(InventoryAllocationConfirmedEvent event);
 
     Order processOrderCreationCompensated(OrderCreationCompensatedEvent event);
+
+    void processPaymentSucceedEvent(PaymentSucceededEvent event);
 
 }

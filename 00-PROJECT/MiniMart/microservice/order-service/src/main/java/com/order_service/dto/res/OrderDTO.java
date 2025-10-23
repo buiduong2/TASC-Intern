@@ -18,7 +18,7 @@ public class OrderDTO {
 
     private LocalDateTime updatedAt;
 
-    private long paymentId;
+    private Long paymentId;
 
     private OrderStatus status;
     

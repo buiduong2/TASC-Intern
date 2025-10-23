@@ -1,6 +1,7 @@
 package com.order_service.service.impl;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -11,13 +12,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.common.exception.GenericException;
 import com.common_kafka.event.catalog.product.ProductValidationPassedEvent;
 import com.common_kafka.event.finance.payment.PaymentRecordPreparedEvent;
+import com.common_kafka.event.finance.payment.PaymentSucceededEvent;
 import com.common_kafka.event.sales.order.OrderCreationCompensatedEvent;
 import com.common_kafka.event.shared.dto.AllocationItemSnapshot;
 import com.common_kafka.event.shared.dto.ValidatedItemSnapshot;
 import com.common_kafka.event.supply.inventory.InventoryAllocationConfirmedEvent;
 import com.common_kafka.event.supply.inventory.InventoryReservedConfirmedEvent;
+import com.common_kafka.exception.UnhandledEventException;
 import com.order_service.dto.req.OrderCreateReq;
 import com.order_service.dto.req.OrderFilter;
 import com.order_service.dto.req.OrderUpdateReq;
@@ -27,10 +31,12 @@ import com.order_service.dto.res.OrderDetailDTO;
 import com.order_service.enums.OrderStatus;
 import com.order_service.enums.PaymentStatus;
 import com.order_service.event.OrderPreparedDomainEvent;
+import com.order_service.exception.ErrorCode;
 import com.order_service.exception.OrderEventNotFoundException;
 import com.order_service.mapper.OrderMapper;
 import com.order_service.model.Order;
 import com.order_service.model.OrderItem;
+import com.order_service.repository.OrderItemRepository;
 import com.order_service.repository.OrderRepository;
 import com.order_service.repository.ShippingMethodRepository;
 import com.order_service.service.OrderService;
@@ -42,6 +48,8 @@ import lombok.RequiredArgsConstructor;
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository repository;
+
+    private final OrderItemRepository itemRepository;
 
     private final ShippingMethodRepository shippingMethodRepository;
 
@@ -55,10 +63,18 @@ public class OrderServiceImpl implements OrderService {
         throw new UnsupportedOperationException("Unimplemented method 'findPage'");
     }
 
+    @Transactional(readOnly = true)
     @Override
     public OrderDetailDTO findByIdAndUserId(long id, Long userId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findByIdAndUserId'");
+
+        Order order = repository.findByIdAndUserIdForClientDetail(id, userId)
+                .orElseThrow(() -> new GenericException(ErrorCode.ORDER_NOT_FOUND, id));
+
+        List<OrderItem> items = itemRepository.findByOrderId(id);
+
+        order.setOrderItems(items);
+
+        return mapper.toClientDetailDTO(order);
     }
 
     @Transactional
@@ -161,7 +177,7 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new OrderEventNotFoundException(orderId, userId));
 
         if (order.getTotal().equals(amountToPay)) {
-            order.setStatus(OrderStatus.CONFIRMED);
+            order.setStatus(OrderStatus.VALIDATED);
             order.setPaymentStatus(PaymentStatus.PENDING);
             order.setPaymentId(paymentId);
 
@@ -213,6 +229,25 @@ public class OrderServiceImpl implements OrderService {
 
         repository.save(order);
         return order;
+    }
+
+    @Transactional
+    @Override
+    public void processPaymentSucceedEvent(PaymentSucceededEvent event) {
+        long orderId = event.getOrderId();
+        long userId = event.getUserId();
+
+        Order order = repository.findWithItemsByIdAndUserIdForUpdate(orderId, userId)
+                .orElseThrow(() -> new OrderEventNotFoundException(orderId, userId));
+        if (order.getPaymentId() != event.getPaymentId()) {
+            throw new UnhandledEventException("Update PaymentStatus", orderId,
+                    "order.paymentId != event.getPaymentId()");
+        }
+
+        order.setPaymentStatus(PaymentStatus.PAID);
+
+        repository.save(order);
+
     }
 
 }

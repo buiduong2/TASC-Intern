@@ -36,4 +36,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             WHERE o.id = ?1 AND o.userId = ?2
             """)
     Optional<Order> findByIdAndUserIdWithItem(long id, long userId);
+
+    @EntityGraph(value = Order.namedGraph_CientDetail, type = EntityGraphType.FETCH)
+    @Query("""
+            FROM Order AS o
+            WHERE o.id = ?1 AND o.userId = ?2
+            """)
+    Optional<Order> findByIdAndUserIdForClientDetail(long orderId, long userId);
 }

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.common_kafka.config.KafkaTopics;
 import com.common_kafka.event.finance.payment.PaymentRecordPreparedEvent;
+import com.common_kafka.event.finance.payment.PaymentSucceededEvent;
 import com.common_kafka.event.sales.order.OrderInitialPaymentRequestedEvent;
 import com.common_kafka.event.shared.res.SagaResult;
 import com.order_service.model.Payment;
@@ -29,5 +30,17 @@ public class PaymentSagaManager {
                 KafkaTopics.FINANCE_PAYMENT_EVENTS,
                 String.valueOf(payment.getOrderId()),
                 preparedEvent);
+    }
+
+    public void publishPaymentSucceededEvent(Payment payment) {
+        PaymentSucceededEvent event = new PaymentSucceededEvent(
+                payment.getOrderId(),
+                payment.getUserId(),
+                payment.getId());
+
+        kafkaTemplate.send(
+                KafkaTopics.FINANCE_PAYMENT_EVENTS,
+                String.valueOf(payment.getOrderId()),
+                event);
     }
 }

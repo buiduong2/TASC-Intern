@@ -43,6 +43,11 @@ import lombok.Setter;
         @NamedAttributeNode(value = "address"),
 })
 
+@NamedEntityGraph(name = Order.namedGraph_CientDetail, attributeNodes = {
+        @NamedAttributeNode(value = "address"),
+        @NamedAttributeNode(value = "shippingMethod"),
+})
+
 @Entity
 @Getter
 @Setter
@@ -52,6 +57,7 @@ public class Order {
 
     public static final String namedGraph_WithItem = "Order.WithOrderItems";
     public static final String namedGraph_WithItemAndAddress = "Order.WithItems-Address";
+    public static final String namedGraph_CientDetail = "Order.client-detail";
 
     @Id
     @GeneratedValue

@@ -1,7 +1,5 @@
 package com.order_service.saga.handler;
 
-import org.springframework.kafka.annotation.KafkaHandler;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,12 +41,6 @@ public class OrderPrepareHandler {
         log.info("[SAGA][OrderId={}] Start Saga. Steps initialized: UNIT_PRICE_CONFIRMED, STOCK_RESERVED",
                 order.getId());
         log.info("[SAGA][OrderId={}] ▶️ Published OrderCreationRequestedEvent", order.getId());
-
-    }
-
-    @KafkaHandler(isDefault = true)
-    public void handleOther(Object other, @Header(name = "__TypeId__", required = false) String typeId) {
-        log.info("[KAFKA] Received message ingored , typeId={}", typeId);
 
     }
 
