@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.order_service.dto.req.OrderFilter;
 import com.order_service.dto.req.OrderUpdateReq;
-import com.order_service.dto.res.OrderAdminDTO;
+import com.order_service.dto.res.OrderAdminSummaryDTO;
 import com.order_service.dto.res.OrderDTO;
 import com.order_service.service.OrderService;
 
@@ -27,7 +27,8 @@ public class AdminOrderController {
     private final OrderService orderService;
 
     @GetMapping
-    public Page<OrderAdminDTO> findAll(@Valid OrderFilter filter, @PageableDefault(size = 10) Pageable pageable) {
+    public Page<OrderAdminSummaryDTO> findAll(@Valid OrderFilter filter,
+            @PageableDefault(size = 10) Pageable pageable) {
         return orderService.findAdminAll(filter, pageable);
     }
 

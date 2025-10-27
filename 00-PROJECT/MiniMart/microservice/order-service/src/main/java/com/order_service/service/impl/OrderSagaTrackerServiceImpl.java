@@ -1,5 +1,9 @@
 package com.order_service.service.impl;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +22,7 @@ public class OrderSagaTrackerServiceImpl implements OrderSagaTrackerService {
 
     private final OrderSagaTrackerRepository repository;
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void create(Long orderId) {
         OrderSagaTracker orderSagaProgress = new OrderSagaTracker();
@@ -60,6 +64,12 @@ public class OrderSagaTrackerServiceImpl implements OrderSagaTrackerService {
     @Override
     public void markSuccessStep(long orderId, SagaStepType stepType) {
         completeStep(orderId, stepType, true, null);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void markCompensated(long orderId, SagaStepType type) {
+        updateStepStatus(orderId, type, SagaStepStatus.COMPENSATED);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -121,11 +131,44 @@ public class OrderSagaTrackerServiceImpl implements OrderSagaTrackerService {
 
     }
 
+    @Override
+    public boolean checkOrderCanceledReadiness(long orderId, long userId) {
+        OrderSagaTracker ops = repository.findByOrderIdForUpdate(orderId)
+                .orElseThrow(() -> new IllegalStateException("OrderSagaProgress not found for orderId=" + orderId));
+
+        if (ops.getPaymentProcessed() == SagaStepStatus.COMPENSATED
+                && ops.getStockFulfilled() == SagaStepStatus.COMPENSATED
+                && ops.getStockReserved() == SagaStepStatus.COMPENSATED) {
+
+            return true;
+        }
+        return false;
+    }
+
     @Transactional(readOnly = true)
     @Override
-    public OrderSagaTracker findById(long orderId) {
-        return repository.findById(orderId)
+    public OrderSagaTracker findByOrderId(long orderId) {
+        return repository.findByOrderIdForUpdate(orderId)
                 .orElseThrow(() -> new IllegalStateException("OrderSagaProgress not found for orderId=" + orderId));
+    }
+
+    @Override
+    public boolean checkCancelRediness(long orderId, long userId) {
+        OrderSagaTracker ost = repository.findByOrderIdForUpdate(orderId)
+                .orElseThrow(() -> new IllegalStateException("OrderSagaProgress not found for orderId=" + orderId));
+
+        SagaStepStatus stockReserved = ost.getStockReserved();
+        SagaStepStatus unitPriceConfirmed = ost.getUnitPriceConfirmed();
+        SagaStepStatus paymentProcessed = ost.getPaymentProcessed();
+        SagaStepStatus stockFulfilled = ost.getStockFulfilled();
+        Set<SagaStepStatus> statuses = new HashSet<>(
+                List.of(stockReserved, unitPriceConfirmed, paymentProcessed, stockFulfilled));
+
+        if (statuses.contains(SagaStepStatus.PENDING)) {
+            return false;
+        }
+
+        return true;
     }
 
 }

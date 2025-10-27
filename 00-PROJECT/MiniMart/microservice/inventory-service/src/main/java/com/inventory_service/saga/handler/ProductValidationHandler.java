@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@KafkaListener(topics = KafkaTopics.CATALOG_PRODUCT_EVENTS, groupId = "inventory-validation-group")
+@KafkaListener(topics = KafkaTopics.CATALOG_PRODUCT_VALIDATION, groupId = "inventory-validation-group")
 public class ProductValidationHandler {
 
     private final StockService stockService;

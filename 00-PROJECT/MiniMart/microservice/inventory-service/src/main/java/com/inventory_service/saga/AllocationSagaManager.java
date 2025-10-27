@@ -9,10 +9,13 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.common_kafka.config.KafkaTopics;
+import com.common_kafka.event.sales.order.OrderCancellationRequestedEvent;
 import com.common_kafka.event.sales.order.OrderStockAllocationRequestedEvent;
 import com.common_kafka.event.shared.dto.AllocationItemSnapshot;
+import com.common_kafka.event.supply.inventory.InventoryAllocationCompensateCompletedEvent;
 import com.common_kafka.event.supply.inventory.InventoryAllocationConfirmedEvent;
 import com.inventory_service.dto.res.StockAllocationResult;
+import com.inventory_service.model.Allocation;
 import com.inventory_service.model.AllocationItem;
 
 import lombok.RequiredArgsConstructor;
@@ -62,6 +65,17 @@ public class AllocationSagaManager {
                 event.getUserId(),
                 data.getAllocation().getId(),
                 allocationItemSnapshots);
+
+        kafkaTemplate.send(KafkaTopics.SUPPLY_INVENTORY_ALLOCATION, String.valueOf(event.getOrderId()), confirmEvent);
+
+    }
+
+    public void publishInventoryAllocationCompensateCompletedEvent(OrderCancellationRequestedEvent event,
+            Allocation allocation) {
+        InventoryAllocationCompensateCompletedEvent confirmEvent = new InventoryAllocationCompensateCompletedEvent(
+                event.getOrderId(),
+                event.getUserId(),
+                allocation == null ? null : allocation.getId());
 
         kafkaTemplate.send(KafkaTopics.SUPPLY_INVENTORY_ALLOCATION, String.valueOf(event.getOrderId()), confirmEvent);
 

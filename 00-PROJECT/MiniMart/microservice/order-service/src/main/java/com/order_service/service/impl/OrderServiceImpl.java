@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.common.exception.GenericException;
@@ -25,7 +26,7 @@ import com.common_kafka.exception.UnhandledEventException;
 import com.order_service.dto.req.OrderCreateReq;
 import com.order_service.dto.req.OrderFilter;
 import com.order_service.dto.req.OrderUpdateReq;
-import com.order_service.dto.res.OrderAdminDTO;
+import com.order_service.dto.res.OrderAdminSummaryDTO;
 import com.order_service.dto.res.OrderDTO;
 import com.order_service.dto.res.OrderDetailDTO;
 import com.order_service.enums.OrderStatus;
@@ -58,9 +59,9 @@ public class OrderServiceImpl implements OrderService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
-    public Page<OrderDTO> findPage(Pageable pageable, Long id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findPage'");
+    public Page<OrderDTO> findPage(Pageable pageable, Long userId) {
+        return repository.findByUserIdForCLientSummary(userId, pageable)
+                .map(mapper::toClientSummaryDTO);
     }
 
     @Transactional(readOnly = true)
@@ -98,16 +99,36 @@ public class OrderServiceImpl implements OrderService {
         throw new UnsupportedOperationException("Unimplemented method 'createFromCart'");
     }
 
+    @Transactional
     @Override
     public void cancel(Long orderId, Long userId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'cancel'");
+        // Check: tồn tại và sở hữu đơn hàng
+        Order order = repository.findByIdAndUserIdWithItem(orderId, userId)
+                .orElseThrow(() -> new GenericException(ErrorCode.ORDER_NOT_FOUND, orderId));
+
+        if (OrderStatus.isOrderEnded(order)) {
+            throw new GenericException(ErrorCode.ORDER_CANCEL_LIFECYCLE_ENDED, orderId);
+        }
+
+        if (OrderStatus.isCancellingOrAwaiting(order)) {
+            throw new GenericException(ErrorCode.ORDER_CANCEL_ALREADY_LOCKED, orderId);
+        }
+
+        if (!OrderStatus.isEligibleForNewCancelRequest(order)) {
+            throw new GenericException(ErrorCode.ORDER_CANCEL_STATUS_INVALID, orderId);
+        }
+
+        order.setStatus(OrderStatus.AWAITING_CANCEL);
+
+        repository.save(order);
+
+        return;
     }
 
     @Override
-    public Page<OrderAdminDTO> findAdminAll(OrderFilter filter, Pageable pageable) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findAdminAll'");
+    public Page<OrderAdminSummaryDTO> findAdminAll(OrderFilter filter, Pageable pageable) {
+        return repository.findAll((root, query, builder) -> builder.conjunction(), pageable)
+                .map(mapper::toAdminSummaryDTO);
     }
 
     @Override
@@ -130,6 +151,10 @@ public class OrderServiceImpl implements OrderService {
         Order order = repository.findWithItemsByIdAndUserIdForUpdate(orderId, userId)
                 .orElseThrow(() -> new OrderEventNotFoundException(orderId, userId));
 
+        if (order.getStatus() != OrderStatus.VALIDATING) {
+            throw new IllegalStateException("Order is not validating");
+        }
+
         Map<Long, ValidatedItemSnapshot> mapUnitPriceByProductId = event.getValidatedItems()
                 .stream()
                 .collect(Collectors.toMap(ValidatedItemSnapshot::getProductId, Function.identity()));
@@ -147,7 +172,7 @@ public class OrderServiceImpl implements OrderService {
 
         total = total.add(order.getShippingMethod().getCost());
 
-        order.setTotal(total);
+        order.setTotalPrice(total);
         repository.save(order);
         return order;
     }
@@ -161,7 +186,11 @@ public class OrderServiceImpl implements OrderService {
         Order order = repository.findById(orderId)
                 .orElseThrow(() -> new OrderEventNotFoundException(orderId, userId));
 
-        order.setStatus(OrderStatus.VALIDATED);
+        if (order.getStatus() != OrderStatus.VALIDATING) {
+            throw new IllegalStateException("Order is not validating");
+        }
+
+        order.setStatus(OrderStatus.CONFIRMED);
         return order;
 
     }
@@ -176,8 +205,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = repository.findWithItemsByIdAndUserIdForUpdate(orderId, userId)
                 .orElseThrow(() -> new OrderEventNotFoundException(orderId, userId));
 
-        if (order.getTotal().equals(amountToPay)) {
-            order.setStatus(OrderStatus.VALIDATED);
+        if (order.getTotalPrice().equals(amountToPay)) {
             order.setPaymentStatus(PaymentStatus.PENDING);
             order.setPaymentId(paymentId);
 
@@ -203,14 +231,19 @@ public class OrderServiceImpl implements OrderService {
                 .stream()
                 .collect(Collectors.toMap(AllocationItemSnapshot::getProductId, Function.identity()));
 
+        BigDecimal totalCost = BigDecimal.ZERO;
+
         for (OrderItem oi : order.getOrderItems()) {
             long productId = oi.getProductId();
             AllocationItemSnapshot ais = mapItemByProductId.get(productId);
             if (ais != null) {
+                totalCost = totalCost.add(ais.getAvgCostPrice());
                 oi.setAvgCostPrice(ais.getAvgCostPrice());
             }
 
         }
+
+        order.setTotalCost(totalCost);
         repository.save(order);
 
         return order;
@@ -239,6 +272,7 @@ public class OrderServiceImpl implements OrderService {
 
         Order order = repository.findWithItemsByIdAndUserIdForUpdate(orderId, userId)
                 .orElseThrow(() -> new OrderEventNotFoundException(orderId, userId));
+
         if (order.getPaymentId() != event.getPaymentId()) {
             throw new UnhandledEventException("Update PaymentStatus", orderId,
                     "order.paymentId != event.getPaymentId()");
@@ -247,6 +281,18 @@ public class OrderServiceImpl implements OrderService {
         order.setPaymentStatus(PaymentStatus.PAID);
 
         repository.save(order);
+
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public Order processCanceled(long orderId, long userId) {
+        Order order = repository.findWithItemsByIdAndUserIdForUpdate(orderId, userId)
+                .orElseThrow(() -> new OrderEventNotFoundException(orderId, userId));
+
+        order.setStatus(OrderStatus.CANCELED);
+
+        return order;
 
     }
 

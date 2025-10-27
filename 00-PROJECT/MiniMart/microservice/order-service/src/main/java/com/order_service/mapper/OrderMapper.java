@@ -9,6 +9,7 @@ import com.common.mapper.ToEntity;
 import com.order_service.dto.req.AddressUpdateReq;
 import com.order_service.dto.req.OrderCreateReq;
 import com.order_service.dto.req.OrderItemCreateReq;
+import com.order_service.dto.res.OrderAdminSummaryDTO;
 import com.order_service.dto.res.OrderDTO;
 import com.order_service.dto.res.OrderDetailDTO;
 import com.order_service.model.Address;
@@ -29,7 +30,8 @@ public interface OrderMapper {
     OrderItem toItem(OrderItemCreateReq req);
 
     @ToEntity
-    @Mapping(target = "total", ignore = true)
+    @Mapping(target = "totalPrice", ignore = true)
+    @Mapping(target = "totalCost", ignore = true)
     @Mapping(target = "shippingMethod", ignore = true)
     @Mapping(target = "paymentId", ignore = true)
     @Mapping(target = "status", ignore = true)
@@ -39,8 +41,9 @@ public interface OrderMapper {
     Order toEntity(OrderCreateReq req);
 
     @Mapping(target = "shippingMethod", source = "shippingMethod.name")
-    @Mapping(target = "shippingCost", source = "shippingMethod.cost")
     OrderDTO toClientSummaryDTO(Order order);
 
     OrderDetailDTO toClientDetailDTO(Order order);
+
+    OrderAdminSummaryDTO toAdminSummaryDTO(Order order);
 }

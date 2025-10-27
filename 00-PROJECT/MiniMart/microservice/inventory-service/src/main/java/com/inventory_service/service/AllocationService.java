@@ -3,6 +3,7 @@ package com.inventory_service.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.common_kafka.event.sales.order.OrderCancellationRequestedEvent;
 import com.common_kafka.event.sales.order.OrderCreationCompensatedEvent;
 import com.common_kafka.event.sales.order.OrderStockAllocationRequestedEvent;
 import com.common_kafka.event.shared.res.SagaResult;
@@ -18,5 +19,7 @@ public interface AllocationService {
     SagaResult<StockAllocationResult> processOrderStockAllocationRequest(OrderStockAllocationRequestedEvent event);
 
     Allocation processOrderCreationCompensated(OrderCreationCompensatedEvent event);
+
+    Allocation processOrderCancellationRequested(OrderCancellationRequestedEvent event);
 
 }

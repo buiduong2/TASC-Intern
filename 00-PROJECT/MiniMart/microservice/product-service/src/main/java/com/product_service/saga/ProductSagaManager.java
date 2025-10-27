@@ -48,7 +48,7 @@ public class ProductSagaManager {
                         .collect(Collectors.toSet()));
 
         kafkaTemplate.send(
-                KafkaTopics.CATALOG_PRODUCT_EVENTS,
+                KafkaTopics.CATALOG_PRODUCT_VALIDATION,
                 String.valueOf(event.getOrderId()),
                 passedEvent);
     }
@@ -68,7 +68,7 @@ public class ProductSagaManager {
                 failedProdutIds);
 
         kafkaTemplate.send(
-                KafkaTopics.CATALOG_PRODUCT_EVENTS,
+                KafkaTopics.CATALOG_PRODUCT_VALIDATION,
                 String.valueOf(event.getOrderId()),
                 failedEvent);
     }

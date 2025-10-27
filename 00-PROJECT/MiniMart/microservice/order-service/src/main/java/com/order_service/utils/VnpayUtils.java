@@ -71,6 +71,68 @@ public class VnpayUtils {
                 orderInfo);
     }
 
+    public static String buildHashDataRefund(Map<String, String> params) {
+        String requestId = nvl(params.get("vnp_RequestId"));
+        String version = nvl(params.get("vnp_Version"));
+        String command = nvl(params.get("vnp_Command"));
+        String tmnCode = nvl(params.get("vnp_TmnCode"));
+        String transactionType = nvl(params.get("vnp_TransactionType"));
+        String txnRef = nvl(params.get("vnp_TxnRef"));
+        String amount = nvl(params.get("vnp_Amount"));
+        String transactionNo = nvl(params.get("vnp_TransactionNo"));
+        String transactionDate = nvl(params.get("vnp_TransactionDate"));
+        String createBy = nvl(params.get("vnp_CreateBy"));
+        String createDate = nvl(params.get("vnp_CreateDate"));
+        String ipAddr = nvl(params.get("vnp_IpAddr"));
+        String orderInfo = nvl(params.get("vnp_OrderInfo"));
+
+        return String.join("|",
+                requestId,
+                version,
+                command,
+                tmnCode,
+                transactionType,
+                txnRef,
+                amount,
+                transactionNo,
+                transactionDate,
+                createBy,
+                createDate,
+                ipAddr,
+                orderInfo);
+    }
+
+    public static String buildHashDataRefundResponse(Map<String, String> params) {
+        String responseId = nvl(params.get("vnp_ResponseId"));
+        String command = nvl(params.get("vnp_Command"));
+        String responseCode = nvl(params.get("vnp_ResponseCode"));
+        String message = nvl(params.get("vnp_Message"));
+        String tmnCode = nvl(params.get("vnp_TmnCode"));
+        String txnRef = nvl(params.get("vnp_TxnRef"));
+        String amount = nvl(params.get("vnp_Amount"));
+        String bankCode = nvl(params.get("vnp_BankCode"));
+        String payDate = nvl(params.get("vnp_PayDate"));
+        String transactionNo = nvl(params.get("vnp_TransactionNo"));
+        String transactionType = nvl(params.get("vnp_TransactionType"));
+        String transactionStatus = nvl(params.get("vnp_TransactionStatus"));
+        String orderInfo = nvl(params.get("vnp_OrderInfo"));
+
+        return String.join("|",
+                responseId,
+                command,
+                responseCode,
+                message,
+                tmnCode,
+                txnRef,
+                amount,
+                bankCode,
+                payDate,
+                transactionNo,
+                transactionType,
+                transactionStatus,
+                orderInfo);
+    }
+
     public static String buildHashDataQueryDRResponse(Map<String, String> params) {
         String responseId = nvl(params.get("vnp_ResponseId"));
         String command = nvl(params.get("vnp_Command"));
@@ -130,6 +192,19 @@ public class VnpayUtils {
             throw new IllegalArgumentException("dateTime cannot be null");
         }
         return dateTime.format(VNP_DATE_FORMATTER);
+    }
+
+    /**
+     * Chuyển chuỗi vnp_PayDate hoặc vnp_TransactionDate sang LocalDateTime
+     * 
+     * @param vnpDateStr chuỗi ngày theo format "yyyyMMddHHmmss"
+     * @return LocalDateTime tương ứng
+     */
+    public static LocalDateTime parseVnpDate(String vnpDateStr) {
+        if (vnpDateStr == null || vnpDateStr.isEmpty()) {
+            return null;
+        }
+        return LocalDateTime.parse(vnpDateStr, VNP_DATE_FORMATTER);
     }
 
     public static Map<String, String> parseQuery(String query) {

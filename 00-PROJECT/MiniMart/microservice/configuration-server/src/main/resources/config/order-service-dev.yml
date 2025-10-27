@@ -2,9 +2,9 @@ eureka:
     client:
         service-url:
             defaultZone: http://localhost:8070/eureka/
-        enabled: false
-        register-with-eureka: false
-        fetch-registry: false
+        enabled: ${SERVICE_ENABLE_EUREKA:true}
+        register-with-eureka: ${SERVICE_ENABLE_EUREKA:true}
+        fetch-registry: ${SERVICE_ENABLE_EUREKA:true}
 
 spring:
     datasource:
@@ -26,12 +26,24 @@ logging:
         org.apache.kafka.clients: WARN
         org.springframework.kafka.listener: INFO
 
-custom: 
-  vnpay: 
-    merchant-ip: 127.0.0.1
-    zone-id: Asia/Ho_Chi_Minh
-    pay-url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-    return-url: http://localhost:8086/v1/payments/vnpay/return
-    query-dr-url: https://sandbox.vnpayment.vn/merchant_webapi/api/transaction
-    tmn-code: '{cipher}b2de3d58129ada1a77a5cb712158d9e06a1aee705e274ddb1784a9a940db937f'
-    hash-secret: '{cipher}4f7a49e1fbd9b5ebfa082917334b3700ce73f2a8d9f9f9bb1257aa250ba0889942bfbb1ecd9496f7714fe31ec595f05b982371c94f118fa6076e54cb06d3b51d'
+custom:
+    vnpay:
+        merchant-ip: 127.0.0.1
+        zone-id: Asia/Ho_Chi_Minh
+        pay-url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+        return-url: http://localhost:8086/v1/payments/vnpay/return
+        query-dr-url: https://sandbox.vnpayment.vn/merchant_webapi/api/transaction
+        tmn-code: '{cipher}b2de3d58129ada1a77a5cb712158d9e06a1aee705e274ddb1784a9a940db937f'
+        hash-secret: '{cipher}4f7a49e1fbd9b5ebfa082917334b3700ce73f2a8d9f9f9bb1257aa250ba0889942bfbb1ecd9496f7714fe31ec595f05b982371c94f118fa6076e54cb06d3b51d'
+
+management:
+    tracing:
+        sampling:
+            probability: 1.0 # tương đương với sleuth.sampler.probability
+        export:
+            zipkin:
+                enabled: true
+                endpoint: http://localhost:9411/api/v2/spans
+        exclusions:
+            - '/eureka/**'
+            - '/actuator/**'

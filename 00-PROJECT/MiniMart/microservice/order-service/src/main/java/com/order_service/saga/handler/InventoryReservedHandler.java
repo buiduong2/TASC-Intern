@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.common_kafka.config.KafkaTopics;
 import com.common_kafka.event.supply.inventory.InventoryReservationFailedEvent;
+import com.common_kafka.event.supply.inventory.InventoryReservedCompenstateCompletedEvent;
 import com.common_kafka.event.supply.inventory.InventoryReservedConfirmedEvent;
 import com.order_service.enums.SagaStepType;
 import com.order_service.model.Order;
@@ -50,6 +51,16 @@ public class InventoryReservedHandler {
                 "[SAGA][OrderId={}][STEP=STOCK_RESERVED][EVENT=InventoryReservationFailed] ❌ Stock reservation failed: {}",
                 event.getOrderId(), event.getReason());
 
+    }
+
+    @KafkaHandler
+    public void handleReservationCompensated(InventoryReservedCompenstateCompletedEvent event) {
+        long orderId = event.getOrderId();
+        long userId = event.getUserId();
+        orderSagaTrackerService.markCompensated(event.getOrderId(), SagaStepType.STOCK_RESERVED);
+        if (orderSagaTrackerService.checkOrderCanceledReadiness(orderId, userId)) {
+            orderService.processCanceled(orderId, userId);
+        }
     }
 
     @KafkaHandler(isDefault = true)

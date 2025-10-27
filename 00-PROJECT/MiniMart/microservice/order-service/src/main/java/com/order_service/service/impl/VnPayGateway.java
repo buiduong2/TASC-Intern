@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -17,8 +18,8 @@ import org.springframework.web.client.RestTemplate;
 
 import com.order_service.dto.res.GatewayResponseData;
 import com.order_service.dto.res.PaymentGatewayCreateDTO;
-import com.order_service.dto.res.PaymentTransactionDTO;
 import com.order_service.enums.IpnResponseType;
+import com.order_service.model.PaymentTransaction;
 import com.order_service.service.PaymentGateway;
 import com.order_service.utils.VnpayUtils;
 
@@ -104,11 +105,18 @@ public class VnPayGateway implements PaymentGateway {
         String txnRef = params.get("vnp_TxnRef");
         String gatewayTxnId = params.get("vnp_TransactionNo");
         BigDecimal amount = new BigDecimal(params.get("vnp_Amount"))
-                .divide(BigDecimal.valueOf(100), 0, RoundingMode.UNNECESSARY);
+                .divide(BigDecimal.valueOf(100), 0, RoundingMode.DOWN);
         String orderInfo = params.get("vnp_OrderInfo");
+        String payDateStr = Optional.ofNullable(params.get("vnp_PayDate"))
+                .orElse(params.get("vnp_TransactionDate"));
+
+        LocalDateTime paidAt = VnpayUtils.parseVnpDate(payDateStr);
+
         boolean success = "00".equals(params.get("vnp_ResponseCode"));
+        System.out.println(params.get("vnp_ResponseCode"));
 
         return GatewayResponseData.builder()
+                .paidAt(paidAt)
                 .txnRef(txnRef)
                 .gatewayTxnId(gatewayTxnId)
                 .amount(amount)
@@ -136,9 +144,41 @@ public class VnPayGateway implements PaymentGateway {
     }
 
     @Override
-    public PaymentTransactionDTO refund(Long paymentId, Long transactionId, Long adminId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'refund'");
+    public GatewayResponseData refund(PaymentTransaction paymentTransaction, HttpServletRequest servletRequest,
+            long userId) {
+        String orderInfo = "Refund for order id =" + paymentTransaction.getPayment().getOrderId();
+        ZoneId zone = ZoneId.of(zoneId); // GMT+7
+        LocalDateTime now = LocalDateTime.now(zone);
+        Map<String, String> params = new HashMap<>();
+        params.put("vnp_RequestId", String.valueOf(System.currentTimeMillis()));
+        params.put("vnp_Version", "2.1.0");
+        params.put("vnp_Command", "refund");
+        params.put("vnp_TmnCode", tmnCode);
+        params.put("vnp_TransactionType", "02");
+        params.put("vnp_TxnRef", paymentTransaction.getTxnRef());
+        params.put("vnp_Amount",
+                paymentTransaction.getAmount().multiply(BigDecimal.valueOf(100)).toBigInteger().toString());
+        params.put("vnp_OrderInfo", orderInfo);
+        params.put("vnp_TransactionNo", paymentTransaction.getGatewayTxnId());
+        params.put("vnp_TransactionDate", VnpayUtils.toVnpDate(paymentTransaction.getCreatedAt()));
+        params.put("vnp_CreateBy", String.valueOf(userId));
+        params.put("vnp_CreateDate", VnpayUtils.toVnpDate(now));
+        params.put("vnp_IpAddr", servletRequest.getRemoteAddr());
+
+        String hashData = VnpayUtils.buildHashDataRefund(params);
+        String secureHash = VnpayUtils.hmacSHA512(hashSecret, hashData);
+
+        HttpHeaders headers = new HttpHeaders();
+        Map<String, String> body = new HashMap<>(params);
+        body.put("vnp_SecureHash", secureHash);
+
+        HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+        @SuppressWarnings("unchecked")
+        Map<String, String> response = (Map<String, String>) restTemplate.postForObject(queryDrUrl, request, Map.class);
+
+        return verifySignature(response, VnpayUtils::buildHashDataRefundResponse);
     }
 
     @Override

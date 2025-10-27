@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@KafkaListener(topics = KafkaTopics.GLOBAL_COMPENSATION_EVENTS, groupId = "inventory-creation-compensated-group")
+@KafkaListener(topics = KafkaTopics.SALES_ORDER_COMPENSATION, groupId = "inventory-creation-compensated-group")
 public class OrderCreationCompensatedHandler {
 
     private final AllocationService allocationService;

@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.common_kafka.event.sales.order.OrderCancellationRequestedEvent;
 import com.common_kafka.event.sales.order.OrderCreationCompensatedEvent;
 import com.common_kafka.event.sales.order.OrderStockAllocationRequestedEvent;
 import com.common_kafka.event.shared.dto.OrderItemData;
@@ -195,6 +196,13 @@ public class AllocationServiceImpl implements AllocationService {
         repository.save(allocation);
 
         return allocation;
+    }
+
+    @Transactional
+    @Override
+    public Allocation processOrderCancellationRequested(OrderCancellationRequestedEvent event) {
+        return processOrderCreationCompensated(new OrderCreationCompensatedEvent(event.getOrderId(), event.getUserId(),
+                event.getItems(), "World hello"));
     }
 
 }

@@ -60,8 +60,8 @@ public class OrderController {
     }
 
     @PostMapping("{id}/cancel")
-    public void delete(@PathVariable Long orderId, @AuthenticationPrincipal InternalHeaderUserDetails userDetail) {
-        service.cancel(orderId, userDetail.getId());
+    public void delete(@PathVariable Long id, @AuthenticationPrincipal InternalHeaderUserDetails userDetail) {
+        service.cancel(id, userDetail.getId());
     }
 
 }

@@ -17,3 +17,15 @@ spring:
                 highlight_sql: true
         hibernate:
             ddl-auto: validate
+
+management:
+    tracing:
+        sampling:
+            probability: 0 # tương đương với sleuth.sampler.probability
+        export:
+            zipkin:
+                enabled: true
+                endpoint: http://localhost:9411/api/v2/spans
+        exclusions:
+            - '/eureka/**'
+            - '/actuator/**'

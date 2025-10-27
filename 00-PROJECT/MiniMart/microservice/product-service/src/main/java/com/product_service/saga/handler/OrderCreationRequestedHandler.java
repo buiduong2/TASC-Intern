@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
-@KafkaListener(topics = KafkaTopics.SALES_ORDER_COMMAND, groupId = "catalog-validation-group")
+@KafkaListener(topics = KafkaTopics.SALES_ORDER_INIT_COMMANDS, groupId = "catalog-validation-group")
 @Slf4j
 public class OrderCreationRequestedHandler {
     private final ProductService service;

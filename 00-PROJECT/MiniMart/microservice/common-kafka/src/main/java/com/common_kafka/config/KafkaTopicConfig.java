@@ -18,50 +18,79 @@ public class KafkaTopicConfig {
                         "retention.ms", "86400000")) // Giữ tin nhắn trong 24 giờ (86,400,000 ms)
                 .build();
     }
-
     // ------------------------------------------------------------------------
-    // TOPICS LIÊN QUAN ĐẾN SALE (ORDER & CART)
+    // SALES (ORDER & CART)
     // ------------------------------------------------------------------------
 
     @Bean
-    NewTopic topicSalesOrderEvents() {
+    public NewTopic salesOrderEvents() {
         return buildDefaultTopic(KafkaTopics.SALES_ORDER_EVENTS);
     }
 
     @Bean
-    NewTopic topicSalesCartEvents() {
+    public NewTopic salesOrderInitCommands() {
+        return buildDefaultTopic(KafkaTopics.SALES_ORDER_INIT_COMMANDS);
+    }
+
+    @Bean
+    public NewTopic salesOrderCancelCommands() {
+        return buildDefaultTopic(KafkaTopics.SALES_ORDER_CANCEL_COMMANDS);
+    }
+
+    @Bean
+    public NewTopic salesOrderCompensation() {
+        return buildDefaultTopic(KafkaTopics.SALES_ORDER_COMPENSATION);
+    }
+
+    @Bean
+    public NewTopic salesCartEvents() {
         return buildDefaultTopic(KafkaTopics.SALES_CART_EVENTS);
     }
 
     // ------------------------------------------------------------------------
-    // TOPICS LIÊN QUAN ĐẾN CATALOG & PRODUCT
+    // CATALOG & PRODUCT
     // ------------------------------------------------------------------------
 
     @Bean
-    NewTopic topicCatalogProductEvents() {
+    public NewTopic catalogProductValidation() {
+        return buildDefaultTopic(KafkaTopics.CATALOG_PRODUCT_VALIDATION);
+    }
+
+    @Bean
+    public NewTopic catalogProductEvents() {
         return buildDefaultTopic(KafkaTopics.CATALOG_PRODUCT_EVENTS);
     }
 
     // ------------------------------------------------------------------------
-    // TOPICS LIÊN QUAN ĐẾN SUPPLY CHAIN (INVENTORY)
+    // SUPPLY CHAIN (INVENTORY)
     // ------------------------------------------------------------------------
 
     @Bean
-    NewTopic topicSupplyInventoryReservation() {
+    public NewTopic supplyInventoryReservation() {
         return buildDefaultTopic(KafkaTopics.SUPPLY_INVENTORY_RESERVATION);
     }
 
     @Bean
-    NewTopic topicSupplyInventoryAllocation() {
+    public NewTopic supplyInventoryAllocation() {
         return buildDefaultTopic(KafkaTopics.SUPPLY_INVENTORY_ALLOCATION);
     }
 
+    @Bean
+    public NewTopic supplyInventoryCompensation() {
+        return buildDefaultTopic(KafkaTopics.SUPPLY_INVENTORY_COMPENSATION);
+    }
+
     // ------------------------------------------------------------------------
-    // TOPICS LIÊN QUAN ĐẾN FINANCE & PAYMENT
+    // FINANCE & PAYMENT
     // ------------------------------------------------------------------------
 
     @Bean
-    NewTopic topicFinancePaymentEvents() {
+    public NewTopic financePaymentRequest() {
+        return buildDefaultTopic(KafkaTopics.FINANCE_PAYMENT_REQUEST);
+    }
+
+    @Bean
+    public NewTopic financePaymentEvents() {
         return buildDefaultTopic(KafkaTopics.FINANCE_PAYMENT_EVENTS);
     }
 }

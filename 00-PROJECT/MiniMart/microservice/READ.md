@@ -246,3 +246,16 @@ Bất kỳ bước nào FAIL:
 └────────────────────────────── END SAGA ────────────────────────────────────────┘
 
 ```
+
+## Saga Order Cancelation
+
+-   Mô tả: Khi người dùng cancel. Lập tức chuyển đổi trạng thái đang yêu cầu hủy . Không compenstate ngược status sau khi đã yêu cầu hủy (có lỗi tự xử lý thủ công). Sẽ có một cronjob tiến hành kiểm tra các Order xem có order nào cần xử lý . Lúc này khi nhận được các request liên quan đến yêu cầu hủy. Lập tức kiểm tra (SagaTracker hoặc timeout quá giới hạn). lập tức phát sự kiện bù trừ
+
+-   Payment Service:
+    -   Tiến hành : đánh dấu canceled . Phát event `PaymentCompensationCompletedEvent`
+    -   nếu đã thanh toán: khởi tạo yêu cầu hoàn tiền. Nếu là COD. hoặc PAYMETN GATEWAY THì cố gắng xử lý hoàn tiền tự động. Hoặc hoàn tiền thủ công nếu thất bại ( tạo bản ghi yêu cầu hoàn tiền)
+
+- Inventory Service 
+    - Đã giữ chỗ 
+
+    - Đã chuyển giao

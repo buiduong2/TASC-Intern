@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.data.web.config.EnableSpringDataWebSupport.PageSerializationMode;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.common.security.InternalHeaderAuditorAware;
 
@@ -14,6 +15,8 @@ import com.common.security.InternalHeaderAuditorAware;
 @EnableJpaAuditing
 @Configuration
 @EnableAsync
+@EnableScheduling
+
 public class MiscConfig {
 
     @Bean

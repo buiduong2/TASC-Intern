@@ -15,3 +15,16 @@ logging:
         org:
             springframework:
                 security: DEBUG
+
+management:
+    tracing:
+        sampling:
+            probability: 0 # tương đương với sleuth.sampler.probability
+        export:
+            zipkin:
+                enabled: true
+                endpoint: http://localhost:9411/api/v2/spans
+
+        exclusions:
+            - '/eureka/**'
+            - '/actuator/**'

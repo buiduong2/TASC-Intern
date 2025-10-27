@@ -1,6 +1,7 @@
 package com.order_service.dto.res;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -10,6 +11,7 @@ import lombok.Setter;
 @Setter
 @Builder
 public class GatewayResponseData {
+    private LocalDateTime paidAt;
     private String txnRef;
     private String gatewayTxnId;
     private BigDecimal amount;

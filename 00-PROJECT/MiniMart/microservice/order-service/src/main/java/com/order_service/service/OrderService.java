@@ -12,14 +12,14 @@ import com.common_kafka.event.supply.inventory.InventoryReservedConfirmedEvent;
 import com.order_service.dto.req.OrderCreateReq;
 import com.order_service.dto.req.OrderFilter;
 import com.order_service.dto.req.OrderUpdateReq;
-import com.order_service.dto.res.OrderAdminDTO;
+import com.order_service.dto.res.OrderAdminSummaryDTO;
 import com.order_service.dto.res.OrderDTO;
 import com.order_service.dto.res.OrderDetailDTO;
 import com.order_service.model.Order;
 
 public interface OrderService {
 
-    Page<OrderDTO> findPage(Pageable pageable, Long id);
+Page<OrderDTO> findPage(Pageable pageable, Long userId);
 
     OrderDetailDTO findByIdAndUserId(long id, Long userId);
 
@@ -29,7 +29,7 @@ public interface OrderService {
 
     void cancel(Long orderId, Long userId);
 
-    Page<OrderAdminDTO> findAdminAll(OrderFilter filter, Pageable pageable);
+    Page<OrderAdminSummaryDTO> findAdminAll(OrderFilter filter, Pageable pageable);
 
     OrderDTO cancelAdmin(long id);
 
@@ -44,6 +44,8 @@ public interface OrderService {
     Order processInventoryAllocationConfirmed(InventoryAllocationConfirmedEvent event);
 
     Order processOrderCreationCompensated(OrderCreationCompensatedEvent event);
+
+    Order processCanceled(long orderId, long userId);
 
     void processPaymentSucceedEvent(PaymentSucceededEvent event);
 

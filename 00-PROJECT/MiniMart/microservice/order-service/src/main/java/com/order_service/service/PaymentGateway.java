@@ -6,8 +6,8 @@ import java.util.Map;
 
 import com.order_service.dto.res.GatewayResponseData;
 import com.order_service.dto.res.PaymentGatewayCreateDTO;
-import com.order_service.dto.res.PaymentTransactionDTO;
 import com.order_service.enums.IpnResponseType;
+import com.order_service.model.PaymentTransaction;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -21,7 +21,7 @@ public interface PaymentGateway {
 
     Object getIpnResponse(IpnResponseType responseType);
 
-    PaymentTransactionDTO refund(Long paymentId, Long transactionId, Long adminId);
+    GatewayResponseData refund(PaymentTransaction paymentTransaction, HttpServletRequest servletRequest, long userId);
 
     GatewayResponseData queryDr(String txnRef, String orderInfo, LocalDateTime createdAt);
 }

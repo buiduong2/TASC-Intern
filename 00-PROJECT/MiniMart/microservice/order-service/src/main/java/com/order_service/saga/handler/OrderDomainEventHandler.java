@@ -1,12 +1,11 @@
 package com.order_service.saga.handler;
 
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import com.order_service.enums.SagaStepType;
+import com.order_service.event.OrderCancelDomainEvent;
 import com.order_service.event.OrderPreparedDomainEvent;
 import com.order_service.model.Order;
 import com.order_service.saga.OrderSagaManager;
@@ -18,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class OrderPrepareHandler {
+public class OrderDomainEventHandler {
 
     private final OrderSagaTrackerService sagaTrackerService;
 
@@ -29,7 +28,6 @@ public class OrderPrepareHandler {
      * Được gọi sau khi Order được tạo thành công (transaction commit).
      */
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleOrderPrepared(OrderPreparedDomainEvent event) {
         Order order = event.getOrder();
 
@@ -42,6 +40,13 @@ public class OrderPrepareHandler {
                 order.getId());
         log.info("[SAGA][OrderId={}] ▶️ Published OrderCreationRequestedEvent", order.getId());
 
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleOrderCancel(OrderCancelDomainEvent event) {
+        Order order = event.getOrder();
+        log.info("[SAGA-CANCEL][OrderId={}] ▶️ Published OrderCancelRequestedEvent", order.getId());
+        sagaManager.publishOrderCancelRequestedEvent(order);
     }
 
 }

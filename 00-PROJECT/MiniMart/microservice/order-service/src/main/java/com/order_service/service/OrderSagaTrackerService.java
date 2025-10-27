@@ -15,8 +15,14 @@ public interface OrderSagaTrackerService {
 
     void markFailedStep(long orderId, SagaStepType stepType, String reason);
 
-    OrderSagaTracker findById(long orderId);
+    OrderSagaTracker findByOrderId(long orderId);
 
     Boolean checkPrePaymentReadinessOrCancelReadiness(Long orderId, long userId);
+
+    boolean checkCancelRediness(long orderId, long userId);
+
+    void markCompensated(long orderId, SagaStepType type);
+
+    boolean checkOrderCanceledReadiness(long orderId, long userId);
 
 }

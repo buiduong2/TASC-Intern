@@ -18,7 +18,7 @@ import lombok.Setter;
 @Setter
 public class OrderDetailDTO {
     private Long id;
-    private BigDecimal total;
+    private BigDecimal totalPrice;
     private String message;
     private OrderStatus status;
 

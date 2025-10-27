@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.common_kafka.event.catalog.product.ProductValidationPassedEvent;
+import com.common_kafka.event.sales.order.OrderCancellationRequestedEvent;
 import com.common_kafka.event.sales.order.OrderCreationCompensatedEvent;
 import com.common_kafka.event.shared.dto.OrderItemData;
 import com.common_kafka.event.shared.dto.ValidatedItemSnapshot;
@@ -104,11 +105,11 @@ public class StockServiceImpl implements StockService {
      */
     @Transactional
     @Override
-    public void processOrderCreationCompensated(OrderCreationCompensatedEvent event) {
+    public Allocation processOrderCreationCompensated(OrderCreationCompensatedEvent event) {
         Optional<Allocation> opt = allocationRepository
                 .findByOrderIdAndStatusForUpdate(event.getOrderId(), AllocationStatus.RESERVE);
         if (opt.isEmpty()) {
-            return;
+            return null;
         }
 
         List<OrderItemData> items = event.getItems().stream()
@@ -122,6 +123,15 @@ public class StockServiceImpl implements StockService {
         Allocation allocation = opt.get();
         allocation.setStatus(AllocationStatus.RELEASED);
         allocationRepository.save(allocation);
+        return allocation;
+
+    }
+
+    @Transactional
+    @Override
+    public Allocation processOrderCancellationRequested(OrderCancellationRequestedEvent event) {
+        return processOrderCreationCompensated(new OrderCreationCompensatedEvent(event.getOrderId(), event.getUserId(),
+                event.getItems(), "hellow orld"));
 
     }
 

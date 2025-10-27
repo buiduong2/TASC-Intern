@@ -7,6 +7,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.common_kafka.config.KafkaTopics;
+import com.common_kafka.event.sales.order.OrderCancellationRequestedEvent;
 import com.common_kafka.event.sales.order.OrderCreationCompensatedEvent;
 import com.common_kafka.event.sales.order.OrderCreationRequestedEvent;
 import com.common_kafka.event.sales.order.OrderInitialPaymentRequestedEvent;
@@ -33,15 +34,12 @@ public class OrderSagaManager {
 
     public void publishOrderCreationRequestedEvent(Order order) {
         kafkaTemplate.send(
-                KafkaTopics.SALES_ORDER_COMMAND,
+                KafkaTopics.SALES_ORDER_INIT_COMMANDS,
                 order.getId().toString(),
                 new OrderCreationRequestedEvent(
                         order.getId(),
                         order.getUserId(),
-                        order.getOrderItems()
-                                .stream()
-                                .map(oi -> new OrderItemData(oi.getId(), oi.getProductId(), oi.getQuantity()))
-                                .collect(Collectors.toCollection(LinkedHashSet::new))));
+                        toOrderItemData(order)));
     }
 
     public void tryPublishOrderInitialPaymentEventOrCancel(Order order) {
@@ -58,7 +56,7 @@ public class OrderSagaManager {
         if (Boolean.TRUE.equals(isReady)) {
             publishOrderInitialPaymentRequestedEvent(order);
         } else if (Boolean.FALSE.equals(isReady)) {
-            OrderSagaTracker tracker = trackerService.findById(order.getId());
+            OrderSagaTracker tracker = trackerService.findByOrderId(order.getId());
             publishCreationCompensatedEvent(order, tracker);
         }
 
@@ -71,11 +69,11 @@ public class OrderSagaManager {
         OrderInitialPaymentRequestedEvent event = new OrderInitialPaymentRequestedEvent(
                 order.getId(),
                 order.getUserId(),
-                order.getTotal(),
+                order.getTotalPrice(),
                 order.getPaymentMethod().name());
 
         kafkaTemplate.send(
-                KafkaTopics.SALES_ORDER_COMMAND,
+                KafkaTopics.FINANCE_PAYMENT_REQUEST,
                 String.valueOf(event.getOrderId()),
                 event);
     }
@@ -86,13 +84,11 @@ public class OrderSagaManager {
         OrderCreationCompensatedEvent event = new OrderCreationCompensatedEvent(
                 order.getId(),
                 order.getUserId(),
-                order.getOrderItems().stream()
-                        .map(oi -> new OrderItemData(oi.getId(), oi.getProductId(), oi.getQuantity()))
-                        .collect(Collectors.toCollection(LinkedHashSet::new)),
+                toOrderItemData(order),
                 ost.getFailureReason());
 
         kafkaTemplate.send(
-                KafkaTopics.GLOBAL_COMPENSATION_EVENTS,
+                KafkaTopics.SALES_ORDER_COMPENSATION,
                 String.valueOf(event.getOrderId()),
                 event);
 
@@ -103,15 +99,31 @@ public class OrderSagaManager {
         OrderStockAllocationRequestedEvent event = new OrderStockAllocationRequestedEvent(
                 order.getId(),
                 order.getUserId(),
-                order.getOrderItems()
-                        .stream()
-                        .map(oi -> new OrderItemData(oi.getId(), oi.getProductId(), oi.getQuantity()))
-                        .collect(Collectors.toCollection(LinkedHashSet::new)));
+                toOrderItemData(order));
 
         kafkaTemplate.send(
-                KafkaTopics.SALES_ORDER_COMMAND,
+                KafkaTopics.SUPPLY_INVENTORY_ALLOCATION,
                 String.valueOf(event.getOrderId()),
                 event);
+    }
+
+    public void publishOrderCancelRequestedEvent(Order order) {
+        OrderCancellationRequestedEvent event = new OrderCancellationRequestedEvent(
+                order.getId(),
+                order.getUserId(),
+                toOrderItemData(order));
+
+        kafkaTemplate.send(
+                KafkaTopics.SALES_ORDER_CANCEL_COMMANDS,
+                String.valueOf(event.getOrderId()),
+                event);
+    }
+
+    private LinkedHashSet<OrderItemData> toOrderItemData(Order order) {
+        return order.getOrderItems()
+                .stream()
+                .map(oi -> new OrderItemData(oi.getId(), oi.getProductId(), oi.getQuantity()))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
 }

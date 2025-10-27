@@ -31,5 +31,5 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
             LEFT JOIN FETCH p.transactions AS t
             WHERE p.id = ?1
             """)
-    Optional<Payment> findByidForUpdate(long paymentId);
+    Optional<Payment> findByIdForUpdate(long paymentId);
 }

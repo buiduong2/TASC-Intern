@@ -49,4 +49,5 @@ public class Payment {
 
     @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL)
     private List<PaymentTransaction> transactions;
+
 }

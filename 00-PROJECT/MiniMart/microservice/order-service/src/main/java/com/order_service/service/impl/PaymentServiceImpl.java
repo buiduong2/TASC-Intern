@@ -6,10 +6,12 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.kafka.common.errors.ResourceNotFoundException;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.common.exception.GenericException;
+import com.common_kafka.event.sales.order.OrderCancellationRequestedEvent;
 import com.common_kafka.event.sales.order.OrderCreationCompensatedEvent;
 import com.common_kafka.event.sales.order.OrderInitialPaymentRequestedEvent;
 import com.common_kafka.event.shared.helper.SagaResultUtils;
@@ -18,7 +20,6 @@ import com.order_service.dto.req.PaymentTransactionReq;
 import com.order_service.dto.req.RefundReq;
 import com.order_service.dto.res.GatewayResponseData;
 import com.order_service.dto.res.PaymentAdminDetailDTO;
-import com.order_service.dto.res.PaymentAdminSummary;
 import com.order_service.dto.res.PaymentGatewayCreateDTO;
 import com.order_service.dto.res.PaymentSummaryDTO;
 import com.order_service.dto.res.PaymentTransactionDTO;
@@ -26,6 +27,7 @@ import com.order_service.enums.IpnResponseType;
 import com.order_service.enums.PaymentMethod;
 import com.order_service.enums.PaymentStatus;
 import com.order_service.enums.TransactionStatus;
+import com.order_service.event.PaymentCanceledDomainEvent;
 import com.order_service.exception.ErrorCode;
 import com.order_service.mapper.PaymentMapper;
 import com.order_service.model.Payment;
@@ -53,6 +55,8 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentCalculator calculator;
 
+    private final ApplicationEventPublisher eventPublisher;
+
     private PaymentGateway getPaymentGateway(String name) {
         if (!paymentGatewayMap.containsKey(name)) {
             throw new IllegalArgumentException("cannot find paymentgateway");
@@ -73,7 +77,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentSummaryDTO findById(long id, Long userId) {
-        return repository.findByIdAndUserId(id, id)
+        return repository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new GenericException(ErrorCode.PAYMENT_NOT_FOUND, id));
     }
 
@@ -89,8 +93,8 @@ public class PaymentServiceImpl implements PaymentService {
             HttpServletRequest request) {
         Payment payment = repository.findByIdAndUserIdForUpdate(paymentId, userId)
                 .orElseThrow(() -> new GenericException(ErrorCode.PAYMENT_NOT_FOUND, paymentId));
-        if (!payment.getStatus().isPending()) {
-            throw new GenericException(ErrorCode.PAYMENT_CONFLICT_COMPLETED, paymentId);
+        if (!PaymentStatus.isCreatableTransaction(payment.getStatus())) {
+            throw new GenericException(ErrorCode.PAYMENT_TRANSACTION_BLOCKED, paymentId, payment.getStatus().name());
         }
 
         String txnRef = generateTxnRef();
@@ -119,10 +123,39 @@ public class PaymentServiceImpl implements PaymentService {
         return dto;
     }
 
+    @Transactional
     @Override
-    public PaymentAdminSummary refund(long paymentId, RefundReq req) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findById'");
+    public PaymentTransactionDTO refund(long transactionId, RefundReq req, long userId,
+            HttpServletRequest servletRequest) {
+        PaymentTransaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        ErrorCode.PAYMENT_TRANSACTION_NOT_FOUND.format(transactionId)));
+
+        if (transaction.getStatus() != TransactionStatus.SUCCESS) {
+            throw new GenericException(ErrorCode.PAYMENT_TRANSACTION_REFUND_STATUS, transactionId);
+        }
+
+        if (req.getIsManual()) {
+            transaction.setStatus(TransactionStatus.MANUAL_REFUNDED);
+            transactionRepository.save(transaction);
+            calculator.calculateAmountPaidAfterRefund(transaction.getPayment(), transaction);
+            return mapper.toTransactionDTO(transaction);
+        }
+
+        PaymentGateway gateway = getPaymentGateway(transaction.getMethod());
+        GatewayResponseData grd = gateway.refund(transaction, servletRequest, userId);
+
+        if (!grd.isIssignatureValid()) {
+            throw new GenericException(ErrorCode.GATEWAY_QUERY_DR_INVALID_SIGNATURE);
+        }
+
+        if (!grd.isSuccess()) {
+            throw new GenericException(ErrorCode.GATEWAY_REFUND_FAILED);
+        }
+        transaction.setStatus(TransactionStatus.REFUNDED);
+        transactionRepository.save(transaction);
+        calculator.calculateAmountPaidAfterRefund(transaction.getPayment(), transaction);
+        return mapper.toTransactionDTO(transaction);
     }
 
     @Transactional
@@ -151,6 +184,7 @@ public class PaymentServiceImpl implements PaymentService {
         return mapper.toTransactionDTO(transaction);
     }
 
+    @Transactional
     @Override
     public PaymentTransactionDTO verifyReturn(String gateway, Map<String, String> allParams) {
         PaymentGateway paymentGateway = getPaymentGateway(gateway);
@@ -169,6 +203,8 @@ public class PaymentServiceImpl implements PaymentService {
         }
         updateTransaction(resultDTO, transaction);
 
+        transactionRepository.save(transaction);
+
         calculator.calculateAmountPaid(transaction.getPayment().getId());
 
         return mapper.toTransactionDTO(transaction);
@@ -178,7 +214,7 @@ public class PaymentServiceImpl implements PaymentService {
         transaction.setGatewayTxnId(grd.getGatewayTxnId());
         if (grd.isSuccess()) {
             transaction.setStatus(TransactionStatus.SUCCESS);
-            transaction.setPaidAt(LocalDateTime.now());
+            transaction.setPaidAt(grd.getPaidAt());
         } else {
             transaction.setStatus(TransactionStatus.FAILED);
         }
@@ -258,6 +294,50 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setStatus(PaymentStatus.CANCELLED);
 
         return;
+    }
+
+    @Transactional
+    @Override
+    public Payment processOrderCancellationRequested(OrderCancellationRequestedEvent event) {
+        long orderId = event.getOrderId();
+        long userId = event.getUserId();
+        Payment payment = repository.findByOrderIdAndUserId(orderId, userId)
+                .orElseGet(() -> null);
+
+        if (payment == null) {
+            return null;
+        }
+
+        if (PaymentStatus.isCompensatedOrCanceled(payment.getStatus())) {
+            eventPublisher.publishEvent(new PaymentCanceledDomainEvent(payment));
+
+            return payment;
+        }
+
+        if (PaymentStatus.isEasyCompensation(payment.getStatus())) {
+            payment.setStatus(PaymentStatus.CANCELLED);
+            repository.save(payment);
+            eventPublisher.publishEvent(new PaymentCanceledDomainEvent(payment));
+            return payment;
+        }
+
+        payment.setStatus(PaymentStatus.MANUAL_REFUND_REQUIRED);
+        repository.save(payment);
+
+        return payment;
+    }
+
+    @Override
+    public void cancel(long paymentId) {
+        Payment payment = repository.findByIdForUpdate(paymentId)
+                .orElseThrow(() -> new GenericException(ErrorCode.PAYMENT_NOT_FOUND));
+
+        if (payment.getAmountPaid() == null || payment.getAmountPaid().compareTo(BigDecimal.ZERO) == 0) {
+
+        }
+
+        return;
+
     }
 
 }

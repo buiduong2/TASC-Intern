@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@KafkaListener(topics = KafkaTopics.SALES_ORDER_COMMAND, groupId = "payment-initial-group")
+@KafkaListener(topics = KafkaTopics.FINANCE_PAYMENT_REQUEST, groupId = "payment-initial-group")
 public class OrderInitialPaymentRequestedHandler {
 
     private final PaymentService paymentService;

@@ -38,6 +38,10 @@ spring:
                         add:
                             type:
                                 headers: true
+            observation-enabled: true
+
+        listener:
+            observation-enabled: true
 
     # cloud:
     #     openfeign:

@@ -11,10 +11,12 @@ import org.springframework.stereotype.Component;
 
 import com.common_kafka.config.KafkaTopics;
 import com.common_kafka.event.catalog.product.ProductValidationPassedEvent;
+import com.common_kafka.event.sales.order.OrderCancellationRequestedEvent;
 import com.common_kafka.event.shared.dto.FailedItemInfo;
 import com.common_kafka.event.shared.dto.ReservedItemSnapshot;
 import com.common_kafka.event.shared.dto.ValidatedItemSnapshot;
 import com.common_kafka.event.supply.inventory.InventoryReservationFailedEvent;
+import com.common_kafka.event.supply.inventory.InventoryReservedCompenstateCompletedEvent;
 import com.common_kafka.event.supply.inventory.InventoryReservedConfirmedEvent;
 import com.inventory_service.model.Allocation;
 import com.inventory_service.model.OrderReservationLog;
@@ -88,5 +90,20 @@ public class StockSagaManager {
                 String.valueOf(event.getOrderId()),
                 failedEvent);
 
+    }
+
+    public void publishInventoryReservedCompenstateCompletedEvent(
+            OrderCancellationRequestedEvent event,
+            Allocation allocation) {
+
+        InventoryReservedCompenstateCompletedEvent confirmEvent = new InventoryReservedCompenstateCompletedEvent(
+                event.getOrderId(),
+                event.getUserId(),
+                allocation == null ? null : allocation.getId());
+
+        kafkaTemplate.send(
+                KafkaTopics.SUPPLY_INVENTORY_RESERVATION,
+                String.valueOf(event.getOrderId()),
+                confirmEvent);
     }
 }

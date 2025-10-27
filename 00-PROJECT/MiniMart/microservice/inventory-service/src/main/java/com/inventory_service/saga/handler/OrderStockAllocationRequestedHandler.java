@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@KafkaListener(topics = KafkaTopics.SALES_ORDER_COMMAND, groupId = "inventory-allocation-group")
+@KafkaListener(topics = KafkaTopics.SUPPLY_INVENTORY_ALLOCATION, groupId = "inventory-allocation-group")
 public class OrderStockAllocationRequestedHandler {
 
     private final AllocationService allocationService;

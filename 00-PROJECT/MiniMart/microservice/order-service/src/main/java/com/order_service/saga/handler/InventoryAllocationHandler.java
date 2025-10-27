@@ -6,6 +6,7 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import com.common_kafka.config.KafkaTopics;
+import com.common_kafka.event.supply.inventory.InventoryAllocationCompensateCompletedEvent;
 import com.common_kafka.event.supply.inventory.InventoryAllocationConfirmedEvent;
 import com.order_service.enums.SagaStepType;
 import com.order_service.service.OrderSagaTrackerService;
@@ -33,7 +34,20 @@ public class InventoryAllocationHandler {
                 "[SAGA][OrderId={}][STEP=STOCK_FULFILLED][EVENT=InventoryAllocationConfirmed] ✅ Stock allocation confirmed",
                 event.getOrderId());
         log.info("[SAGA][OrderId={}] 🎯 Saga completed successfully", event.getOrderId());
+    }
 
+    @KafkaHandler
+    public void handleInventoryAllocationCompensateCompletedEvent(InventoryAllocationCompensateCompletedEvent event) {
+        long orderId = event.getOrderId();
+        long userId = event.getUserId();
+        orderSagaTrackerService.markCompensated(event.getOrderId(), SagaStepType.STOCK_FULFILLED);
+        if (orderSagaTrackerService.checkOrderCanceledReadiness(orderId, userId)) {
+            orderService.processCanceled(orderId, userId);
+        }
+
+        log.info(
+                "[SAGA][OrderId={}][STEP=STOCK_FULFILLED][EVENT=InventoryAllocationCompensateCompletedEvent] ✅ Stock allocation compensated",
+                event.getOrderId());
     }
 
     @KafkaHandler(isDefault = true)

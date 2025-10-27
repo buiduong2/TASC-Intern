@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@KafkaListener(topics = KafkaTopics.GLOBAL_COMPENSATION_EVENTS, groupId = "order-creation-compensated-group")
+@KafkaListener(topics = KafkaTopics.SALES_ORDER_COMPENSATION, groupId = "order-creation-compensated-group")
 public class OrderCreationCompensatedHandler {
 
     private final OrderService orderService;
@@ -48,6 +48,5 @@ public class OrderCreationCompensatedHandler {
     @KafkaHandler(isDefault = true)
     public void handleOther(Object other, @Header(name = "__TypeId__", required = false) String typeId) {
         log.info("[KAFKA] Received message ingored , typeId={}", typeId);
-
     }
 }

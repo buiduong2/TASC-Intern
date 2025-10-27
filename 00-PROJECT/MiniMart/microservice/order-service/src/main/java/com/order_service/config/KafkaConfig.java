@@ -10,7 +10,9 @@ public class KafkaConfig {
 
     @Bean
     KafkaTemplate<String, Object> jsonKafkaTemplate(ProducerFactory<String, Object> factory) {
-        return new KafkaTemplate<>(factory);
+        KafkaTemplate<String, Object> kafkaTemplate = new KafkaTemplate<>(factory);
+        kafkaTemplate.setObservationEnabled(true);
+        return kafkaTemplate;
     }
 
 }

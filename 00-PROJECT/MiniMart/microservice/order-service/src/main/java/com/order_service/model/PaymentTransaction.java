@@ -45,6 +45,7 @@ public class PaymentTransaction {
 
     @Column(length = 100, nullable = false, unique = true)
     private String txnRef;
+    
     private String gatewayTxnId;
 
     private LocalDateTime createdAt = LocalDateTime.now();

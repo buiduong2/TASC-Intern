@@ -1,21 +1,30 @@
 package com.order_service.enums;
 
-import lombok.Getter;
-
-@Getter
 public enum PaymentStatus {
-    PREPARING(true),
-    PENDING(true),
-    PARTIAL(true),
-    PAID(false),
-    REFUND_PENDING(true),
-    REFUNDED(false),
-    CANCELLED(false);
+    PREPARING,
+    PENDING,
+    PARTIAL,
+    PAID,
+    REFUND_PENDING,
+    REFUNDED,
+    REFUND_FAILED,
+    MANUAL_REFUND_REQUIRED,
+    CANCELLED;
 
-    private PaymentStatus(boolean isPending) {
-        this.isPending = isPending;
+    public static boolean isCreatableTransaction(PaymentStatus status) {
+        return status == PENDING || status == PARTIAL;
     }
 
-    boolean isPending;
+    public static boolean isEasyCompensation(PaymentStatus status) {
+        return status == PREPARING || status == PENDING;
+    }
+
+    public static boolean isCompensatedOrCanceled(PaymentStatus status) {
+        return status == CANCELLED || status == REFUNDED;
+    }
+
+    public static boolean isPaid(PaymentStatus status) {
+        return status == PARTIAL || status == PAID;
+    }
 
 }

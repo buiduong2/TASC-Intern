@@ -12,21 +12,22 @@ import lombok.Setter;
 @Getter
 @Setter
 public class OrderDTO {
+
     private Long id;
 
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
+    private BigDecimal totalPrice;
 
     private Long paymentId;
 
+    private Long userId;
+
     private OrderStatus status;
-    
+
     private PaymentStatus paymentStatus;
 
     private String shippingMethod;
 
-    private BigDecimal shippingCost;
+    private LocalDateTime createdAt;
 
-    private BigDecimal total;
+    private LocalDateTime updatedAt;
 }

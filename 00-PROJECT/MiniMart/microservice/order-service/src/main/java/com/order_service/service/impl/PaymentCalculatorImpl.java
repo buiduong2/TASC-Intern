@@ -11,6 +11,7 @@ import com.common.exception.GenericException;
 import com.order_service.enums.PaymentStatus;
 import com.order_service.enums.TransactionStatus;
 import com.order_service.event.PaymentPaidDomainEvent;
+import com.order_service.event.PaymentRefundedDomainEvent;
 import com.order_service.exception.ErrorCode;
 import com.order_service.model.Payment;
 import com.order_service.model.PaymentTransaction;
@@ -30,7 +31,7 @@ public class PaymentCalculatorImpl implements PaymentCalculator {
     @Transactional
     @Override
     public void calculateAmountPaid(long paymentId) {
-        Payment payment = paymentRepository.findByidForUpdate(paymentId)
+        Payment payment = paymentRepository.findByIdForUpdate(paymentId)
                 .orElseThrow(() -> new GenericException(ErrorCode.PAYMENT_NOT_FOUND, paymentId));
 
         if (payment.getTransactions() == null || payment.getTransactions().isEmpty()) {
@@ -59,8 +60,12 @@ public class PaymentCalculatorImpl implements PaymentCalculator {
                 .subtract(paymentTransaction.getAmount());
 
         payment.setAmountPaid(newAmountPaid);
-        payment.setStatus(PaymentStatus.REFUNDED);
-        payment.setCompletedAt(LocalDateTime.now());
+
+        if (payment.getAmountPaid().compareTo(BigDecimal.ONE) <= 0) {
+            payment.setStatus(PaymentStatus.REFUNDED);
+            payment.setCompletedAt(LocalDateTime.now());
+            eventPublisher.publishEvent(new PaymentRefundedDomainEvent(payment));
+        }
     }
 
 }

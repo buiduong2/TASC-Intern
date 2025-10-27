@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.common_kafka.config.KafkaTopics;
+import com.common_kafka.event.finance.payment.PaymentCompensationCompletedEvent;
 import com.common_kafka.event.finance.payment.PaymentRecordPreparedEvent;
 import com.common_kafka.event.finance.payment.PaymentSucceededEvent;
 import com.order_service.enums.SagaStepType;
@@ -23,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @KafkaListener(topics = KafkaTopics.FINANCE_PAYMENT_EVENTS, groupId = "order-payment-record-group")
 @Slf4j
-public class PaymentRecordCreatedHandler {
+public class PaymentEventHandler {
     private final OrderService orderService;
     private final OrderSagaTrackerService orderSagaTrackerService;
     private final OrderSagaManager orderSagaManager;
@@ -45,6 +46,19 @@ public class PaymentRecordCreatedHandler {
     public void handlePaymentSucceededEvent(PaymentSucceededEvent event) {
         orderSagaTrackerService.markSuccessStep(event.getOrderId(), SagaStepType.PAYMENT_PROCESSED);
         orderService.processPaymentSucceedEvent(event);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @KafkaHandler
+    public void handlePaymentCompensationCompletedEvent(PaymentCompensationCompletedEvent event) {
+        orderSagaTrackerService.markCompensated(event.getOrderId(), SagaStepType.PAYMENT_PROCESSED);
+
+        long orderId = event.getOrderId();
+        long userId = event.getUserId();
+        if (orderSagaTrackerService.checkOrderCanceledReadiness(orderId, userId)) {
+            orderService.processCanceled(orderId, userId);
+        }
+
     }
 
     @KafkaHandler(isDefault = true)
