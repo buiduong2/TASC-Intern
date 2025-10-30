@@ -63,7 +63,7 @@ public class OrderDetailDTO {
         private int quantity;
 
         public BigDecimal getTotalPrice() {
-            return unitPrice.multiply(BigDecimal.valueOf(quantity));
+            return unitPrice == null ? null : unitPrice.multiply(BigDecimal.valueOf(quantity));
         }
     }
 }

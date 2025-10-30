@@ -13,7 +13,12 @@ import jakarta.persistence.LockModeType;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
-    Optional<Payment> findByOrderIdAndUserId(long orderId, long userId);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            FROM Payment  AS p
+            WHERE p.orderId = ?1 AND p.userId = ?2
+            """)
+    Optional<Payment> findByOrderIdAndUserIdForCompensation(long orderId, long userId);
 
     Optional<PaymentSummaryDTO> findByIdAndUserId(long paymentId, long userId);
 
@@ -32,4 +37,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
             WHERE p.id = ?1
             """)
     Optional<Payment> findByIdForUpdate(long paymentId);
+
+    boolean existsByOrderId(long orderId);
 }

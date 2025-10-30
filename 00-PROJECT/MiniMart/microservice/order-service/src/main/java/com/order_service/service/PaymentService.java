@@ -1,11 +1,11 @@
 package com.order_service.service;
 
 import java.util.Map;
+import java.util.Optional;
 
 import com.common_kafka.event.sales.order.OrderCancellationRequestedEvent;
 import com.common_kafka.event.sales.order.OrderCreationCompensatedEvent;
 import com.common_kafka.event.sales.order.OrderInitialPaymentRequestedEvent;
-import com.common_kafka.event.shared.res.SagaResult;
 import com.order_service.dto.req.PaymentTransactionReq;
 import com.order_service.dto.req.RefundReq;
 import com.order_service.dto.res.PaymentAdminDetailDTO;
@@ -17,9 +17,9 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public interface PaymentService {
 
-    SagaResult<Payment> processInitialPaymentRequest(OrderInitialPaymentRequestedEvent event);
+    Payment processInitialPaymentRequest(OrderInitialPaymentRequestedEvent event);
 
-    void processOrderCreationCompensated(OrderCreationCompensatedEvent event);
+    Optional<Payment> processOrderCreationCompensated(OrderCreationCompensatedEvent event);
 
     PaymentAdminDetailDTO findAdminById(long id);
 
@@ -35,8 +35,6 @@ public interface PaymentService {
     PaymentTransactionDTO verifyReturn(String gateway, Map<String, String> allParams);
 
     Object handleIpn(String gateway, Map<String, String> allParams);
-
-    void cancel(long paymentId);
 
     Payment processOrderCancellationRequested(OrderCancellationRequestedEvent event);
 

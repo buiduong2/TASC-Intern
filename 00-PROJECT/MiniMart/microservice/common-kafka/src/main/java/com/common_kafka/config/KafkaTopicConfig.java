@@ -18,28 +18,11 @@ public class KafkaTopicConfig {
                         "retention.ms", "86400000")) // Giữ tin nhắn trong 24 giờ (86,400,000 ms)
                 .build();
     }
-    // ------------------------------------------------------------------------
-    // SALES (ORDER & CART)
-    // ------------------------------------------------------------------------
 
+    // ================= SALES =================
     @Bean
     public NewTopic salesOrderEvents() {
         return buildDefaultTopic(KafkaTopics.SALES_ORDER_EVENTS);
-    }
-
-    @Bean
-    public NewTopic salesOrderInitCommands() {
-        return buildDefaultTopic(KafkaTopics.SALES_ORDER_INIT_COMMANDS);
-    }
-
-    @Bean
-    public NewTopic salesOrderCancelCommands() {
-        return buildDefaultTopic(KafkaTopics.SALES_ORDER_CANCEL_COMMANDS);
-    }
-
-    @Bean
-    public NewTopic salesOrderCompensation() {
-        return buildDefaultTopic(KafkaTopics.SALES_ORDER_COMPENSATION);
     }
 
     @Bean
@@ -47,10 +30,7 @@ public class KafkaTopicConfig {
         return buildDefaultTopic(KafkaTopics.SALES_CART_EVENTS);
     }
 
-    // ------------------------------------------------------------------------
-    // CATALOG & PRODUCT
-    // ------------------------------------------------------------------------
-
+    // ================= CATALOG =================
     @Bean
     public NewTopic catalogProductValidation() {
         return buildDefaultTopic(KafkaTopics.CATALOG_PRODUCT_VALIDATION);
@@ -58,13 +38,10 @@ public class KafkaTopicConfig {
 
     @Bean
     public NewTopic catalogProductEvents() {
-        return buildDefaultTopic(KafkaTopics.CATALOG_PRODUCT_EVENTS);
+        return buildDefaultTopic(KafkaTopics.CATALOG_PRODUCT_VALIDATION_EVENTS);
     }
 
-    // ------------------------------------------------------------------------
-    // SUPPLY CHAIN (INVENTORY)
-    // ------------------------------------------------------------------------
-
+    // ================= SUPPLY =================
     @Bean
     public NewTopic supplyInventoryReservation() {
         return buildDefaultTopic(KafkaTopics.SUPPLY_INVENTORY_RESERVATION);
@@ -76,21 +53,24 @@ public class KafkaTopicConfig {
     }
 
     @Bean
-    public NewTopic supplyInventoryCompensation() {
-        return buildDefaultTopic(KafkaTopics.SUPPLY_INVENTORY_COMPENSATION);
+    public NewTopic supplyInventoryReservationEvents() {
+        return buildDefaultTopic(KafkaTopics.SUPPLY_INVENTORY_RESERVATION_EVENTS);
     }
 
-    // ------------------------------------------------------------------------
-    // FINANCE & PAYMENT
-    // ------------------------------------------------------------------------
-
     @Bean
-    public NewTopic financePaymentRequest() {
-        return buildDefaultTopic(KafkaTopics.FINANCE_PAYMENT_REQUEST);
+    public NewTopic supplyInventoryAllocationEvents() {
+        return buildDefaultTopic(KafkaTopics.SUPPLY_INVENTORY_ALLOCATION_EVENTS);
+    }
+
+    // ================= FINANCE =================
+    @Bean
+    public NewTopic financePaymentCommand() {
+        return buildDefaultTopic(KafkaTopics.FINANCE_PAYMENT_COMMAND);
     }
 
     @Bean
     public NewTopic financePaymentEvents() {
         return buildDefaultTopic(KafkaTopics.FINANCE_PAYMENT_EVENTS);
     }
+
 }

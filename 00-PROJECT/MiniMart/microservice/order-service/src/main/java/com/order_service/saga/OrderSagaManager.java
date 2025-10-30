@@ -9,14 +9,16 @@ import org.springframework.stereotype.Service;
 import com.common_kafka.config.KafkaTopics;
 import com.common_kafka.event.sales.order.OrderCancellationRequestedEvent;
 import com.common_kafka.event.sales.order.OrderCreationCompensatedEvent;
-import com.common_kafka.event.sales.order.OrderCreationRequestedEvent;
 import com.common_kafka.event.sales.order.OrderInitialPaymentRequestedEvent;
+import com.common_kafka.event.sales.order.OrderProductValidationRequestedEvent;
 import com.common_kafka.event.sales.order.OrderStockAllocationRequestedEvent;
+import com.common_kafka.event.sales.order.OrderStockReservationRequestedEvent;
 import com.common_kafka.event.shared.dto.OrderItemData;
+import com.common_kafka.exception.saga.ResourceNotFoundException;
+import com.order_service.enums.SagaStepStatus;
 import com.order_service.model.Order;
 import com.order_service.model.OrderSagaTracker;
-import com.order_service.repository.OrderRepository;
-import com.order_service.service.OrderSagaTrackerService;
+import com.order_service.repository.OrderSagaTrackerRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,41 +30,32 @@ public class OrderSagaManager {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    private final OrderSagaTrackerService trackerService;
+    private final OrderSagaTrackerRepository trackerRepository;
 
-    private final OrderRepository orderRepository;
-
-    public void publishOrderCreationRequestedEvent(Order order) {
+    public void publishOrderProductValidationRequestedEvent(Order order) {
         kafkaTemplate.send(
-                KafkaTopics.SALES_ORDER_INIT_COMMANDS,
+                KafkaTopics.CATALOG_PRODUCT_VALIDATION,
                 order.getId().toString(),
-                new OrderCreationRequestedEvent(
+                new OrderProductValidationRequestedEvent(
                         order.getId(),
                         order.getUserId(),
                         toOrderItemData(order)));
     }
 
-    public void tryPublishOrderInitialPaymentEventOrCancel(Order order) {
-        checkAndAdvanceOrder(order);
-    }
+    public void publishOrderStockReservationRequestedEvent(Order order) {
+        OrderStockReservationRequestedEvent event = new OrderStockReservationRequestedEvent(
+                order.getId(),
+                order.getUserId(),
+                toOrderItemData(order));
 
-    public void tryPublishCreationCompensatedEvent(long orderId, long userId) {
-        Order order = orderRepository.findByIdAndUserIdWithItem(orderId, userId).orElseThrow();
-        checkAndAdvanceOrder(order);
-    }
-
-    public void checkAndAdvanceOrder(Order order) {
-        Boolean isReady = trackerService.checkPrePaymentReadinessOrCancelReadiness(order.getId(), order.getUserId());
-        if (Boolean.TRUE.equals(isReady)) {
-            publishOrderInitialPaymentRequestedEvent(order);
-        } else if (Boolean.FALSE.equals(isReady)) {
-            OrderSagaTracker tracker = trackerService.findByOrderId(order.getId());
-            publishCreationCompensatedEvent(order, tracker);
-        }
+        kafkaTemplate.send(
+                KafkaTopics.SUPPLY_INVENTORY_RESERVATION,
+                order.getId().toString(),
+                event);
 
     }
 
-    private void publishOrderInitialPaymentRequestedEvent(Order order) {
+    public void publishOrderInitialPaymentRequestedEvent(Order order) {
         log.info("[SAGA][OrderId={}][ACTION=publishPaymentRequested] ✅ Published OrderInitialPaymentRequestedEvent",
                 order.getId());
 
@@ -73,13 +66,16 @@ public class OrderSagaManager {
                 order.getPaymentMethod().name());
 
         kafkaTemplate.send(
-                KafkaTopics.FINANCE_PAYMENT_REQUEST,
+                KafkaTopics.FINANCE_PAYMENT_COMMAND,
                 String.valueOf(event.getOrderId()),
                 event);
     }
 
-    private void publishCreationCompensatedEvent(Order order, OrderSagaTracker ost) {
-        log.warn("[SAGA][OrderId={}][ACTION=publishCancellation] ❌ Saga canceled", order.getId());
+    public void publishCreationCompensatedEvent(Order order) {
+        OrderSagaTracker ost = trackerRepository.findByOrderIdForUpdate(order.getId())
+                .orElseThrow(() -> ResourceNotFoundException.of(
+                        "OrderSagaTracker",
+                        order.getId()));
 
         OrderCreationCompensatedEvent event = new OrderCreationCompensatedEvent(
                 order.getId(),
@@ -87,11 +83,34 @@ public class OrderSagaManager {
                 toOrderItemData(order),
                 ost.getFailureReason());
 
-        kafkaTemplate.send(
-                KafkaTopics.SALES_ORDER_COMPENSATION,
-                String.valueOf(event.getOrderId()),
-                event);
+        SagaStepStatus paymentProcessed = ost.getPaymentProcessed();
+        SagaStepStatus stockReserved = ost.getStockReserved();
 
+        if (needCompensate(stockReserved)) {
+            kafkaTemplate.send(
+                    KafkaTopics.SUPPLY_INVENTORY_RESERVATION,
+                    String.valueOf(event.getOrderId()),
+                    event);
+        }
+
+        if (needCompensate(paymentProcessed)) {
+            kafkaTemplate.send(
+                    KafkaTopics.FINANCE_PAYMENT_COMMAND,
+                    String.valueOf(event.getOrderId()),
+                    event);
+        }
+
+    }
+
+    private boolean needCompensate(SagaStepStatus status) {
+        if (status == SagaStepStatus.NOT_STARTED) {
+            return false;
+        }
+        if (status == SagaStepStatus.COMPENSATED) {
+            return false;
+        }
+
+        return true;
     }
 
     public void publishOrderStockAllocationRequestedEvent(Order order) {
@@ -108,15 +127,27 @@ public class OrderSagaManager {
     }
 
     public void publishOrderCancelRequestedEvent(Order order) {
+
         OrderCancellationRequestedEvent event = new OrderCancellationRequestedEvent(
                 order.getId(),
                 order.getUserId(),
                 toOrderItemData(order));
 
         kafkaTemplate.send(
-                KafkaTopics.SALES_ORDER_CANCEL_COMMANDS,
+                KafkaTopics.SUPPLY_INVENTORY_ALLOCATION,
                 String.valueOf(event.getOrderId()),
                 event);
+
+        kafkaTemplate.send(
+                KafkaTopics.SUPPLY_INVENTORY_RESERVATION,
+                String.valueOf(event.getOrderId()),
+                event);
+
+        kafkaTemplate.send(
+                KafkaTopics.FINANCE_PAYMENT_COMMAND,
+                String.valueOf(event.getOrderId()),
+                event);
+
     }
 
     private LinkedHashSet<OrderItemData> toOrderItemData(Order order) {

@@ -24,10 +24,10 @@ public class OrderSagaTracker {
     private Long orderId;
 
     @Enumerated(EnumType.STRING)
-    private SagaStepStatus stockReserved;
+    private SagaStepStatus unitPriceConfirmed;
 
     @Enumerated(EnumType.STRING)
-    private SagaStepStatus unitPriceConfirmed;
+    private SagaStepStatus stockReserved;
 
     @Enumerated(EnumType.STRING)
     private SagaStepStatus paymentProcessed;

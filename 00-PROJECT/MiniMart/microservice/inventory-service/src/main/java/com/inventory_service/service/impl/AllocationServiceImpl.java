@@ -1,5 +1,6 @@
 package com.inventory_service.service.impl;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -10,15 +11,18 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.common_kafka.event.sales.order.OrderCancellationRequestedEvent;
-import com.common_kafka.event.sales.order.OrderCreationCompensatedEvent;
 import com.common_kafka.event.sales.order.OrderStockAllocationRequestedEvent;
 import com.common_kafka.event.shared.dto.OrderItemData;
-import com.common_kafka.event.shared.helper.SagaResultUtils;
-import com.common_kafka.event.shared.res.SagaResult;
+import com.common_kafka.exception.saga.BusinessInvariantViolationException;
+import com.common_kafka.exception.saga.IdempotentEventException;
+import com.common_kafka.exception.saga.InvalidStateException;
+import com.common_kafka.exception.saga.ResourceNotFoundException;
 import com.inventory_service.dto.req.StockAllocationFilter;
 import com.inventory_service.dto.res.StockAllocationResult;
 import com.inventory_service.dto.res.StockAllocationSummaryDTO;
@@ -26,7 +30,7 @@ import com.inventory_service.enums.AllocationStatus;
 import com.inventory_service.enums.OrderReservationLogStatus;
 import com.inventory_service.enums.PurchaseStatus;
 import com.inventory_service.exception.AllocationNotEnoughStockException;
-import com.inventory_service.exception.AllocationNotFoundException;
+import com.inventory_service.exception.StockReservationException;
 import com.inventory_service.model.Allocation;
 import com.inventory_service.model.AllocationItem;
 import com.inventory_service.model.OrderReservationLog;
@@ -60,29 +64,59 @@ public class AllocationServiceImpl implements AllocationService {
         throw new UnsupportedOperationException("Unimplemented method 'findAll'");
     }
 
+    /**
+     * ├─ Tìm Allocation (pessimistic lock)
+     * ├─ Validate state = RESERVE
+     * ├─ Lấy các PurchaseItem khả dụng
+     * ├─ Lấy danh sách OrderReservationLog
+     * ├─ Dò FIFO để phân bổ hàng
+     * ├─ Commit từng sản phẩm vào StockTransaction
+     * ├─ Update Allocation → ALLOCATED
+     * ├─ Save tất cả
+     */
     @Transactional
     @Override
-    public SagaResult<StockAllocationResult> processOrderStockAllocationRequest(
+    public StockAllocationResult processOrderStockAllocationRequest(
             OrderStockAllocationRequestedEvent event) {
-        return SagaResultUtils.execute(() -> {
-            long orderId = event.getOrderId();
 
-            Allocation allocation = repository.findByOrderIdAndStatusForUpdate(orderId, AllocationStatus.RESERVE)
-                    .orElseThrow(() -> new AllocationNotFoundException(
-                            "Allocation Not found when processOrderStockAllocationRequest for orderId = " + orderId));
+        long orderId = event.getOrderId();
 
-            List<Long> productIds = event.getItems().stream().map(OrderItemData::getProductId).toList();
+        Allocation allocation = repository.findByOrderIdForUpdate(orderId)
+                .orElseThrow(() -> ResourceNotFoundException.of("Allocation", orderId));
 
-            List<PurchaseItem> pis = purchaseItemRepository.findByProductIdInAndPurchaseStatusForAllocation(
-                    productIds,
-                    PurchaseStatus.ACTIVE);
+        if (allocation.getStatus() != AllocationStatus.RESERVE) {
+            throw InvalidStateException.of(
+                    "Allocation",
+                    allocation.getId(),
+                    allocation.getStatus().name(),
+                    AllocationStatus.RESERVE.name());
+        }
 
-            List<OrderReservationLog> logs = orderReservationLogRepository.findByOrderIdAndStatusForAllocation(
+        if (allocation.getAllocationItems() != null && !allocation.getAllocationItems().isEmpty()) {
+            throw new IdempotentEventException("Allocation", allocation.getId(), Instant.now());
+        }
+
+        List<Long> productIds = event.getItems().stream().map(OrderItemData::getProductId).toList();
+
+        List<PurchaseItem> pis = purchaseItemRepository.findByProductIdInAndPurchaseStatusForAllocation(
+                productIds,
+                PurchaseStatus.ACTIVE);
+
+        List<OrderReservationLog> logs = orderReservationLogRepository.findByOrderIdAndStatusForAllocation(
+                orderId,
+                OrderReservationLogStatus.RESERVED);
+
+        if (logs.size() == 0) {
+            throw new BusinessInvariantViolationException(
+                    "OrderReservationLog",
                     orderId,
-                    OrderReservationLogStatus.RESERVED);
+                    "Some thing wrong we don't have any OrderReservationLog");
+        }
 
+        try {
             // Process
             List<AllocationItem> allocationItems = allocationForOrder(pis, logs);
+
             commitAllocationForOrder(logs);
 
             // Update Allocation
@@ -94,13 +128,17 @@ public class AllocationServiceImpl implements AllocationService {
             orderReservationLogRepository.saveAll(logs);
 
             return StockAllocationResult.of(allocation, allocationItems);
-        });
+
+        } catch (StockReservationException e) {
+            throw BusinessInvariantViolationException.of("Allocation", allocation.getId(), e.getMessage());
+        } catch (AllocationNotEnoughStockException e) {
+            throw BusinessInvariantViolationException.of("AllocationItem", e.getProductId(), e.getMessage());
+        }
     }
 
     private void commitAllocationForOrder(List<OrderReservationLog> logs) {
         for (OrderReservationLog log : logs) {
             stockTransactionService.commitSingleProduct(log);
-            log.setStatus(OrderReservationLogStatus.COMMITTED);
         }
     }
 
@@ -166,20 +204,32 @@ public class AllocationServiceImpl implements AllocationService {
         return allocationItems;
     }
 
-    /**
-     * Method sẽ tiến hành đảo ngược quá trình AllocationItem
-     */
-
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Retryable(maxAttempts = 3)
     @Override
-    public Allocation processOrderCreationCompensated(OrderCreationCompensatedEvent event) {
+    public Allocation processOrderCancellationRequested(OrderCancellationRequestedEvent event) {
         Optional<Allocation> opt = repository
                 .findByOrderIdAndStatusForCompenstate(event.getOrderId(), AllocationStatus.ALLOCATED);
         if (opt.isEmpty()) {
-            return null;
+            Allocation dummy = new Allocation();
+            dummy.setOrderId(event.getOrderId());
+            dummy.setUserId(event.getUserId());
+            dummy.setStatus(AllocationStatus.RELEASED);
+            repository.saveAndFlush(dummy);
+            return dummy;
         }
 
         Allocation allocation = opt.get();
+
+        if (allocation.getStatus() == AllocationStatus.RELEASED) {
+            throw new IdempotentEventException("Allocation", allocation.getId(), Instant.now());
+        }
+
+        if (allocation.getStatus() != AllocationStatus.ALLOCATED) {
+            return allocation;
+        }
+
+        
 
         List<AllocationItem> allocationItems = allocationItemRepository
                 .findByAllocationIdForCompensate(allocation.getId())
@@ -196,13 +246,6 @@ public class AllocationServiceImpl implements AllocationService {
         repository.save(allocation);
 
         return allocation;
-    }
-
-    @Transactional
-    @Override
-    public Allocation processOrderCancellationRequested(OrderCancellationRequestedEvent event) {
-        return processOrderCreationCompensated(new OrderCreationCompensatedEvent(event.getOrderId(), event.getUserId(),
-                event.getItems(), "World hello"));
     }
 
 }

@@ -1,5 +1,7 @@
 ## JAva Collection
 
+- 
+
 ### 1. Khái niệm
 
 -   Mảng là một cấu trúc dữ liệu dùng để lưu trữ nhiều phần tử `cùng kiểu dữ liệu` trong một biến duy nhất

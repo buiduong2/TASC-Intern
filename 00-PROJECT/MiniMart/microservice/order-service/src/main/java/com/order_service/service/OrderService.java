@@ -5,8 +5,8 @@ import org.springframework.data.domain.Pageable;
 
 import com.common_kafka.event.catalog.product.ProductValidationPassedEvent;
 import com.common_kafka.event.finance.payment.PaymentRecordPreparedEvent;
-import com.common_kafka.event.finance.payment.PaymentSucceededEvent;
-import com.common_kafka.event.sales.order.OrderCreationCompensatedEvent;
+import com.common_kafka.event.finance.payment.PaymentRefundedEvent;
+import com.common_kafka.event.finance.payment.PaymentPaidEvent;
 import com.common_kafka.event.supply.inventory.InventoryAllocationConfirmedEvent;
 import com.common_kafka.event.supply.inventory.InventoryReservedConfirmedEvent;
 import com.order_service.dto.req.OrderCreateReq;
@@ -19,7 +19,7 @@ import com.order_service.model.Order;
 
 public interface OrderService {
 
-Page<OrderDTO> findPage(Pageable pageable, Long userId);
+    Page<OrderDTO> findPage(Pageable pageable, Long userId);
 
     OrderDetailDTO findByIdAndUserId(long id, Long userId);
 
@@ -43,10 +43,12 @@ Page<OrderDTO> findPage(Pageable pageable, Long userId);
 
     Order processInventoryAllocationConfirmed(InventoryAllocationConfirmedEvent event);
 
-    Order processOrderCreationCompensated(OrderCreationCompensatedEvent event);
-
     Order processCanceled(long orderId, long userId);
 
-    void processPaymentSucceedEvent(PaymentSucceededEvent event);
+    void processPaymentPaidEvent(PaymentPaidEvent event);
+
+    Order processOrderCreationCompensated(long orderId, long userId);
+
+    void processPaymentRefunded(PaymentRefundedEvent event);
 
 }

@@ -20,6 +20,11 @@
 
     <dependencies>
 
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>proteced</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>

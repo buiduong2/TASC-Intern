@@ -38,7 +38,7 @@ public class AdminOrderController {
         return orderService.cancelAdmin(id);
     }
 
-    @PostMapping("{id}/process")
+    @PostMapping("{id}/status")
     public OrderDTO updateStatus(@PathVariable long id, @Valid @RequestBody OrderUpdateReq req) {
         return orderService.updateStatus(id, req);
     }

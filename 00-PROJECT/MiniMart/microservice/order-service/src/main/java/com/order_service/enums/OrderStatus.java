@@ -7,26 +7,29 @@ import com.order_service.model.Order;
 public enum OrderStatus {
     VALIDATING, // Đang chờ Product + Stock xác thực
     CONFIRMED, // Đơn đã được xác nhận (Ready for shipment
+    ALLOCATED,
     SHIPPING, // Muốn SHIP phải PAID + CONFIRMED
     COMPLETED, // Giao hàng thành công
     CREATION_FAILED, // Saga bù trừ đang diễn ra
-    AWAITING_CANCEL,
-    CANCELING,
+    CANCELING, // Bắt đầu hủy từ admin
     CANCELED // Hủy hoàn toàn
     ;
+
+    public static boolean isCreating(Order order) {
+        return order.getStatus() == VALIDATING;
+    }
 
     private final static Set<OrderStatus> endedStatuses = Set.of(
             OrderStatus.COMPLETED,
             OrderStatus.CANCELED,
             OrderStatus.CREATION_FAILED);
 
-    public static boolean isOrderEnded(Order order) {
+    public static boolean isEnded(Order order) {
         return endedStatuses.contains(order.getStatus());
     }
 
-    public static boolean isCancellingOrAwaiting(Order order) {
-        return order.getStatus() == CANCELING ||
-                order.getStatus() == AWAITING_CANCEL;
+    public static boolean isCancelling(Order order) {
+        return order.getStatus() == CANCELING;
     }
 
     private final static Set<OrderStatus> cancelableStatus = Set.of(

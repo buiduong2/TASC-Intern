@@ -53,9 +53,16 @@ spring:
                         - id: order-service
                           uri: lb://order-service
                           predicates: 
-                            - Path=/v1/orders/**
+                            - Path=/v1/orders/**,/v1/admin/orders/**
                           filters:
                               - RemoveRequestHeader=Authorization
+                        - id: payemnt-service
+                          uri: lb://order-service
+                          predicates: 
+                            - Path=/v1/payments/**
+                          filters:
+                              - RemoveRequestHeader=Authorization
+                        
 management:
     endpoint:
         gateway:

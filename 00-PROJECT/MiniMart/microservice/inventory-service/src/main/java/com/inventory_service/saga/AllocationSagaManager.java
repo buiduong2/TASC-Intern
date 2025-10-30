@@ -66,7 +66,7 @@ public class AllocationSagaManager {
                 data.getAllocation().getId(),
                 allocationItemSnapshots);
 
-        kafkaTemplate.send(KafkaTopics.SUPPLY_INVENTORY_ALLOCATION, String.valueOf(event.getOrderId()), confirmEvent);
+        kafkaTemplate.send(KafkaTopics.SUPPLY_INVENTORY_ALLOCATION_EVENTS, String.valueOf(event.getOrderId()), confirmEvent);
 
     }
 
@@ -77,7 +77,7 @@ public class AllocationSagaManager {
                 event.getUserId(),
                 allocation == null ? null : allocation.getId());
 
-        kafkaTemplate.send(KafkaTopics.SUPPLY_INVENTORY_ALLOCATION, String.valueOf(event.getOrderId()), confirmEvent);
+        kafkaTemplate.send(KafkaTopics.SUPPLY_INVENTORY_ALLOCATION_EVENTS, String.valueOf(event.getOrderId()), confirmEvent);
 
     }
 

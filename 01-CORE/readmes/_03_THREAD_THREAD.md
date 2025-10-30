@@ -15,60 +15,29 @@
 
 ## Thread là gì
 
--   `Thread` luồng. là một `đơn vị nhỏ nhất của CPU` có thể được lên lịch để thực thi
+-   `Thread` (hay còn gọi là luồng) trong lập trình là một chuỗi thực thi độc lập nhỏ nhất `nằm trong một tiến trình` (process).
+
+-   `Thread (Luồng)` là một phần của `tiến trình`. Một tiến trình có thể chứa nhiều luồng. Các luồng này `chia sẻ chung` không gian bộ nhớ và tài nguyên của tiến trình cha, nhưng mỗi luồng có ngăn xếp (stack) và bộ đếm chương trình (program counter) `riêng để thực hiện các công việc khác nhau cùng lúc (đồng thời).`
+
+-   **Lợi ích của Thread**
+
+-   Việc sử dụng thread, còn gọi là đa luồng (multithreading), mang lại nhiều lợi ích quan trọng:
+
+    -   `Tăng tốc độ xử lý (Hiệu suất):` Bằng cách cho phép chương trình thực hiện nhiều tác vụ đồng thời. Ví dụ, trong một ứng dụng đồ họa, một luồng có thể xử lý giao diện người dùng, trong khi luồng khác đang thực hiện tính toán phức tạp ở nền.
+
+    -   `Phản hồi tốt hơn: `Giúp giao diện người dùng không bị "đứng" (freeze) khi chương trình đang thực hiện một tác vụ nặng. Luồng giao diện vẫn hoạt động bình thường, trong khi các luồng khác xử lý công việc.
+
+    -   `Sử dụng hiệu quả tài nguyên CPU:` Đặc biệt quan trọng với các CPU đa nhân (multi-core), vì các luồng có thể được phân phối và chạy trên các nhân CPU khác nhau.
+
 -   Trong một `process`. Có thể có nhiều `Thread` cùng chạy song song. Chia sẻ cùng một bộ nhớ và tài nguyên bên trong Process đó
 
--   Trong Java
+-   **Thread**
 
-    -   Thread là 1 Luồng `thực thi độc lập` bên trong chương trình
-    -   Khi một chương trình Java chạy nó sẽ tạo ra ít nhất 1 thread là 1 ThraedMain để thực thi phương thức `main`
-    -   Ta có thể tạo thêm nhiều thread khác để thực hiện công việc song song (như xử lý dữ liệu, đọc file, giao tiếp mạng)
-    -   là một tiến trình con `(sub-process)
+-   `Đối tượng Thread trong Java` là một thực thể `đại diện cho một luồng thực thi` (a single thread of control) trong chương trình của bạn. 🧵 Nó cho phép bạn thực hiện các `tác vụ song song hoặc đồng thời trong Java.`
 
--   So sánh với Process
-    -   Các luồng chia sẻ không gian địa chỉ ô nhớ giống nhau
-    -   Luồng là nhẹ
-    -   Sự giao tiếp giữa các luồng có chi phí thấp
-
-```java
-public class MyThreadDemo {
-    public static void main(String[] args) {
-        // Thread chính (main thread)
-        System.out.println("Hello from main thread");
-
-        // Tạo một thread mới bằng cách dùng lambda (Runnable)
-        Thread worker = new Thread(() -> {
-            System.out.println("Hello from worker thread");
-        });
-
-        worker.start(); // chạy thread mới song song với main
-    }
-}
-// Khi chạy thì min thread và woker threaad chạy song song
-```
-
--   **Đặc điểm của Thread**
-
--   Là một thực thể của `java.lang.Thread` hoặc được tạo thông qua `Runnable` / `Callable`
--   Mõi Thread có ngăn xếp `stack riêng` , nhưng `chung bộ nhớ heap` với các thread khác trong cùng một chương trình
--   CHương trình được dùng để
-
-    -   Chạy `đa nhiệm multitasking`
-    -   Tăng hiệu năng trên `đa lõi CPU`
-    -   Xử lý tác vụ nền (background task)
-
--
--   **So sánh ngắn gọn**
--   `process`: chương trình đang chạy, nặng, độc lập, bộ nhớ riêng
--   `Thread` Luồng thực thi trong process, chia sẻ bộ nhớ
-
--   **Vòng đời của Thread**
--   Vòng đời của Thread trong Java được kiểm soát bởi JVM. Java Định nghĩa các trạng thái của Luồng bằng thuộc tính tatic của class `Thread.State`
-    -   `NEW`: đây là trạng thái khi luồng vừa được tạo bằng phương thức khởi tạo của Thread, nhưng chưa được `start()`. Ở trạng thái này, luồng được tạo ra nhưng chưa được cấp phát tài nguyên và cũng chưa chạy. Nếu luồng đang ở trạng thái này mà chúng ta gọi các phương thức ép buộc như `stop`, `resume` ,`suspend`. sẽ là nguyên nhân xảy ra một exception `IllegalThreadStateException`
-    -   `RUNABLE`: sau khi gọi phương thức `start()` thì luồng test đã được cấp phát tài nguyên và các lịch điều phối CPU cho luồng test cũng bắt đầu có hiệu lực. Ở đây, chúng ta dùng trạng thái là runnable chứ không phải là running, vì luồng không thực sự luôn chạy mà tùy vào hệ thống mà có sự điều phối CPU khác nhau
-    -   `WAITING`: Thread chờ không giới hạn trong một thời gian nhất định, hoặc là không có luồng nào đánh thức nó
-    -   `BLOCKED` Đây là một trạng thái "Not runnable" là trạng thái Thread vẫn còn sống, nhưng hiện tại không được chọn để chayj. Thread chờ một monitor để unlokc một đối tượng mà nó cần
-    -   `TERMINATED` : Một thread trong trạng thái terminated hoặc dead khi phương thức `run()` của nó bị thoát
+-   **Đặc điểm**
+    -   Chia sẻ Tài nguyên
+    -   Độc lập Xử lý
 
 ## Có bao nhiêu cách để tạo 1 thread trong java
 
@@ -130,19 +99,29 @@ public class RunnableSimple implements Runnable {
 
 -   **Định nghĩa**:
 
-    -   là một tiến trình (Process) thực hiện nhiều luồng đồng thời. Một ứng dụng Java ngoài luồng chính có thể có các luồng khác thực thi đồng thời làm ứng dụng chạy nhanh và hiệu quả hơn
+    -   `Đa luồng (Multithreading)` là một khả năng của chương trình hoặc hệ điều hành cho phép `thực hiện nhiều luồng (thread) `hoặc nhiều phần của một chương trình `một cách đồng thời (concurrently) `hoặc `song song (parallelly).`
 
 -   **Ưu điểm**
 
-    -   Nó không chặn người sử dụng vì các luồng là độc lập và ta có thể thực hiện nhiều công việc cùng lúc
-        -   Như luồng giao diện, và gửi kết quả
-    -   Mỗi luồng có thể dùng chung và chia sẻ nguồn tài nguyên trong quá trình chạy, nhưng có thể thực hiện một cách độc lập
-    -   Exception có Throw thì ko ảnh hưởng đến Thread khác
+    -   `Phản hồi Tốt hơn:` Giúp ứng dụng không bị "đứng" (freeze). Ví dụ, một luồng xử lý tải dữ liệu nặng, trong khi luồng khác vẫn duy trì giao diện người dùng hoạt động bình thường.
+
+    -   `Sử dụng Tài nguyên Hiệu quả` Tận dụng tối đa sức mạnh của các bộ xử lý đa nhân, cho phép chương trình hoàn thành công việc nhanh hơn.
+
+    -   `Tiết kiệm Chi phí` Việc tạo và chuyển đổi giữa các luồng tốn ít tài nguyên và thời gian hơn nhiều so với việc tạo và chuyển đổi giữa các tiến trình (process) hoàn toàn mới.
 
 -   **Nhược điểm**
-    -   Càng nhiều luồng thì xử lý càng phức tạp
-    -   Xử lý vấn đề tranh chấp bộ nhớ, đồng bộ dữ liệu phức tạp
-    -   Cần tránh các luồng chết (deadlock) , luồng chạy mà không làm ji cả trong ứng dụng
+
+    -   `Phức tạp trong Lập trình và Gỡ lỗi (Debugging)`
+    -   `Nguy cơ về Đồng bộ hóa và Tranh chấp Dữ liệu`
+    -   `Chi phí Quản lý và Overhead`:
+        -   Context Switching Overhead
+        -   Tăng Mức sử dụng Bộ nhớ
+
+-   **So sánh đồng thời và song song**
+
+    -   `Đồng thời (Concurrency):` Xảy ra khi một CPU đơn nhân (single-core) quản lý nhiều tác vụ bằng cách chuyển đổi qua lại rất nhanh giữa chúng (time-slicing). Mặc dù có vẻ như chúng chạy cùng lúc, nhưng thực chất tại một thời điểm, chỉ có một luồng đang chạy.
+
+    -   `Song song (Parallelism): `Xảy ra khi các luồng được thực thi cùng một lúc trên các nhân CPU (cores) khác nhau của bộ xử lý đa nhân. Đây là cách thực sự giúp tăng tốc độ xử lý tổng thể.
 
 ## - Làm thế nào để biết được 1 thread, multi thread đã hoàn thành hay chưa?
 

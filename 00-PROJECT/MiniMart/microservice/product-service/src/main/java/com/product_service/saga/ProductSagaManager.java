@@ -1,5 +1,6 @@
 package com.product_service.saga;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,7 +14,7 @@ import com.common.utils.Utils;
 import com.common_kafka.config.KafkaTopics;
 import com.common_kafka.event.catalog.product.ProductValidationFailedEvent;
 import com.common_kafka.event.catalog.product.ProductValidationPassedEvent;
-import com.common_kafka.event.sales.order.OrderCreationRequestedEvent;
+import com.common_kafka.event.sales.order.OrderProductValidationRequestedEvent;
 import com.common_kafka.event.shared.dto.OrderItemData;
 import com.common_kafka.event.shared.dto.ValidatedItemSnapshot;
 import com.product_service.model.Product;
@@ -26,7 +27,7 @@ public class ProductSagaManager {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public void publishProductValidationPassedEvent(OrderCreationRequestedEvent event, List<Product> products) {
+    public void publishProductValidationPassedEvent(OrderProductValidationRequestedEvent event, List<Product> products) {
         Map<Long, OrderItemData> mapByProductId = event.getItems()
                 .stream()
                 .collect(Collectors.toMap(OrderItemData::getProductId, Function.identity()));
@@ -48,12 +49,12 @@ public class ProductSagaManager {
                         .collect(Collectors.toSet()));
 
         kafkaTemplate.send(
-                KafkaTopics.CATALOG_PRODUCT_VALIDATION,
+                KafkaTopics.CATALOG_PRODUCT_VALIDATION_EVENTS,
                 String.valueOf(event.getOrderId()),
                 passedEvent);
     }
 
-    public void publishProductValidationFailedEvent(OrderCreationRequestedEvent event, List<Product> products) {
+    public void publishProductValidationFailedEvent(OrderProductValidationRequestedEvent event, List<Product> products) {
         Set<Long> existedIds = products.stream().map(Product::getId).collect(Collectors.toSet());
         Set<Long> failedProdutIds = event.getItems()
                 .stream()
@@ -68,7 +69,20 @@ public class ProductSagaManager {
                 failedProdutIds);
 
         kafkaTemplate.send(
-                KafkaTopics.CATALOG_PRODUCT_VALIDATION,
+                KafkaTopics.CATALOG_PRODUCT_VALIDATION_EVENTS,
+                String.valueOf(event.getOrderId()),
+                failedEvent);
+    }
+
+    public void publishProductValidationFailedEvent(OrderProductValidationRequestedEvent event) {
+        ProductValidationFailedEvent failedEvent = new ProductValidationFailedEvent(
+                event.getOrderId(),
+                event.getUserId(),
+                "Product Service is Error",
+                Collections.emptySet());
+
+        kafkaTemplate.send(
+                KafkaTopics.CATALOG_PRODUCT_VALIDATION_EVENTS,
                 String.valueOf(event.getOrderId()),
                 failedEvent);
     }

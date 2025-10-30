@@ -1,21 +1,26 @@
 package com.order_service.service.impl;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.kafka.common.errors.ResourceNotFoundException;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.common.exception.GenericException;
 import com.common_kafka.event.sales.order.OrderCancellationRequestedEvent;
 import com.common_kafka.event.sales.order.OrderCreationCompensatedEvent;
 import com.common_kafka.event.sales.order.OrderInitialPaymentRequestedEvent;
-import com.common_kafka.event.shared.helper.SagaResultUtils;
-import com.common_kafka.event.shared.res.SagaResult;
+import com.common_kafka.exception.saga.DuplicateResourceException;
+import com.common_kafka.exception.saga.IdempotentEventException;
+import com.common_kafka.exception.saga.InvalidStateException;
 import com.order_service.dto.req.PaymentTransactionReq;
 import com.order_service.dto.req.RefundReq;
 import com.order_service.dto.res.GatewayResponseData;
@@ -27,7 +32,6 @@ import com.order_service.enums.IpnResponseType;
 import com.order_service.enums.PaymentMethod;
 import com.order_service.enums.PaymentStatus;
 import com.order_service.enums.TransactionStatus;
-import com.order_service.event.PaymentCanceledDomainEvent;
 import com.order_service.exception.ErrorCode;
 import com.order_service.mapper.PaymentMapper;
 import com.order_service.model.Payment;
@@ -54,8 +58,6 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentMapper mapper;
 
     private final PaymentCalculator calculator;
-
-    private final ApplicationEventPublisher eventPublisher;
 
     private PaymentGateway getPaymentGateway(String name) {
         if (!paymentGatewayMap.containsKey(name)) {
@@ -265,78 +267,100 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Transactional
     @Override
-    public SagaResult<Payment> processInitialPaymentRequest(OrderInitialPaymentRequestedEvent event) {
-        return SagaResultUtils.execute(() -> {
-            long orderId = event.getOrderId();
-            long userId = event.getUserId();
+    public Payment processInitialPaymentRequest(OrderInitialPaymentRequestedEvent event) {
 
-            Payment payment = new Payment();
-            payment.setOrderId(orderId);
-            payment.setName(PaymentMethod.valueOf(event.getPaymentMethod()));
-            payment.setStatus(PaymentStatus.PENDING);
-            payment.setAmountTotal(event.getTotalAmount());
-            payment.setUserId(userId);
-            repository.save(payment);
-            return payment;
-        });
-    }
-
-    @Transactional
-    @Override
-    public void processOrderCreationCompensated(OrderCreationCompensatedEvent event) {
-        Payment payment = repository.findByOrderIdAndUserId(event.getOrderId(), event.getUserId())
-                .orElseGet(() -> null);
-
-        if (payment == null || payment.getStatus().equals(PaymentStatus.CANCELLED)) {
-            return;
+        if (repository.existsByOrderId(event.getOrderId())) {
+            throw new DuplicateResourceException("Payment", event.getOrderId());
         }
 
-        payment.setStatus(PaymentStatus.CANCELLED);
-
-        return;
-    }
-
-    @Transactional
-    @Override
-    public Payment processOrderCancellationRequested(OrderCancellationRequestedEvent event) {
         long orderId = event.getOrderId();
         long userId = event.getUserId();
-        Payment payment = repository.findByOrderIdAndUserId(orderId, userId)
-                .orElseGet(() -> null);
 
-        if (payment == null) {
-            return null;
-        }
-
-        if (PaymentStatus.isCompensatedOrCanceled(payment.getStatus())) {
-            eventPublisher.publishEvent(new PaymentCanceledDomainEvent(payment));
-
-            return payment;
-        }
-
-        if (PaymentStatus.isEasyCompensation(payment.getStatus())) {
-            payment.setStatus(PaymentStatus.CANCELLED);
+        Payment payment = new Payment();
+        payment.setOrderId(orderId);
+        payment.setName(PaymentMethod.valueOf(event.getPaymentMethod()));
+        payment.setStatus(PaymentStatus.PENDING);
+        payment.setAmountTotal(event.getTotalAmount());
+        payment.setUserId(userId);
+        try {
             repository.save(payment);
-            eventPublisher.publishEvent(new PaymentCanceledDomainEvent(payment));
-            return payment;
+        } catch (DataIntegrityViolationException ex) {
+            throw new DuplicateResourceException("Payment", orderId);
         }
-
-        payment.setStatus(PaymentStatus.MANUAL_REFUND_REQUIRED);
-        repository.save(payment);
 
         return payment;
     }
 
+    /**
+     * PaymentService:
+     * ├─ find payment by orderId
+     * ├─ if already cancelled → skip
+     * ├─ else set status = CANCELLED
+     * ├─ save payment
+     * └─ publish PaymentCompensationCompletedEvent ✅
+     */
+    @Transactional
     @Override
-    public void cancel(long paymentId) {
-        Payment payment = repository.findByIdForUpdate(paymentId)
-                .orElseThrow(() -> new GenericException(ErrorCode.PAYMENT_NOT_FOUND));
+    public Optional<Payment> processOrderCreationCompensated(OrderCreationCompensatedEvent event) {
+        Optional<Payment> paymentOpt = repository.findByOrderIdAndUserIdForCompensation(event.getOrderId(),
+                event.getUserId());
 
-        if (payment.getAmountPaid() == null || payment.getAmountPaid().compareTo(BigDecimal.ZERO) == 0) {
-
+        if (!paymentOpt.isPresent()) {
+            return paymentOpt;
         }
 
-        return;
+        Payment payment = paymentOpt.get();
+
+        if (payment.getStatus() != PaymentStatus.PENDING) {
+            throw new InvalidStateException("Payment",
+                    payment.getId(),
+                    payment.getStatus().name(),
+                    PaymentStatus.PENDING.name());
+        }
+
+        payment.setStatus(PaymentStatus.CANCELLED);
+
+        repository.save(payment);
+
+        return paymentOpt;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    @Retryable(maxAttempts = 3)
+    public Payment processOrderCancellationRequested(OrderCancellationRequestedEvent event) {
+        long orderId = event.getOrderId();
+        long userId = event.getUserId();
+        Optional<Payment> paymentOpt = repository.findByOrderIdAndUserIdForCompensation(orderId, userId);
+
+        if (paymentOpt.isEmpty()) {
+            Payment payment = new Payment();
+            payment.setOrderId(orderId);
+            payment.setUserId(userId);
+            payment.setStatus(PaymentStatus.CANCELLED);
+
+            repository.saveAndFlush(payment);
+            return payment;
+        } else {
+            Payment payment = paymentOpt.get();
+
+            PaymentStatus status = payment.getStatus();
+            if (PaymentStatus.isCompensatedOrCanceled(status)) {
+                throw new IdempotentEventException("Payment", payment.getId(), Instant.now());
+            }
+
+            if (PaymentStatus.isEasyCompensation(status)) {
+                payment.setStatus(PaymentStatus.CANCELLED);
+            }
+
+            if (PaymentStatus.isPaid(status)) {
+                payment.setStatus(PaymentStatus.REFUND_REQUIRED);
+            }
+
+            repository.save(payment);
+            return payment;
+
+        }
 
     }
 

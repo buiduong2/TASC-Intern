@@ -12,10 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.common.exception.GenericException;
-import com.common_kafka.event.sales.order.OrderCreationRequestedEvent;
+import com.common_kafka.event.sales.order.OrderProductValidationRequestedEvent;
 import com.common_kafka.event.shared.dto.OrderItemData;
-import com.common_kafka.event.shared.helper.SagaResultUtils;
-import com.common_kafka.event.shared.res.SagaResult;
 import com.product_service.dto.req.ProductCheckExistsReq;
 import com.product_service.dto.req.ProductUpdateReq;
 import com.product_service.dto.res.ProductCheckExistsRes;
@@ -185,15 +183,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public SagaResult<ProductValidationResult> processOrderCreationRequested(OrderCreationRequestedEvent event) {
-        return SagaResultUtils.execute(() -> {
-            Set<Long> requestIds = event.getItems().stream().map(OrderItemData::getProductId)
-                    .collect(Collectors.toCollection(HashSet::new));
+    public ProductValidationResult processOrderCreationRequested(OrderProductValidationRequestedEvent event) {
+        Set<Long> requestIds = event.getItems().stream().map(OrderItemData::getProductId)
+                .collect(Collectors.toCollection(HashSet::new));
 
-            List<Product> products = repository.findByIdInAndStatusIn(requestIds, List.of(ProductStatus.ACTIVE));
-            boolean allValid = products.size() == requestIds.size();
-            return ProductValidationResult.of(allValid, products);
-        });
+        List<Product> products = repository.findByIdInAndStatusIn(requestIds, List.of(ProductStatus.ACTIVE));
+        boolean allValid = products.size() == requestIds.size();
+        return ProductValidationResult.of(allValid, products);
 
     }
 

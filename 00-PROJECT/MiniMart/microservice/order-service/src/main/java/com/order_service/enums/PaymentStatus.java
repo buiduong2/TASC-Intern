@@ -5,10 +5,8 @@ public enum PaymentStatus {
     PENDING,
     PARTIAL,
     PAID,
-    REFUND_PENDING,
+    REFUND_REQUIRED,
     REFUNDED,
-    REFUND_FAILED,
-    MANUAL_REFUND_REQUIRED,
     CANCELLED;
 
     public static boolean isCreatableTransaction(PaymentStatus status) {
@@ -20,7 +18,7 @@ public enum PaymentStatus {
     }
 
     public static boolean isCompensatedOrCanceled(PaymentStatus status) {
-        return status == CANCELLED || status == REFUNDED;
+        return status == CANCELLED || status == REFUNDED || status == REFUND_REQUIRED;
     }
 
     public static boolean isPaid(PaymentStatus status) {

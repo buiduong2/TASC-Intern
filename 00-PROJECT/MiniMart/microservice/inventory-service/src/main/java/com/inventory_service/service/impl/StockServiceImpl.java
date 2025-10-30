@@ -1,5 +1,6 @@
 package com.inventory_service.service.impl;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -7,15 +8,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.common_kafka.event.catalog.product.ProductValidationPassedEvent;
 import com.common_kafka.event.sales.order.OrderCancellationRequestedEvent;
 import com.common_kafka.event.sales.order.OrderCreationCompensatedEvent;
+import com.common_kafka.event.sales.order.OrderStockReservationRequestedEvent;
 import com.common_kafka.event.shared.dto.OrderItemData;
 import com.common_kafka.event.shared.dto.ValidatedItemSnapshot;
-import com.common_kafka.event.shared.res.SagaResult;
+import com.common_kafka.exception.saga.IdempotentEventException;
+import com.common_kafka.exception.saga.InvalidStateException;
+import com.common_kafka.exception.saga.LogicViolationException;
+import com.common_kafka.exception.saga.ResourceNotFoundException;
 import com.inventory_service.dto.res.ReservateStockResult;
 import com.inventory_service.enums.AllocationStatus;
 import com.inventory_service.exception.StockReservationException;
@@ -67,10 +73,15 @@ public class StockServiceImpl implements StockService {
         service.syncQuantityByProductIdIn(productIds);
     }
 
+    @Transactional(noRollbackFor = LogicViolationException.class)
     @Override
-    public SagaResult<ReservateStockResult> processProductValidationEvent(ProductValidationPassedEvent event) {
+    public ReservateStockResult processOrderStockReservationRequested(OrderStockReservationRequestedEvent event) {
         long orderId = event.getOrderId();
         long userId = event.getUserId();
+
+        if (allocationRepository.existsByOrderId(orderId)) {
+            throw new IdempotentEventException("Allocation", orderId, Instant.now());
+        }
 
         Allocation allocation = new Allocation();
         allocation.setStatus(AllocationStatus.RESERVE);
@@ -79,24 +90,23 @@ public class StockServiceImpl implements StockService {
 
         allocationRepository.save(allocation);
 
-        List<ValidatedItemSnapshot> vis = event.getValidatedItems()
+        List<ValidatedItemSnapshot> vis = event.getItems()
                 .stream()
-                .sorted(Comparator.comparingLong(ValidatedItemSnapshot::getProductId))
+                .sorted(Comparator.comparingLong(OrderItemData::getProductId))
+                .map(oi -> new ValidatedItemSnapshot(oi.getOrderItemId(), oi.getProductId(), oi.getQuantity(), null))
                 .toList();
 
-        try {
-            List<OrderReservationLog> logs = new ArrayList<>();
-            for (ValidatedItemSnapshot vi : vis) {
+        List<OrderReservationLog> logs = new ArrayList<>();
+        for (ValidatedItemSnapshot vi : vis) {
+            try {
                 OrderReservationLog log = transactionService.reserveSingleProduct(orderId, vi);
                 logs.add(log);
+            } catch (StockReservationException e) {
+                throw LogicViolationException.of("Stock", vi.getProductId(), e.getMessage());
             }
-
-            return SagaResult.success(ReservateStockResult.of(logs, allocation));
-        } catch (StockReservationException e) {
-            return SagaResult.failure(e.getMessage());
-        } catch (Exception e) {
-            return SagaResult.failure("Server Error");
         }
+
+        return ReservateStockResult.of(logs, allocation);
 
     }
 
@@ -106,10 +116,19 @@ public class StockServiceImpl implements StockService {
     @Transactional
     @Override
     public Allocation processOrderCreationCompensated(OrderCreationCompensatedEvent event) {
-        Optional<Allocation> opt = allocationRepository
-                .findByOrderIdAndStatusForUpdate(event.getOrderId(), AllocationStatus.RESERVE);
+        Optional<Allocation> opt = allocationRepository.findByOrderIdForUpdate(event.getOrderId());
         if (opt.isEmpty()) {
-            return null;
+            throw ResourceNotFoundException.of("Allocation", event.getOrderId());
+        }
+
+        Allocation allocation = opt.get();
+
+        if (allocation.getStatus() != AllocationStatus.RESERVE) {
+            throw InvalidStateException.of(
+                    "Allocation",
+                    allocation.getId(),
+                    allocation.getStatus().name(),
+                    AllocationStatus.RESERVE.name());
         }
 
         List<OrderItemData> items = event.getItems().stream()
@@ -120,18 +139,48 @@ public class StockServiceImpl implements StockService {
             transactionService.compensateSingleReservation(event.getOrderId(), orderItemData.getProductId());
         }
 
-        Allocation allocation = opt.get();
         allocation.setStatus(AllocationStatus.RELEASED);
         allocationRepository.save(allocation);
         return allocation;
 
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Retryable(maxAttempts = 3)
     @Override
     public Allocation processOrderCancellationRequested(OrderCancellationRequestedEvent event) {
-        return processOrderCreationCompensated(new OrderCreationCompensatedEvent(event.getOrderId(), event.getUserId(),
-                event.getItems(), "hellow orld"));
+        final long orderId = event.getOrderId();
+        final long userId = event.getUserId();
+
+        Optional<Allocation> opt = allocationRepository.findByOrderIdForUpdate(event.getOrderId());
+        if (opt.isEmpty()) {
+
+            Allocation dummy = new Allocation();
+            dummy.setOrderId(orderId);
+            dummy.setUserId(userId);
+
+            dummy.setStatus(AllocationStatus.RELEASED);
+            allocationRepository.saveAndFlush(dummy);
+            return dummy;
+        }
+
+        Allocation allocation = opt.get();
+        AllocationStatus currentStatus = allocation.getStatus();
+        if (currentStatus == AllocationStatus.RELEASED) {
+            throw new IdempotentEventException("Allocation", allocation.getId(), Instant.now());
+        }
+
+        if (currentStatus == AllocationStatus.RESERVE) {
+
+            return processOrderCreationCompensated(
+                    new OrderCreationCompensatedEvent(
+                            event.getOrderId(),
+                            event.getUserId(),
+                            event.getItems(),
+                            "hellow orld"));
+
+        }
+        return allocation;
 
     }
 

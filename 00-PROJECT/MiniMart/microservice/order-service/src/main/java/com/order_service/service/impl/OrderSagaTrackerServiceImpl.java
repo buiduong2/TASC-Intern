@@ -1,13 +1,16 @@
 package com.order_service.service.impl;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.common_kafka.exception.saga.ResourceNotFoundException;
 import com.order_service.enums.SagaStepStatus;
 import com.order_service.enums.SagaStepType;
 import com.order_service.model.OrderSagaTracker;
@@ -41,66 +44,90 @@ public class OrderSagaTrackerServiceImpl implements OrderSagaTrackerService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
-    public void startStep(long orderId, SagaStepType stepType) {
-        switch (stepType) {
-            case UNIT_PRICE_CONFIRMED -> repository.updateUnitPriceConfirmed(orderId, SagaStepStatus.PENDING);
-            case STOCK_RESERVED -> repository.updateStockReserved(orderId, SagaStepStatus.PENDING);
-            case PAYMENT_PROCESSED -> repository.updatePaymentProcessed(orderId, SagaStepStatus.PENDING);
-            case STOCK_FULFILLED -> repository.updateStockFulfilled(orderId, SagaStepStatus.PENDING);
-            default -> throw new IllegalArgumentException("Unsupported step type: " + stepType);
-        }
-    }
-
-    @Override
-    public void completeStep(long orderId, SagaStepType stepType, boolean success, String reason) {
-        if (success) {
-            updateStepStatus(orderId, stepType, SagaStepStatus.SUCCESS);
-        } else {
-            handleStepFailure(orderId, stepType, reason);
-        }
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Override
-    public void markSuccessStep(long orderId, SagaStepType stepType) {
-        completeStep(orderId, stepType, true, null);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Override
-    public void markCompensated(long orderId, SagaStepType type) {
-        updateStepStatus(orderId, type, SagaStepStatus.COMPENSATED);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Override
-    public void markFailedStep(long orderId, SagaStepType stepType, String reason) {
-        completeStep(orderId, stepType, false, reason);
-    }
-
-    private void updateStepStatus(long orderId, SagaStepType stepType, SagaStepStatus status) {
-        switch (stepType) {
-            case UNIT_PRICE_CONFIRMED -> repository.updateUnitPriceConfirmed(orderId, status);
-            case STOCK_RESERVED -> repository.updateStockReserved(orderId, status);
-            case PAYMENT_PROCESSED -> repository.updatePaymentProcessed(orderId, status);
-            case STOCK_FULFILLED -> repository.updateStockFulfilled(orderId, status);
-        }
-    }
-
-    private void handleStepFailure(long orderId, SagaStepType stepType, String reason) {
+    public void startSteps(long orderId, Collection<SagaStepType> types) {
         OrderSagaTracker ops = repository.findByOrderIdForUpdate(orderId)
-                .orElseThrow(() -> new IllegalStateException("OrderSagaProgress not found for orderId=" + orderId));
+                .orElseThrow(() -> ResourceNotFoundException.of("OrderSagaTracker", orderId));
+
+        for (SagaStepType type : types) {
+            updateStatus(ops, type, oldstatus -> oldstatus == SagaStepStatus.NOT_STARTED, SagaStepStatus.PENDING);
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void startStep(long orderId, SagaStepType type) {
+        OrderSagaTracker ops = repository.findByOrderIdForUpdate(orderId)
+                .orElseThrow(() -> ResourceNotFoundException.of("OrderSagaTracker", orderId));
+
+        updateStatus(ops, type, oldstatus -> oldstatus == SagaStepStatus.NOT_STARTED, SagaStepStatus.PENDING);
+
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void completeStep(long orderId, SagaStepType type) {
+        OrderSagaTracker ops = repository.findByOrderIdForUpdate(orderId)
+                .orElseThrow(() -> ResourceNotFoundException.of("OrderSagaTracker", orderId));
+
+        updateStatus(ops, type, oldstatus -> oldstatus == SagaStepStatus.PENDING, SagaStepStatus.PENDING);
+
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void compensatedStep(long orderId, SagaStepType type) {
+        OrderSagaTracker ops = repository.findByOrderIdForUpdate(orderId)
+                .orElseThrow(() -> ResourceNotFoundException.of("OrderSagaTracker", orderId));
+
+        updateStatus(ops, type, (currentStatus) -> true, SagaStepStatus.COMPENSATED);
+
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void failedStep(long orderId, SagaStepType stepType, String reason) {
+        OrderSagaTracker ops = repository.findByOrderIdForUpdate(orderId)
+                .orElseThrow(() -> ResourceNotFoundException.of("OrderSagaTracker", orderId));
 
         concatFailureReason(ops, reason);
 
-        switch (stepType) {
-            case UNIT_PRICE_CONFIRMED -> ops.setUnitPriceConfirmed(SagaStepStatus.FAILED);
-            case STOCK_RESERVED -> ops.setStockReserved(SagaStepStatus.FAILED);
-            case PAYMENT_PROCESSED -> ops.setPaymentProcessed(SagaStepStatus.FAILED);
-            case STOCK_FULFILLED -> ops.setStockFulfilled(SagaStepStatus.FAILED);
-        }
+        updateStatus(ops, stepType, current -> current == SagaStepStatus.PENDING, SagaStepStatus.FAILED);
 
         repository.save(ops);
+    }
+
+    public void updateStatus(
+            OrderSagaTracker ops,
+            SagaStepType type, Predicate<SagaStepStatus> oldStatusCheck,
+            SagaStepStatus newStatus) {
+
+        switch (type) {
+            case PAYMENT_PROCESSED:
+                if (oldStatusCheck.test(ops.getPaymentProcessed())) {
+                    ops.setPaymentProcessed(newStatus);
+                }
+                break;
+
+            case UNIT_PRICE_CONFIRMED:
+                if (oldStatusCheck.test(ops.getUnitPriceConfirmed())) {
+                    ops.setUnitPriceConfirmed(newStatus);
+                }
+                break;
+
+            case STOCK_FULFILLED:
+                if (oldStatusCheck.test(ops.getStockFulfilled())) {
+                    ops.setStockFulfilled(newStatus);
+                }
+                break;
+
+            case STOCK_RESERVED:
+                if (oldStatusCheck.test(ops.getStockReserved())) {
+                    ops.setStockReserved(newStatus);
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     private void concatFailureReason(OrderSagaTracker ops, String reason) {
@@ -111,11 +138,10 @@ public class OrderSagaTrackerServiceImpl implements OrderSagaTrackerService {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public Boolean checkPrePaymentReadinessOrCancelReadiness(Long orderId, long userId) {
-        OrderSagaTracker ops = repository.findByOrderIdForUpdate(orderId)
-                .orElseThrow(() -> new IllegalStateException("OrderSagaProgress not found for orderId=" + orderId));
+        OrderSagaTracker ops = repository.findByOrderId(orderId)
+                .orElseThrow(() -> ResourceNotFoundException.of("OrderSagaTracker", orderId));
 
         if (ops.getUnitPriceConfirmed() == SagaStepStatus.FAILED || ops.getStockReserved() == SagaStepStatus.FAILED) {
 
@@ -133,42 +159,30 @@ public class OrderSagaTrackerServiceImpl implements OrderSagaTrackerService {
 
     @Override
     public boolean checkOrderCanceledReadiness(long orderId, long userId) {
-        OrderSagaTracker ops = repository.findByOrderIdForUpdate(orderId)
-                .orElseThrow(() -> new IllegalStateException("OrderSagaProgress not found for orderId=" + orderId));
+        OrderSagaTracker ops = repository.findByOrderId(orderId)
+                .orElseThrow(() -> ResourceNotFoundException.of("OrderSagaTracker", orderId));
 
-        if (ops.getPaymentProcessed() == SagaStepStatus.COMPENSATED
-                && ops.getStockFulfilled() == SagaStepStatus.COMPENSATED
-                && ops.getStockReserved() == SagaStepStatus.COMPENSATED) {
+        SagaStepStatus paymentProcessed = ops.getPaymentProcessed();
+        SagaStepStatus stockFulfilled = ops.getStockFulfilled();
+        SagaStepStatus stockReserved = ops.getStockReserved();
 
-            return true;
+        Set<SagaStepStatus> statuses = new HashSet<>(List.of(paymentProcessed, stockFulfilled, stockReserved));
+
+        if (statuses.contains(SagaStepStatus.PENDING)
+                || statuses.contains(SagaStepStatus.SUCCESS)
+                || statuses.contains(SagaStepStatus.FAILED)) {
+
+            return false;
         }
-        return false;
+
+        return true;
     }
 
     @Transactional(readOnly = true)
     @Override
     public OrderSagaTracker findByOrderId(long orderId) {
-        return repository.findByOrderIdForUpdate(orderId)
-                .orElseThrow(() -> new IllegalStateException("OrderSagaProgress not found for orderId=" + orderId));
-    }
-
-    @Override
-    public boolean checkCancelRediness(long orderId, long userId) {
-        OrderSagaTracker ost = repository.findByOrderIdForUpdate(orderId)
-                .orElseThrow(() -> new IllegalStateException("OrderSagaProgress not found for orderId=" + orderId));
-
-        SagaStepStatus stockReserved = ost.getStockReserved();
-        SagaStepStatus unitPriceConfirmed = ost.getUnitPriceConfirmed();
-        SagaStepStatus paymentProcessed = ost.getPaymentProcessed();
-        SagaStepStatus stockFulfilled = ost.getStockFulfilled();
-        Set<SagaStepStatus> statuses = new HashSet<>(
-                List.of(stockReserved, unitPriceConfirmed, paymentProcessed, stockFulfilled));
-
-        if (statuses.contains(SagaStepStatus.PENDING)) {
-            return false;
-        }
-
-        return true;
+        return repository.findByOrderId(orderId)
+                .orElseThrow(() -> ResourceNotFoundException.of("OrderSagaTracker", orderId));
     }
 
 }

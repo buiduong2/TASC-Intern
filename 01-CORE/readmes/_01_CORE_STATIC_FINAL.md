@@ -2,38 +2,36 @@
 
 ### Thế nào là static
 
--   Trong Java. từ khóa `static` được sử dụng để quản lý bộ nhớ tốt hơn và nó có thể truy cập trực tiếp thông qua `class` mà ko cần khởi tạo
-
--   Từ khóa `static` thuộc về class chứ ko thuộc về instance của class đó
-
--   Những chỗ có thể áp dụng từ khóa Static
-
-    -   Biến Static (static Variable)
-    -   static method
-    -   Static block
-    -   static class
-    -   import static
-    
+-   Từ khóa `static` trong Java là một bộ điều chỉnh (`modifier`) được sử dụng để chỉ ra rằng một thành phần `(biến, phương thức, khối hoặc lớp lồng nhau)` `thuộc về lớp` (Class) `chứ không phải thuộc về bất kỳ đối tượng (Instance)` cụ thể nào của lớp đó.
 -   **Static varaible**
 
--   các biến khai báo ở trong một class có thể được khai báo với từ khóa `static`. Và lúc đó nó được gọi là `class Variable`
+-   `Đặc điểm`: Chỉ có một bản sao duy nhất của biến này được tạo ra và chia sẻ bởi tất cả các đối tượng của lớp.
 
--   Việc cấp phát bộ nhớ cho biến static chỉ xảy ra một lần khi class được nạp vào bộ nhớ
+-   `Mục đích`: Dùng để đại diện cho `thuộc tính chung` của tất cả các đối tượng (ví dụ: tên công ty, tên trường đại học, hằng số π).
 
--   Giá trị mặc định khi khai báo biến non-static và static là giống nhau
+-   `Lợi ích`: Tiết kiệm bộ nhớ đáng kể, vì giá trị chung không cần được sao chép cho mỗi đối tượng.
 
 -   **Static method**
 
 -   Một method được khai báo với từ khóa `static` thì phương thức đó được gọi là phương thức static
 
--   Đặc điểm:
+-   `Đặc điểm:`
 
-    -   Một static method thuộc class chứ ko thuộc instance
-    -   Một static method có thể được gọi mà ko cần khởi tạo (íntance) của một class
-    -   Static method có thể truy cập vào `static varible` và thay đổi giá trị của nó
-    -   Một static method chỉ có thể gọi một static method khác `Không thể gọi một method non-static`
+    -   Thuộc về lớp, có thể gọi trực tiếp bằng `TênLớp.TênPhươngThức().`
+    -   Không thể truy cập trực tiếp các biến hoặc phương thức `non-static (instance)` vì chúng không gắn với bất kỳ đối tượng nào.
+
+    -   Không thể sử dụng từ khóa `this` hoặc `super`.
+
     -   Không thể sử dụng từ khóa `this` hoặc `super`
+
     -   Không thể ghi đè static method trong java. Bởi vì kĩ thuật ghi đề `override` phương thức được dựa trên gán động khi chương trình đang chạy (runtime) và những phương thức static được gán tĩnh trong thời gian biên dịch. Phương thức tĩnh ko ràng buộc với intance của class nên static method ko thể bị ghi đè
+
+-   `mục đích`
+
+    -   Thường dùng cho các phương thức tiện ích (Utility Methods) không cần truy cập dữ liệu cụ thể của đối tượng
+    -   Ví dụ: Các phương thức trong lớp java.lang.Math như `Math.max()`, `Math.min()` đều là static.
+
+    - 
 
 -   **Static Block**
 
@@ -125,7 +123,7 @@ public class Service {
 
 ## Final
 
-?  ? Nếu được cho ví dụ minh họa.
+? ? Nếu được cho ví dụ minh họa.
 
 ## Thế nào là final
 
@@ -140,8 +138,8 @@ public class Service {
 
 ### Khai báo 1 biến final khác gì với static, biến khai báo bằng final có thể chỉnh sửa được không
 
-- Mục đích khai báo biến final thì ta chắc chắn rằng trong suốt vòng đời của nó ko được phép gán lại lần nữa
+-   Mục đích khai báo biến final thì ta chắc chắn rằng trong suốt vòng đời của nó ko được phép gán lại lần nữa
 
-- Còn với biến static: ta sử dụng với mục đích đem cho nó thuộc về sở hữu của class . Mà ko thuộc về instance của Object nưa. Từ đó có thể truy cập dễ dàng thông qua class mà ko cần tạo đối tượng
+-   Còn với biến static: ta sử dụng với mục đích đem cho nó thuộc về sở hữu của class . Mà ko thuộc về instance của Object nưa. Từ đó có thể truy cập dễ dàng thông qua class mà ko cần tạo đối tượng
 
-- Biến khai báo bằng final không chỉnh sửa được
+-   Biến khai báo bằng final không chỉnh sửa được

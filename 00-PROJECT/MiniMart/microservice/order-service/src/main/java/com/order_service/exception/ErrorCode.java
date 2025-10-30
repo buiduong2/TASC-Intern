@@ -7,14 +7,14 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode implements com.common.exception.ErrorCode {
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "Order with id = {0} not found"),
     // --- LỖI RIÊNG BIỆT CHO HÀM CANCEL ---
-    ORDER_CANCEL_LIFECYCLE_ENDED(HttpStatus.UNAUTHORIZED,
-            "Order with id = {0} has ended and cannot be canceled."),
 
     ORDER_CANCEL_STATUS_INVALID(HttpStatus.UNAUTHORIZED,
             "Order with id = {0} is in a non-cancelable status (e.g., Shipping, Delivered)."),
 
-    ORDER_CANCEL_ALREADY_LOCKED(HttpStatus.UNAUTHORIZED,
-            "Order with id = {0} is already locked for cancellation (e.g., CANCELING, AWAITING_CANCEL)."),
+    ORDER_UPDATE_STATUS_INVALID(HttpStatus.UNAUTHORIZED,
+            "Order Status with id = {0} can't not satisfied ALLOCATED or SHIPPING "),
+    ORDER_UPDATE_STATUS_STEP_INVALID(HttpStatus.UNAUTHORIZED, "Order status with id = {0} current is {1} expected {2}"),
+    ORDER_UPDATE_STATUS_PAYMENT(HttpStatus.UNAUTHORIZED, "Order with id = {0} require pay to be process"),
 
     // --- LỖI CHUNG KHÁC ---
     PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "Payment with id = {0} not found"),

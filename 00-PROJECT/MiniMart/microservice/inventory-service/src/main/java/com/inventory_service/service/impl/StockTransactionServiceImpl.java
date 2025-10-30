@@ -5,8 +5,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.common_kafka.event.shared.dto.ValidatedItemSnapshot;
-import com.common_kafka.exception.EventEntityNotFoundException;
-import com.common_kafka.exception.UnhandledEventException;
+import com.common_kafka.exception.saga.LogicViolationException;
+import com.common_kafka.exception.saga.ResourceNotFoundException;
+import com.common_kafka.exception.saga.BusinessInvariantViolationException;
 import com.inventory_service.enums.OrderReservationLogStatus;
 import com.inventory_service.exception.ErrorCode;
 import com.inventory_service.exception.StockReservationException;
@@ -69,13 +70,14 @@ public class StockTransactionServiceImpl implements StockTransactionService {
         }
 
         Stock stock = stockRepository.findByProductIdForUpdate(productId)
-                .orElseThrow(() -> new EventEntityNotFoundException("compensateSingleReservation", productId, "Stock"));
+                .orElseThrow(() -> ResourceNotFoundException.of("stock", productId));
 
         int reserveQuantity = log.getQuantityReserved();
 
         stock.setPendingReservation(stock.getPendingReservation() - reserveQuantity);
+
         if (stock.getPendingReservation() < 0) {
-            throw new UnhandledEventException("COMPENSATE_ORDER", stock.getId(), "Stock quantity < 0");
+            throw new BusinessInvariantViolationException("Stock", stock.getId(), "Stock has pendign reservation < 0");
         }
 
         stockRepository.save(stock);
@@ -88,6 +90,10 @@ public class StockTransactionServiceImpl implements StockTransactionService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void commitSingleProduct(OrderReservationLog log) {
+        if (log.getStatus() != OrderReservationLogStatus.RESERVED) {
+            return;
+        }
+
         Long productId = log.getProductId();
         Stock stock = stockRepository.findByProductIdForUpdate(productId)
                 .orElseThrow(
@@ -111,6 +117,8 @@ public class StockTransactionServiceImpl implements StockTransactionService {
                     productId);
         }
 
+        log.setStatus(OrderReservationLogStatus.COMMITTED);
+
         stockRepository.save(stock);
     }
 
@@ -118,8 +126,7 @@ public class StockTransactionServiceImpl implements StockTransactionService {
     @Override
     public void compensateSingleCommitProduct(long orderId, long productId) {
         OrderReservationLog log = logRepository.findByOrderIdAndProductIdAndStatusForCompenstate(orderId, productId)
-                .orElseThrow(() -> new EventEntityNotFoundException("compensateSingleReservation", productId,
-                        "OrderReservationLog"));
+                .orElseThrow(() -> ResourceNotFoundException.of("Stock", productId));
 
         if (log.getStatus() != OrderReservationLogStatus.COMMITTED) {
             // Skip
@@ -127,14 +134,16 @@ public class StockTransactionServiceImpl implements StockTransactionService {
         }
 
         Stock stock = stockRepository.findByProductIdForUpdate(productId)
-                .orElseThrow(() -> new EventEntityNotFoundException("compensateSingleReservation", productId, "Stock"));
+                .orElseThrow(
+                        () -> LogicViolationException.of("Stock", productId,
+                                "Stock must be pre created but not found"));
 
         int reserveQuantity = log.getQuantityReserved();
 
         stock.setCommittedAllocation(stock.getCommittedAllocation() - reserveQuantity);
 
         if (stock.getCommittedAllocation() < 0) {
-            throw new UnhandledEventException("COMPENSATE_ORDER", stock.getId(), "Stock committedAllocation < 0");
+            throw new BusinessInvariantViolationException("Stock", stock.getId(), "Stock has CommittedAllocation < 0");
         }
 
         stockRepository.save(stock);

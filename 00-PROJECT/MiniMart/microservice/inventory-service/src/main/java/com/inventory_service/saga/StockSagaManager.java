@@ -10,11 +10,11 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import com.common_kafka.config.KafkaTopics;
-import com.common_kafka.event.catalog.product.ProductValidationPassedEvent;
-import com.common_kafka.event.sales.order.OrderCancellationRequestedEvent;
+import com.common_kafka.event.sales.order.OrderStockReservationRequestedEvent;
+import com.common_kafka.event.shared.AbstractSagaEvent;
 import com.common_kafka.event.shared.dto.FailedItemInfo;
+import com.common_kafka.event.shared.dto.OrderItemData;
 import com.common_kafka.event.shared.dto.ReservedItemSnapshot;
-import com.common_kafka.event.shared.dto.ValidatedItemSnapshot;
 import com.common_kafka.event.supply.inventory.InventoryReservationFailedEvent;
 import com.common_kafka.event.supply.inventory.InventoryReservedCompenstateCompletedEvent;
 import com.common_kafka.event.supply.inventory.InventoryReservedConfirmedEvent;
@@ -34,7 +34,7 @@ public class StockSagaManager {
     private final StockRepository stockRepository;
 
     public void publishInventoryReservedConfirmedEvent(
-            ProductValidationPassedEvent event,
+            OrderStockReservationRequestedEvent event,
             List<OrderReservationLog> logs,
             Allocation allocation) {
 
@@ -49,25 +49,25 @@ public class StockSagaManager {
                 allocation.getId());
 
         kafkaTemplate.send(
-                KafkaTopics.SUPPLY_INVENTORY_RESERVATION,
+                KafkaTopics.SUPPLY_INVENTORY_RESERVATION_EVENTS,
                 String.valueOf(event.getOrderId()),
                 confirmEvent);
 
     }
 
-    public void publishInventoryReservedFailedEvent(ProductValidationPassedEvent event, String reason) {
+    public void publishInventoryReservedFailedEvent(OrderStockReservationRequestedEvent event, String reason) {
 
         Set<FailedItemInfo> failedItems = new HashSet<>();
 
         List<Stock> stocks = stockRepository.findByProductIdIn(
-                event.getValidatedItems()
+                event.getItems()
                         .stream()
-                        .map(ValidatedItemSnapshot::getProductId)
+                        .map(OrderItemData::getProductId)
                         .toList());
         Map<Long, Integer> mapAvaiableQtyByProductId = stocks.stream()
                 .collect(Collectors.toMap(Stock::getProductId, s -> s.getAvaiableQuantity()));
 
-        for (ValidatedItemSnapshot vi : event.getValidatedItems()) {
+        for (OrderItemData vi : event.getItems()) {
             Integer avaiableQty = mapAvaiableQtyByProductId.get(vi.getProductId());
             if (avaiableQty != null && vi.getQuantity() > avaiableQty) {
                 failedItems.add(
@@ -86,14 +86,22 @@ public class StockSagaManager {
                 failedItems);
 
         kafkaTemplate.send(
-                KafkaTopics.SUPPLY_INVENTORY_RESERVATION,
+                KafkaTopics.SUPPLY_INVENTORY_RESERVATION_EVENTS,
                 String.valueOf(event.getOrderId()),
                 failedEvent);
 
     }
 
-    public void publishInventoryReservedCompenstateCompletedEvent(
-            OrderCancellationRequestedEvent event,
+    /**
+     * ├─ Khóa Allocation
+     * ├─ Duyệt từng OrderItem:
+     * │ ├─ Giảm pendingReservation
+     * │ └─ Cập nhật log = COMPENSATED
+     * ├─ Đặt Allocation.status = RELEASED
+     * └─ Gửi InventoryReservedCompenstateCompletedEvent ✅
+     * 
+     */
+    public void publishInventoryReservedCompenstateCompletedEvent(AbstractSagaEvent event,
             Allocation allocation) {
 
         InventoryReservedCompenstateCompletedEvent confirmEvent = new InventoryReservedCompenstateCompletedEvent(
@@ -102,8 +110,9 @@ public class StockSagaManager {
                 allocation == null ? null : allocation.getId());
 
         kafkaTemplate.send(
-                KafkaTopics.SUPPLY_INVENTORY_RESERVATION,
+                KafkaTopics.SUPPLY_INVENTORY_RESERVATION_EVENTS,
                 String.valueOf(event.getOrderId()),
                 confirmEvent);
     }
+
 }
