@@ -1,0 +1,32 @@
+/* You can add global styles to this file, and also import other style files */
+@import 'tailwindcss';
+/* Thiết lập cho tất cả các phần tử có scrollbar */
+html::-webkit-scrollbar,
+::-webkit-scrollbar {
+  width: 8px; /* Chiều rộng thanh cuộn dọc */
+  height: 8px; /* Chiều cao thanh cuộn ngang */
+}
+
+/* Áp dụng cho cả html và mọi phần tử có scrollbar */
+html::-webkit-scrollbar-track,
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+html::-webkit-scrollbar-thumb,
+::-webkit-scrollbar-thumb {
+  background: #a0a0a0;
+  border-radius: 10px;
+}
+
+html::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:hover {
+  background: #707070;
+}
+/* 3. KHÔNG THỂ THIẾU: Thêm style cho Firefox (đảm bảo tính tương thích) 
+*/
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #a0a0a0 #f1f1f1;
+}

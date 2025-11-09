@@ -1,0 +1,61 @@
+<aside class="flex h-full flex-col justify-between overflow-x-hidden overflow-y-auto bg-slate-100">
+  <nav>
+    @for (navItem of navItems; track navItem.id) {
+      <section class="grid grid-cols-[24px_1fr] gap-3 p-3">
+        <app-layout-show-on-compact>
+          <div
+            class="h-10 p-2"
+            (click)="toggleGroupAndExpandLayout(navItem.id)"
+            class="cursor-pointer"
+          >
+            <lucide-icon [img]="navItem.icon" size="20" class="fill-current" />
+          </div>
+        </app-layout-show-on-compact>
+        <app-layout-show-on-expanded>
+          <div class="p-2" (click)="toggleGroup(navItem.id)">
+            <lucide-icon [img]="navItem.icon" size="20" class="fill-current" />
+          </div>
+          <div class="min-w-[250px]">
+            <div class="relative flex justify-between">
+              <h3 class="flex-1 p-2 font-semibold" (click)="toggleGroup(navItem.id)">
+                <a [href]="navItem.link" class="block">{{ navItem.title }}</a>
+              </h3>
+
+              <button
+                class="cursor-pointer rounded p-2 transition-colors hover:bg-slate-200"
+                (click)="toggleGroup(navItem.id)"
+              >
+                @if (openGroup().has(navItem.id)) {
+                  <lucide-icon [img]="ChevronDownIcon" size="20" />
+                } @else {
+                  <lucide-icon [img]="ChevronUpIcon" size="20" />
+                }
+              </button>
+            </div>
+            @if (openGroup().has(navItem.id)) {
+              <ul>
+                @for (item of navItem.items; track item.id) {
+                  <li class="rounded p-1 hover:bg-slate-300">
+                    <a
+                      [href]="item.link"
+                      [class.text-blue-500]="item.link === '#vip'"
+                      class="block transition-colors hover:text-blue-500"
+                      >{{ item.label }}</a
+                    >
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        </app-layout-show-on-expanded>
+      </section>
+    }
+  </nav>
+  <app-layout-show-on-expanded>
+    <p class="p-4 pt-5 text-sm">
+      Copyright © 2025
+      <br />
+      Developer Express Inc.
+    </p>
+  </app-layout-show-on-expanded>
+</aside>
