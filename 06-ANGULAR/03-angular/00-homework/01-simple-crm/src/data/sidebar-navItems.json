@@ -1,0 +1,58 @@
+[
+    {
+        "id": 1,
+        "link": "#",
+        "title": "CRM",
+        "items": [
+            {
+                "id": 1,
+                "label": "Contact List",
+                "link": "#vip"
+            },
+            {
+                "id": 2,
+                "label": "Contact Details",
+                "link": "#"
+            }
+        ]
+    },
+    {
+        "id": 2,
+        "link": "#",
+        "title": "Planning",
+        "items": [
+            {
+                "id": 1,
+                "label": "Task List",
+                "link": "#"
+            },
+            {
+                "id": 2,
+                "label": "Task Details",
+                "link": "#"
+            }
+        ]
+    },
+    {
+        "id": 3,
+        "link": "#",
+        "title": "Analytics",
+        "items": [
+            {
+                "id": 1,
+                "label": "Dardboard",
+                "link": "#"
+            },
+            {
+                "id": 2,
+                "label": "Sales Report",
+                "link": "#"
+            },
+            {
+                "id": 3,
+                "label": "Geography",
+                "link": "#"
+            }
+        ]
+    }
+]

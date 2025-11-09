@@ -1,0 +1,123 @@
+[
+    {
+        "id": 1,
+        "name": "Ren Amamiya (Hero)",
+        "role": "Phantom Thief Leader",
+        "company": "Shujin Academy",
+        "status": "Salaried",
+        "assignedTo": "Sojiro Sakura",
+        "phone": "(XXX) XXX-5555",
+        "email": "hero@metaverse.com",
+        "avatar": "assets/img/hero.avif"
+    },
+    {
+        "id": 2,
+        "name": "Ryuji Sakamoto (Skull)",
+        "role": "Athlete/Student",
+        "company": "Shujin Academy",
+        "status": "Commission",
+        "assignedTo": "Ren Amamiya",
+        "phone": "(213) 555-2525",
+        "email": "ryuji.s@shujin.edu",
+        "avatar": "assets/img/ryuji.avif"
+    },
+    {
+        "id": 3,
+        "name": "Ann Takamaki (Panther)",
+        "role": "Model/Student",
+        "company": "Shujin Academy",
+        "status": "Salaried",
+        "assignedTo": "Kawakami",
+        "phone": "(213) 555-3030",
+        "email": "ann.t@shujin.edu",
+        "avatar": "assets/img/ann.avif"
+    },
+    {
+        "id": 4,
+        "name": "Yusuke Kitagawa (Fox)",
+        "role": "Artist/Student",
+        "company": "Kosei High School",
+        "status": "Terminated",
+        "assignedTo": "Madarame Estate",
+        "phone": "(213) 555-4444",
+        "email": "yusuke.k@art.com",
+        "avatar": "assets/img/ryuji.avif"
+    },
+    {
+        "id": 5,
+        "name": "Makoto Niijima (Queen)",
+        "role": "Student Council/Strategist",
+        "company": "Shujin Academy",
+        "status": "Salaried",
+        "assignedTo": "Sae Niijima",
+        "phone": "(213) 555-4040",
+        "email": "makoto.n@shujin.edu",
+        "avatar": "assets/img/makoto.avif"
+    },
+    {
+        "id": 6,
+        "name": "Futaba Sakura (Oracle)",
+        "role": "Hacker/Consultant",
+        "company": "Leblanc Coffee",
+        "status": "Commission",
+        "assignedTo": "Sojiro Sakura",
+        "phone": "(213) 555-6060",
+        "email": "futaba.s@leblanc.net",
+        "avatar": "assets/img/futaba.jpg"
+    },
+    {
+        "id": 7,
+        "name": "Haru Okumura (Noir)",
+        "role": "CEO/Student",
+        "company": "Okumura Foods",
+        "status": "Salaried",
+        "assignedTo": "Morgana",
+        "phone": "(213) 555-7070",
+        "email": "haru.o@okumurafoods.com",
+        "avatar": "assets/img/haru.avif"
+    },
+    {
+        "id": 8,
+        "name": "Goro Akechi (Crow)",
+        "role": "Detective Prince",
+        "company": "Tokyo Police",
+        "status": "Commission",
+        "assignedTo": "Masayoshi Shido",
+        "phone": "(213) 555-8888",
+        "email": "goro.a@tokyolaw.gov",
+        "avatar": "assets/img/akechi.avif"
+    },
+    {
+        "id": 9,
+        "name": "Kasumi Yoshizawa (Violet)",
+        "role": "Gymnast/Student",
+        "company": "Kosei High School",
+        "status": "Salaried",
+        "assignedTo": "Maruki",
+        "phone": "(213) 555-9000",
+        "email": "kasumi.y@gym.com",
+        "avatar": "assets/img/kasumi.avif"
+    },
+    {
+        "id": 10,
+        "name": "Morgana (Mona)",
+        "role": "Navigator/Mascot",
+        "company": "Phantom Thieves",
+        "status": "Commission",
+        "assignedTo": "Ren Amamiya",
+        "phone": "(XXX) XXX-0001",
+        "email": "morgana@metaverse.com",
+        "avatar": "assets/img/morgana.avif"
+    },
+    {
+        "id": 11,
+        "name": "Lavenza",
+        "role": "Assistant/Guard",
+        "company": "Velvet Room",
+        "status": "Commission",
+        "assignedTo": "Igor",
+        "phone": "(XXX) XXX-1111",
+        "email": "lavenza@velvet.net",
+        "avatar": "assets/img/lavenza.avif"
+    }
+]

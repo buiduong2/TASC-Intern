@@ -1,5 +1,4 @@
-<div class="relative flex h-full flex-col bg-white flex-1">
-
+<div class="relative flex h-full flex-1 flex-col bg-white">
   <!-- Table Page header -->
   <div class="flex justify-between p-6">
     <!-- Left -->
@@ -61,25 +60,32 @@
       </thead>
 
       <tbody>
-        @for (d of data; track d) {
-          <tr class="border-b border-neutral-200 text-center">
-            <td class="p-3"><input type="checkbox" name="" id="" /></td>
+        @for (em of employees; track em.id) {
+          <tr
+            class="border-b border-neutral-200 text-center hover:bg-neutral-100"
+            (click)="clickRow(em.id)"
+          >
+            <td class="p-3"><input type="checkbox" /></td>
             <td class="p-3">
-              <span>Jackie Garmin</span>
-              <span>Support Assistant</span>
+              <span>{{ em.name }}</span>
+              <br />
+              <span>{{ em.role }}</span>
             </td>
-            <td class="p-3">Tom's Club</td>
-            <td class="p-3">Salaried</td>
-            <td class="p-3">John Heart</td>
-            <td class="p-3">(213) 555-1824</td>
+            <td class="p-3">{{ em.company }}</td>
             <td class="p-3">
-              <span>helloworldgmail.com</span>
+              <div class="flex items-center gap-2">
+                <span [class]="getStatusDotClasses(em.status, 'h-2 w-2 rounded-full')"></span>
+                <span [class]="getStatusTextClasses(em.status)">{{ em.status }}</span>
+              </div>
+            </td>
+            <td class="p-3">{{ em.assignedTo }}</td>
+            <td class="p-3">{{ em.phone }}</td>
+            <td class="p-3">
+              <span>{{ em.email }}</span>
             </td>
           </tr>
         }
       </tbody>
     </table>
   </div>
-
-  <!-- Table Page Footer -->
 </div>

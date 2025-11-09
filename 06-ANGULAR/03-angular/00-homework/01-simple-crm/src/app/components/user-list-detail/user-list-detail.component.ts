@@ -1,18 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import {
-  LucideAngularModule,
-  PinIcon,
-  XIcon,
-  PhoneIcon,
-  MailIcon,
-  HouseIcon,
-  DiscIcon,
-  PenIcon,
   ChevronDown,
+  DiscIcon,
+  HouseIcon,
+  LucideAngularModule,
+  MailIcon,
+  PenIcon,
+  PhoneIcon,
 } from 'lucide-angular';
-import { UiAccordionComponent } from '../app-ui/ui-accordion/ui-accordion.component';
 import { UIAccordionContentComponent } from '../app-ui/ui-accordion/ui-accordion-content.component';
 import { UIAccordionTriggerDirective } from '../app-ui/ui-accordion/ui-accordion-trigger.component';
+import { UiAccordionComponent } from '../app-ui/ui-accordion/ui-accordion.component';
+import { Employee } from '../../pages/user-list-page/user-list-page.component';
+import { getStatusDotClasses, getStatusTextClasses } from '../../utils/utils';
 
 @Component({
   selector: 'app-user-list-detail',
@@ -29,9 +29,7 @@ import { UIAccordionTriggerDirective } from '../app-ui/ui-accordion/ui-accordion
     }
   `,
 })
-export class UserListDetailComponent implements OnInit {
-  readonly PinIcon = PinIcon;
-  readonly XIcon = XIcon;
+export class UserListDetailComponent {
   readonly PhoneIcon = PhoneIcon;
   readonly MailIcon = MailIcon;
   readonly HouseIcon = HouseIcon;
@@ -39,7 +37,10 @@ export class UserListDetailComponent implements OnInit {
   readonly PenIcon = PenIcon;
   readonly ChevronDown = ChevronDown;
 
-  constructor() {}
+  readonly getStatusDotClasses = getStatusDotClasses;
+  readonly getStatusTextClasses = getStatusTextClasses;
 
-  ngOnInit() {}
+  @Input({ required: true }) employee!: Employee;
+
+  constructor() {}
 }

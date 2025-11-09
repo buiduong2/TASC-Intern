@@ -10,6 +10,11 @@ export interface AccordionStateEvent {
   selector: 'app-ui-accordion',
   template: ` <ng-content></ng-content> `,
   providers: [UIAccordionStateService],
+  styles: `
+    :host {
+      display: contents;
+    }
+  `,
 })
 export class UiAccordionComponent implements OnInit {
   constructor(private stateService: UIAccordionStateService) {

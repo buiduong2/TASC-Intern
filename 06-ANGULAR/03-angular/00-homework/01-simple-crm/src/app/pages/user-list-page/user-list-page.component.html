@@ -1,4 +1,24 @@
-<div class="flex h-full w-full px-8">
-  <app-ui-table />
-  <app-user-list-detail />
+<div class="h-full w-full px-8" [class]="isPinned() ? `flex` : `relative`">
+  <app-ui-table [employees]="employees()" (onClickRecord)="viewDetail($event)" />
+  <div [class]="!isPinned() ? `absolute top-0 right-0 bottom-0 z-10 shadow` : ''">
+    @if (isOpenDetail()) {
+      <app-user-list-detail [employee]="selectedEmployee()!">
+        <ng-container header-action>
+          <button
+            class="cursor-pointer rounded-full p-1 transition-colors hover:bg-slate-300"
+            [class]="{ 'bg-slate-300': isPinned() }"
+            (click)="togglePin()"
+          >
+            <lucide-icon [img]="PinIcon" class="-rotate-90" size="20" />
+          </button>
+          <button
+            class="cursor-pointer rounded-full p-1 transition-colors hover:bg-slate-300"
+            (click)="closeDetail()"
+          >
+            <lucide-icon [img]="XIcon" size="20" />
+          </button>
+        </ng-container>
+      </app-user-list-detail>
+    }
+  </div>
 </div>

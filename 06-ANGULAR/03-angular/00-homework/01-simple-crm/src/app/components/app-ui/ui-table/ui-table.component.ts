@@ -1,13 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import {
+  FileSymlinkIcon,
   LucideAngularModule,
   PlusIcon,
   RefreshCwIcon,
-  FileSymlinkIcon,
-  TableIcon,
   SearchIcon,
+  TableIcon,
 } from 'lucide-angular';
-
+import { Employee } from '../../../pages/user-list-page/user-list-page.component';
+import { getStatusTextClasses, getStatusDotClasses } from '../../../utils/utils';
 @Component({
   selector: 'app-ui-table',
   templateUrl: './ui-table.component.html',
@@ -25,9 +26,15 @@ export class UiTableComponent {
   readonly TableIcon = TableIcon;
   readonly SearchIcon = SearchIcon;
 
-  data = Array(100)
-    .fill(null)
-    .map((_, i) => i);
+  readonly getStatusTextClasses = getStatusTextClasses;
+  readonly getStatusDotClasses = getStatusDotClasses;
 
+  @Input({ required: true }) employees!: Employee[];
+
+  @Output() onClickRecord = new EventEmitter<number>();
   constructor() {}
+
+  clickRow(id: number) {
+    this.onClickRecord.emit(id);
+  }
 }
