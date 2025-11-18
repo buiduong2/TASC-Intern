@@ -1,0 +1,30 @@
+<header class="fixed top-0 right-0 left-0 z-50 bg-white/90 p-4 shadow">
+  <div class="container mx-auto grid grid-cols-[1fr_auto_1fr] items-center">
+    <div class="flex items-center gap-2">
+      <a routerLink="/" class="contents">
+        <div class="h-12 w-12 overflow-hidden rounded-full">
+          <img src="img/logo.jpg" alt="Logo" />
+        </div>
+        <h2 class="text-2xl font-bold text-gray-800">Kachabazar</h2>
+      </a>
+    </div>
+
+    <nav>
+      <ul class="flex justify-center">
+        <li>
+          <a class="cursor-pointer text-lg!" matButton routerLink="/">Home</a>
+        </li>
+        <li>
+          <a class="cursor-pointer text-lg!" matButton routerLink="category">Categories</a>
+        </li>
+        <li>
+          <a class="cursor-pointer text-lg!" matButton routerLink="about">About</a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="flex justify-end">
+      <a matButton="filled" routerLink="/login">Login</a>
+    </div>
+  </div>
+</header>

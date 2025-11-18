@@ -1,0 +1,108 @@
+{
+  "content": [
+    {
+      "id": 1,
+      "name": "Blackberries",
+      "imageUrl": "img/products/Blackberries-1-25-qt-removebg-preview.webp",
+      "salePrice": 189.99,
+      "compareAtPrice": 211.96,
+      "stock": 100
+    },
+    {
+      "id": 2,
+      "name": "Calabaza Squash",
+      "imageUrl": "img/products/Calabaza-Squash-Package-each-removebg-preview28129.webp",
+      "salePrice": null,
+      "compareAtPrice": 98.03,
+      "stock": 100
+    },
+    {
+      "id": 3,
+      "name": "Cauliflower",
+      "imageUrl": "img/products/Cauliflower-1-35lb-removebg-preview.webp",
+      "salePrice": 129.99,
+      "compareAtPrice": 139.15,
+      "stock": 100
+    },
+    {
+      "id": 4,
+      "name": "Clementine",
+      "imageUrl": "img/products/Clementine-5ct-removebg-preview.webp",
+      "salePrice": 39.99,
+      "compareAtPrice": 48.12,
+      "stock": 100
+    },
+    {
+      "id": 5,
+      "name": "Green Leaf Lettuce",
+      "imageUrl": "img/products/Green-Leaf-Lettuce-each__1_-removebg-preview28129.webp",
+      "salePrice": null,
+      "compareAtPrice": 112.72,
+      "stock": 100
+    },
+    {
+      "id": 6,
+      "name": "Kale Sprouts",
+      "imageUrl": "img/products/Kale-Sprouts-3oz-removebg-preview.webp",
+      "salePrice": 90.00,
+      "compareAtPrice": 106.06,
+      "stock": 100
+    },
+    {
+      "id": 7,
+      "name": "Lettuce",
+      "imageUrl": "img/products/Lettuce-1lb-removebg-preview.webp",
+      "salePrice": 179.99,
+      "compareAtPrice": 193.26,
+      "stock": 100
+    },
+    {
+      "id": 8,
+      "name": "Parsley",
+      "imageUrl": "img/products/Parsley-each-removebg-preview28129.webp",
+      "salePrice": null,
+      "compareAtPrice": 134.63,
+      "stock": 100
+    },
+    {
+      "id": 9,
+      "name": "Radicchio",
+      "imageUrl": "img/products/Radicchio-12ct-removebg-preview.webp",
+      "salePrice": 45.00,
+      "compareAtPrice": 58.66,
+      "stock": 100
+    },
+    {
+      "id": 10,
+      "name": "Rainbow Chard",
+      "imageUrl": "img/products/Rainbow-Chard-Package-per-lb-removebg-preview.webp",
+      "salePrice": null,
+      "compareAtPrice": 7.07,
+      "stock": 100
+    },
+    {
+      "id": 11,
+      "name": "Rainbow Peppers",
+      "imageUrl": "img/products/Rainbow-Peppers-4ct-removebg-preview.webp",
+      "salePrice": 79.99,
+      "compareAtPrice": 90.85,
+      "stock": 100
+    },
+    {
+      "id": 12,
+      "name": "Strawberries",
+      "imageUrl": "img/products/Strawberries-9-25oz-removebg-preview.webp",
+      "salePrice": 140.00,
+      "compareAtPrice": 156.95,
+      "stock": 100
+    }
+  ],
+  "totalElements": 12,
+  "totalPages": 1,
+  "pageNumber": 0,
+  "pageSize": 12,
+  "first": true,
+  "last": true,
+  "empty": false,
+  "sort": null
+}

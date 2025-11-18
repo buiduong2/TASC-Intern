@@ -1,0 +1,44 @@
+<section>
+  <div class="container px-4 py-12">
+    <form class="mx-auto w-xl rounded-md bg-white p-10 shadow hover:shadow-lg focus:shadow-lg">
+      <div>
+        <h1 class="text-center text-3xl font-bold">Login</h1>
+        <p class="mt-1 mb-4 text-center text-sm text-gray-500">
+          Login with your email and password
+        </p>
+      </div>
+
+      <mat-form-field class="mb-5 w-full">
+        <mat-label>Email</mat-label>
+        <input matInput placeholder="Ex. Pizza" type="email" />
+      </mat-form-field>
+
+      <mat-form-field class="mb-5 w-full">
+        <mat-label>Password</mat-label>
+        <input matInput placeholder="Ex. 1234567" type="password" />
+        <mat-hint>Include area code</mat-hint>
+      </mat-form-field>
+
+      <!-- Action -->
+      <div>
+        <button matButton="filled" class="w-full">Login</button>
+        <div class="my-4 text-center font-medium">OR</div>
+
+        <button matButton="filled" class="w-full bg-green-600!">Login with Google</button>
+        <button matButton="filled" class="mt-4 w-full bg-blue-400!">Login with Github</button>
+      </div>
+
+      <div class="mt-4 text-center text-sm text-gray-900">
+        <div class="mt-2.5 text-gray-500">
+          Don't have an account?
+          <a
+            class="mx-2 cursor-pointer font-bold text-gray-800 hover:text-cyan-500"
+            routerLink="/register"
+          >
+            <span class="capitalize">Sign Up</span>
+          </a>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>

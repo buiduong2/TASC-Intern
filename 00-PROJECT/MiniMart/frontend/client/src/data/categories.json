@@ -1,0 +1,68 @@
+[
+  {
+    "id": 1,
+    "name": "Fish & Meat",
+    "imageUrl": "img/categories/carp-fish_paxzrt.webp",
+    "description": "Fish & Meat category"
+  },
+  {
+    "id": 2,
+    "name": "Fruits & Vegetable",
+    "imageUrl": "img/categories/cabbage_n59uv3.webp",
+    "description": "Fruits & Vegetable category"
+  },
+  {
+    "id": 3,
+    "name": "Cooking Essentials",
+    "imageUrl": "img/categories/frying-pan_vglm5c.webp",
+    "description": "Cooking Essentials category"
+  },
+  {
+    "id": 4,
+    "name": "Biscuits & Cakes",
+    "imageUrl": "img/categories/cookie_1_ugipqa.webp",
+    "description": "Biscuits & Cakes category"
+  },
+  {
+    "id": 5,
+    "name": "Household Tools",
+    "imageUrl": "img/categories/spray_pebsjt.webp",
+    "description": "Household Tools category"
+  },
+  {
+    "id": 6,
+    "name": "Pet Care",
+    "imageUrl": "img/categories/cat_tznwmq.webp",
+    "description": "Pet Care category"
+  },
+  {
+    "id": 7,
+    "name": "Beauty & Health",
+    "imageUrl": "img/categories/beauty_vfbmzc.webp",
+    "description": "Beauty & Health category"
+  },
+  {
+    "id": 8,
+    "name": "Jam & Jelly",
+    "imageUrl": "img/categories/strawberry-jam-1.webp",
+    "description": "Jam & Jelly category"
+  },
+  {
+    "id": 9,
+    "name": "Milk & Dairy",
+    "imageUrl": "img/categories/milk_dcl0dr.webp",
+    "description": "Milk & Dairy category"
+  },
+  {
+    "id": 10,
+    "name": "Drinks",
+    "imageUrl": "img/categories/juice_p5gv5k.webp",
+    "description": "Drinks category"
+  },
+  {
+    "id": 11,
+    "name": "Breakfast",
+    "imageUrl": "img/categories/bagel_mt3fod.webp",
+    "description": "Breakfast category"
+  }
+]

@@ -1,0 +1,17 @@
+<section class="bg-gray-100 py-16">
+  <div class="container mx-auto px-4">
+    <div class="mb-10 flex flex-col items-center justify-center">
+      <h2 class="mb-2 text-xl font-semibold lg:text-2xl">Featured Categories</h2>
+      <p class="text-base leading-6 text-gray-600 dark:text-gray-400">
+        Choose your necessary products from this feature categories.
+      </p>
+    </div>
+    <div class="flex flex-wrap">
+      @for (product of products; track product.id) {
+        <div class="w-1/6 px-1 py-1">
+          <app-product-card [product]="product" />
+        </div>
+      }
+    </div>
+  </div>
+</section>

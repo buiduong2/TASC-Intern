@@ -1,0 +1,48 @@
+<article class="group h-full rounded-xl bg-white">
+  <div class="h- relative cursor-pointer bg-gray-200">
+    <a [routerLink]="['/product', product.id]">
+      <img [src]="product.imageUrl" class="transition-transform group-hover:scale-110" />
+    </a>
+
+    @if (isOnSale()) {
+      <span
+        class="absolute top-3 right-3 z-10 inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-600 ring-1 ring-red-600/10 ring-inset"
+      >
+        {{ discountPercent() }} % Off
+      </span>
+    }
+    <div class="absolute right-3 bottom-3">
+      <div
+        class="border-gray-10 hover:border-accent flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-2 bg-blue-900 font-medium text-white transition-colors duration-300 hover:border-blue-800 hover:bg-blue-800 hover:text-gray-50 focus:border-blue-500 focus:bg-blue-500 focus:text-gray-50"
+      >
+        <app-bag-icon />
+      </div>
+    </div>
+  </div>
+  <div class="p-4 pt-3">
+    <div class="mb-1">
+      <a [routerLink]="['/product', product.id]">
+        <h4
+          class="line-clamp-1 cursor-pointer text-sm font-medium text-gray-800 hover:text-blue-900"
+        >
+          {{ product.name }}
+        </h4>
+      </a>
+    </div>
+    <div class="mb-2 flex items-center gap-2">
+      <div class="flex items-center"><app-star-icons /></div>
+
+      <p class="text-xs text-gray-400">0.0 ( 0 reviews )</p>
+    </div>
+    <div class="product-price font-bold">
+      @if (isOnSale()) {
+        <span class="inline-block text-base text-gray-900">${{ product.salePrice }}</span>
+        <span class="ml-1 text-base font-normal text-gray-400 sm:text-sm">
+          ${{ product.compareAtPrice }}
+        </span>
+      } @else {
+        <span class="inline-block text-base text-gray-900">${{ product.compareAtPrice }}</span>
+      }
+    </div>
+  </div>
+</article>
