@@ -25,7 +25,7 @@ public class OrderSagaTrackerServiceImpl implements OrderSagaTrackerService {
 
     private final OrderSagaTrackerRepository repository;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void create(Long orderId) {
         OrderSagaTracker orderSagaProgress = new OrderSagaTracker();
@@ -53,7 +53,7 @@ public class OrderSagaTrackerServiceImpl implements OrderSagaTrackerService {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void startStep(long orderId, SagaStepType type) {
         OrderSagaTracker ops = repository.findByOrderIdForUpdate(orderId)
@@ -63,7 +63,7 @@ public class OrderSagaTrackerServiceImpl implements OrderSagaTrackerService {
 
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void completeStep(long orderId, SagaStepType type) {
         OrderSagaTracker ops = repository.findByOrderIdForUpdate(orderId)
@@ -73,7 +73,7 @@ public class OrderSagaTrackerServiceImpl implements OrderSagaTrackerService {
 
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void compensatedStep(long orderId, SagaStepType type) {
         OrderSagaTracker ops = repository.findByOrderIdForUpdate(orderId)
@@ -83,7 +83,7 @@ public class OrderSagaTrackerServiceImpl implements OrderSagaTrackerService {
 
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void failedStep(long orderId, SagaStepType stepType, String reason) {
         OrderSagaTracker ops = repository.findByOrderIdForUpdate(orderId)

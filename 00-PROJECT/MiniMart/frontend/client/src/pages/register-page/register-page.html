@@ -1,9 +1,79 @@
 <section>
   <div class="container px-4 py-12">
-    <form class="mx-auto w-xl rounded-md bg-white p-10 shadow hover:shadow-lg focus:shadow-lg">
+    <form
+      class="mx-auto w-xl rounded-md bg-white p-10 shadow hover:shadow-lg focus:shadow-lg"
+      method="POST"
+      [formGroup]="form"
+      (submit)="submitRegister()"
+    >
       <div>
         <h1 class="text-center text-3xl font-bold">Register</h1>
         <p class="mt-1 mb-4 text-center text-sm text-gray-500">We does not support regsiter</p>
+      </div>
+
+      <div class="flex flex-wrap gap-y-2">
+        <div class="w-full">
+          <mat-form-field class="w-full">
+            <mat-label>Username</mat-label>
+            <input matInput type="text" formControlName="username" />
+            <mat-error>
+              {{ getErrorMessage(form, 'username') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="w-full">
+          <mat-form-field class="w-full">
+            <mat-label>Password</mat-label>
+            <input matInput type="password" formControlName="password" />
+            <mat-error>
+              {{ getErrorMessage(form, 'password') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="w-full">
+          <mat-form-field class="w-full">
+            <mat-label>Password Confirm</mat-label>
+            <input matInput type="password" formControlName="confirmPassword" />
+            <mat-error>
+              {{ getErrorMessage(form, 'confirmPassword') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="w-full">
+          <mat-form-field class="w-full">
+            <mat-label>Email</mat-label>
+            <input matInput type="email" formControlName="email" />
+            <mat-error>
+              {{ getErrorMessage(form, 'email') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="w-1/2 pr-2">
+          <mat-form-field class="w-full">
+            <mat-label>First Name</mat-label>
+            <input matInput type="text" formControlName="firstName" />
+            <mat-error>
+              {{ getErrorMessage(form, 'firstName') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="w-1/2 pl-2">
+          <mat-form-field class="w-full">
+            <mat-label>Last Name</mat-label>
+            <input matInput type="text" formControlName="lastName" />
+            <mat-error>
+              {{ getErrorMessage(form, 'lastName') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="w-full">
+          <button matButton="filled" class="w-full" [disabled]="isSubmitting()">Register</button>
+        </div>
       </div>
     </form>
   </div>

@@ -41,7 +41,11 @@ public interface OrderMapper {
     Order toEntity(OrderCreateReq req);
 
     @Mapping(target = "shippingMethod", source = "shippingMethod.name")
+    @Mapping(target = "paymentUrl", ignore = true)
     OrderDTO toClientSummaryDTO(Order order);
+
+    @Mapping(target = "shippingMethod", source = "order.shippingMethod.name")
+    OrderDTO toClientSummaryDTO(Order order, String paymentUrl);
 
     OrderDetailDTO toClientDetailDTO(Order order);
 

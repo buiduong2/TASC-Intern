@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .formLogin(FormLoginConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/v1/internal/**").permitAll()
                         .anyRequest().hasAnyAuthority("STAFF", "ADMIN"));
 
         return http.build();

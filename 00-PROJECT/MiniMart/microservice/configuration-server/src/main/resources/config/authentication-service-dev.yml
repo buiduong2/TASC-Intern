@@ -36,7 +36,7 @@ logging:
                 security: DEBUG
 custom:
     client:
-        origins: http://localhost:5173/,http://127.0.0.1:5500/
+        origins: http://localhost:4200/,http://127.0.0.1:5500/
 
     security:
         oauth2:
@@ -45,8 +45,8 @@ custom:
                     dashboard:
                         client-id: dashboard
                         client-secret: dashboard
-                        redirect-uri: http://localhost:5173/callback
-                        post-logout-redirect-uri: http://localhost:5173
+                        redirect-uri: http://localhost:4200/callback
+                        post-logout-redirect-uri: http://localhost:4200
                         scope: DASHBOARD
 
 management:

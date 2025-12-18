@@ -7,11 +7,19 @@
       </p>
     </div>
     <div class="flex flex-wrap">
-      @for (product of products; track product.id) {
+      @for (product of products(); track product.id) {
         <div class="w-1/6 px-1 py-1">
           <app-product-card [product]="product" />
         </div>
       }
     </div>
+
+    @if (page()?.totalPages ?? 0 > 1) {
+      <app-paginator
+        [totalPages]="page()?.totalPages ?? 0"
+        [pageNumber]="pageNumber()"
+        (pageChange)="handleOnPageChage($event)"
+      />
+    }
   </div>
 </section>

@@ -1,5 +1,7 @@
 package com.order_service.exception;
 
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -36,5 +38,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ValidationErrorResponse> handleValidationException(ValidationException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ValidationErrorResponseFactory.from(ex));
+    }
+
+    @ExceptionHandler(OrderSyncStepFailedException.class)
+    public ResponseEntity<?> handleOrderSync(OrderSyncStepFailedException ex) {
+
+        Map<String, Object> body = Map.of(
+                "orderId", ex.getOrderId(),
+                "step", ex.getStep(),
+                "error", ex.getReason());
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(body);
     }
 }

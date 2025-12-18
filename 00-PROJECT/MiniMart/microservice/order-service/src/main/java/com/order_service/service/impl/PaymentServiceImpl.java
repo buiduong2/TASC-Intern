@@ -282,6 +282,7 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setStatus(PaymentStatus.PENDING);
         payment.setAmountTotal(event.getTotalAmount());
         payment.setUserId(userId);
+
         try {
             repository.save(payment);
         } catch (DataIntegrityViolationException ex) {

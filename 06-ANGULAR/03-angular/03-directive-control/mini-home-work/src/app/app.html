@@ -1,0 +1,21 @@
+<main>
+    <h1>Danh sách sinh viên</h1>
+    <ul>
+
+        @if(isUserEmpty()) {
+        <li>Không có sinh viên nào</li>
+        } @else {
+        @for(user of users ; track user.id) {
+        <li>{{user.name}}</li>
+        }
+        }
+
+    </ul>
+
+    <hr>
+
+    <div>
+        <input type="text" [(ngModel)]="inputText" placeholder="Nhập tên sinh viên mới" (keyup.enter)="addUser()">
+        <button (click)="addUser()">Thêm user mới</button>
+    </div>
+</main>

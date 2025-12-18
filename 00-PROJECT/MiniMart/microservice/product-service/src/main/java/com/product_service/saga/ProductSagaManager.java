@@ -2,22 +2,18 @@ package com.product_service.saga;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import com.common.utils.Utils;
 import com.common_kafka.config.KafkaTopics;
 import com.common_kafka.event.catalog.product.ProductValidationFailedEvent;
 import com.common_kafka.event.catalog.product.ProductValidationPassedEvent;
 import com.common_kafka.event.sales.order.OrderProductValidationRequestedEvent;
-import com.common_kafka.event.shared.dto.OrderItemData;
 import com.common_kafka.event.shared.dto.ValidatedItemSnapshot;
 import com.product_service.model.Product;
+import com.product_service.saga.utils.ProductSagaUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,26 +23,17 @@ public class ProductSagaManager {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public void publishProductValidationPassedEvent(OrderProductValidationRequestedEvent event, List<Product> products) {
-        Map<Long, OrderItemData> mapByProductId = event.getItems()
-                .stream()
-                .collect(Collectors.toMap(OrderItemData::getProductId, Function.identity()));
+    private final ProductSagaUtils utils;
+
+    public void publishProductValidationPassedEvent(OrderProductValidationRequestedEvent event,
+            List<Product> products) {
+
+        Set<ValidatedItemSnapshot> validatedItemSnapshots = utils.getValidatedItemSnapshots(event, products);
 
         ProductValidationPassedEvent passedEvent = new ProductValidationPassedEvent(
                 event.getOrderId(),
                 event.getUserId(),
-                products.stream()
-                        .map(p -> {
-                            OrderItemData orderItemData = mapByProductId.get(p.getId());
-                            long orderItemId = orderItemData.getOrderItemId();
-                            int quantity = orderItemData.getQuantity();
-                            return new ValidatedItemSnapshot(
-                                    orderItemId,
-                                    p.getId(),
-                                    quantity,
-                                    Utils.coalesce(p.getSalePrice(), p.getCompareAtPrice()));
-                        })
-                        .collect(Collectors.toSet()));
+                validatedItemSnapshots);
 
         kafkaTemplate.send(
                 KafkaTopics.CATALOG_PRODUCT_VALIDATION_EVENTS,
@@ -54,13 +41,10 @@ public class ProductSagaManager {
                 passedEvent);
     }
 
-    public void publishProductValidationFailedEvent(OrderProductValidationRequestedEvent event, List<Product> products) {
-        Set<Long> existedIds = products.stream().map(Product::getId).collect(Collectors.toSet());
-        Set<Long> failedProdutIds = event.getItems()
-                .stream()
-                .map(OrderItemData::getProductId)
-                .filter(id -> !existedIds.contains(id))
-                .collect(Collectors.toSet());
+    public void publishProductValidationFailedEvent(OrderProductValidationRequestedEvent event,
+            List<Product> products) {
+
+        Set<Long> failedProdutIds = utils.get(event, products);
 
         ProductValidationFailedEvent failedEvent = new ProductValidationFailedEvent(
                 event.getOrderId(),

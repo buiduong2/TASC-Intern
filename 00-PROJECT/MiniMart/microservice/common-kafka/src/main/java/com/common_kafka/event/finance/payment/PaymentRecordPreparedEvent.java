@@ -17,9 +17,24 @@ public class PaymentRecordPreparedEvent extends AbstractSagaEvent {
 
     private BigDecimal amountToPay;
 
+    private String paymentUrl;
+
     public PaymentRecordPreparedEvent(long orderId, long userId, Long paymentId, BigDecimal amountToPay) {
         super(orderId, userId);
         this.paymentId = paymentId;
         this.amountToPay = amountToPay;
     }
+
+    public PaymentRecordPreparedEvent(
+            long orderId,
+            long userId,
+            Long paymentId,
+            BigDecimal amountToPay,
+            String payUrl) {
+        super(orderId, userId);
+        this.paymentId = paymentId;
+        this.amountToPay = amountToPay;
+        this.paymentUrl = payUrl;
+    }
+
 }

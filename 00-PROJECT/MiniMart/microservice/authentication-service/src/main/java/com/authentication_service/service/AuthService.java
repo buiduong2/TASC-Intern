@@ -6,10 +6,10 @@ import com.authentication_service.dto.res.UserDTO;
 
 public interface AuthService {
 
-    UserDTO getInfo(Long authId);
+    UserDTO getInfo(long authId);
 
     UserDTO register(RegisterReq registerReq);
 
-    void changePassword(ChangePasswordReq req, Long authId);
+    void changePassword(ChangePasswordReq req, long authId);
 
 }

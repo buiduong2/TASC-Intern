@@ -43,13 +43,13 @@ spring:
         listener:
             observation-enabled: true
 
-    # cloud:
-    #     openfeign:
-    #         circuitbreaker:
-    #             enabled: true
-    #     feign:
-    #         client:
-    #             config:
-    #                 default:
-    #                     connectTimeout: 5000
-    #                     readTimeout: 10000
+        # cloud:
+        #     openfeign:
+        #         circuitbreaker:
+        #             enabled: true
+        feign:
+            client:
+                config:
+                    default:
+                        connectTimeout: 5000
+                        readTimeout: 10000

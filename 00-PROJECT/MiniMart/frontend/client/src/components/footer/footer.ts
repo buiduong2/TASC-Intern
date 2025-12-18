@@ -5,7 +5,6 @@ import { MatInputModule } from '@angular/material/input';
 @Component({
   selector: 'app-footer',
   templateUrl: './footer.html',
-  styleUrls: ['./footer.css'],
   imports: [MatAnchor, MatInputModule],
 })
 export class FooterComponent implements OnInit {

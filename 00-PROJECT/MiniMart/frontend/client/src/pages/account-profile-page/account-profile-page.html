@@ -1,0 +1,56 @@
+@if (auth.profile(); as p) {
+  <div class="rounded-xl bg-white shadow-md">
+    <!-- Header -->
+    <div
+      class="flex items-start justify-between rounded-t-xl bg-linear-to-r from-orange-500 to-yellow-500 p-8 text-white"
+    >
+      <h2 class="text-2xl font-bold">Hồ sơ cá nhân</h2>
+
+      <button mat-flat-button color="primary" class="bg-white! text-orange-600!">
+        <mat-icon>edit</mat-icon>
+        Chỉnh sửa hồ sơ
+      </button>
+    </div>
+
+    <!-- Avatar in the center -->
+    <div class="-mt-10 flex justify-center">
+      <img
+        src="https://res.cloudinary.com/dsm2g8fub/image/upload/v1742565615/f64ab753-dcab-49e6-9959-ebc5e88c6c9c.png"
+        class="h-24 w-24 rounded-full border-4 border-white shadow"
+      />
+    </div>
+
+    <!-- Main content -->
+    <div class="p-8 text-center">
+      <h3 class="text-xl font-bold">Duong123z</h3>
+      <p class="text-gray-600">{{ p.username }}</p>
+
+      <hr class="my-6" />
+
+      <!-- Info grid -->
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div class="rounded-lg border bg-yellow-50 p-4">
+          <p class="text-sm text-gray-500">Tên người dùng</p>
+          <p class="text-lg font-semibold">{{ p.fullName }}</p>
+        </div>
+
+        <div class="rounded-lg border bg-yellow-50 p-4">
+          <p class="text-sm text-gray-500">Email</p>
+          <p class="text-lg font-semibold">{{ p.email }}</p>
+        </div>
+      </div>
+
+      <!-- Danger zone -->
+      <div class="mt-10">
+        <button
+          mat-flat-button
+          color="warn"
+          class="border! border-red-300! bg-red-50! text-red-600! hover:bg-red-100!"
+        >
+          <mat-icon>delete</mat-icon>
+          Xóa tài khoản
+        </button>
+      </div>
+    </div>
+  </div>
+}

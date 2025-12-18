@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.common_kafka.config.KafkaTopics;
 import com.common_kafka.event.sales.order.OrderCancellationRequestedEvent;
@@ -36,17 +38,18 @@ public class OrderSagaManager {
         kafkaTemplate.send(
                 KafkaTopics.CATALOG_PRODUCT_VALIDATION,
                 order.getId().toString(),
-                new OrderProductValidationRequestedEvent(
-                        order.getId(),
-                        order.getUserId(),
-                        toOrderItemData(order)));
+                createOrderProductValidationRequestedEvent(order));
     }
 
-    public void publishOrderStockReservationRequestedEvent(Order order) {
-        OrderStockReservationRequestedEvent event = new OrderStockReservationRequestedEvent(
+    public OrderProductValidationRequestedEvent createOrderProductValidationRequestedEvent(Order order) {
+        return new OrderProductValidationRequestedEvent(
                 order.getId(),
                 order.getUserId(),
                 toOrderItemData(order));
+    }
+
+    public void publishOrderStockReservationRequestedEvent(Order order) {
+        OrderStockReservationRequestedEvent event = createOrderStockReservationRequestedEvent(order);
 
         kafkaTemplate.send(
                 KafkaTopics.SUPPLY_INVENTORY_RESERVATION,
@@ -55,15 +58,19 @@ public class OrderSagaManager {
 
     }
 
+    public OrderStockReservationRequestedEvent createOrderStockReservationRequestedEvent(Order order) {
+        OrderStockReservationRequestedEvent event = new OrderStockReservationRequestedEvent(
+                order.getId(),
+                order.getUserId(),
+                toOrderItemData(order));
+        return event;
+    }
+
     public void publishOrderInitialPaymentRequestedEvent(Order order) {
         log.info("[SAGA][OrderId={}][ACTION=publishPaymentRequested] ✅ Published OrderInitialPaymentRequestedEvent",
                 order.getId());
 
-        OrderInitialPaymentRequestedEvent event = new OrderInitialPaymentRequestedEvent(
-                order.getId(),
-                order.getUserId(),
-                order.getTotalPrice(),
-                order.getPaymentMethod().name());
+        OrderInitialPaymentRequestedEvent event = createOrderIntialPaymentRequestedEvent(order);
 
         kafkaTemplate.send(
                 KafkaTopics.FINANCE_PAYMENT_COMMAND,
@@ -71,6 +78,16 @@ public class OrderSagaManager {
                 event);
     }
 
+    public OrderInitialPaymentRequestedEvent createOrderIntialPaymentRequestedEvent(Order order) {
+        return new OrderInitialPaymentRequestedEvent(
+                order.getId(),
+                order.getUserId(),
+                order.getTotalPrice(),
+                order.getPaymentMethod().name());
+
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
     public void publishCreationCompensatedEvent(Order order) {
         OrderSagaTracker ost = trackerRepository.findByOrderIdForUpdate(order.getId())
                 .orElseThrow(() -> ResourceNotFoundException.of(

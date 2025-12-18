@@ -50,6 +50,8 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
     Optional<Order> findByIdForUpdate(long id);
 
     // =========Non-Lockig =========
+    // GET
+
     @EntityGraph(value = Order.namedGraph_WithItem, type = EntityGraphType.FETCH)
     @Query("""
             FROM Order AS o
@@ -64,13 +66,18 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
             """)
     Optional<Order> findByIdAndUserIdForClientDetail(long orderId, long userId);
 
-    // GET
+    @EntityGraph(value = Order.namedGraphClientSummary, type = EntityGraphType.FETCH)
+    @Query("""
+            FROM Order AS o
+            WHERE o.userId = ?1
+            """)
+    Page<Order> findByUserIdForCLientSummary(long userId, Pageable pageable);
 
     @EntityGraph(value = Order.namedGraphClientSummary, type = EntityGraphType.FETCH)
     @Query("""
             FROM Order AS o
             WHERE o.id = ?1 AND o.userId = ?2
             """)
-    Page<Order> findByUserIdForCLientSummary(long userId, Pageable pageable);
+    Optional<Order> findByIdAndUserIdForCLientSummary(long orderId, long userId);
 
 }

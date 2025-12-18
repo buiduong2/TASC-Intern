@@ -22,7 +22,8 @@ spring:
                         - id: auth-mvc
                           uri: lb://authentication-service
                           predicates:
-                              - Path=/login
+                              - Path=/login,/oauth2/authorize/**,/oauth2/token/**,/profile
+                          
 
                         - id: auth-api
                           uri: lb://authentication-service
@@ -45,24 +46,24 @@ spring:
 
                         - id: admin-bff
                           uri: lb://admin-bff
-                          predicates: 
-                            - Path=/v1/admin/users
+                          predicates:
+                              - Path=/v1/admin/users
                           filters:
                               - RemoveRequestHeader=Authorization
 
                         - id: order-service
                           uri: lb://order-service
-                          predicates: 
-                            - Path=/v1/orders/**,/v1/admin/orders/**
+                          predicates:
+                              - Path=/v1/orders/**,/v1/admin/orders/**
                           filters:
                               - RemoveRequestHeader=Authorization
                         - id: payemnt-service
                           uri: lb://order-service
-                          predicates: 
-                            - Path=/v1/payments/**
+                          predicates:
+                              - Path=/v1/payments/**
                           filters:
                               - RemoveRequestHeader=Authorization
-                        
+
 management:
     endpoint:
         gateway:

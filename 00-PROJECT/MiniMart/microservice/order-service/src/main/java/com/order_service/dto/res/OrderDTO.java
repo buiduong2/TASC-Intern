@@ -30,4 +30,6 @@ public class OrderDTO {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    private String paymentUrl;
 }

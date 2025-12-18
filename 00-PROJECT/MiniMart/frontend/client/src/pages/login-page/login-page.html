@@ -16,12 +16,11 @@
       <mat-form-field class="mb-5 w-full">
         <mat-label>Password</mat-label>
         <input matInput placeholder="Ex. 1234567" type="password" />
-        <mat-hint>Include area code</mat-hint>
       </mat-form-field>
 
       <!-- Action -->
       <div>
-        <button matButton="filled" class="w-full">Login</button>
+        <button matButton="filled" class="w-full" (click)="login($event)">Login</button>
         <div class="my-4 text-center font-medium">OR</div>
 
         <button matButton="filled" class="w-full bg-green-600!">Login with Google</button>

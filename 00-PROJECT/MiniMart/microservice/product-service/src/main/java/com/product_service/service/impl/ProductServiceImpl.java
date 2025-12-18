@@ -3,7 +3,6 @@ package com.product_service.service.impl;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -12,15 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.common.exception.GenericException;
-import com.common_kafka.event.sales.order.OrderProductValidationRequestedEvent;
-import com.common_kafka.event.shared.dto.OrderItemData;
-import com.product_service.dto.req.ProductCheckExistsReq;
 import com.product_service.dto.req.ProductUpdateReq;
-import com.product_service.dto.res.ProductCheckExistsRes;
 import com.product_service.dto.res.ProductDetailDTO;
 import com.product_service.dto.res.ProductDetailDTO.ProductRelateDTO;
 import com.product_service.dto.res.ProductSummaryDTO;
-import com.product_service.dto.res.ProductValidationResult;
 import com.product_service.enums.ProductStatus;
 import com.product_service.event.Action;
 import com.product_service.event.ProductEvent;
@@ -169,28 +163,6 @@ public class ProductServiceImpl implements ProductService {
         eventPublisher.publishEvent(
                 new ProductEvent(product.getId(), categoryId, categoryId, Action.DELETED));
         throw new UnsupportedOperationException("Unimplemented method 'deleteById'");
-    }
-
-    @Override
-    public ProductCheckExistsRes validateExistsByIdsForInternal(ProductCheckExistsReq req) {
-        List<Long> existsedProductIds = repository.getProductIdByIdnAndStatusIn(req.getProductIds(),
-                ProductStatus.getTransactableStatuses());
-        Set<Long> requiredIds = new HashSet<>(req.getProductIds());
-
-        requiredIds.removeAll(existsedProductIds);
-
-        return new ProductCheckExistsRes(requiredIds.isEmpty(), requiredIds);
-    }
-
-    @Override
-    public ProductValidationResult processOrderCreationRequested(OrderProductValidationRequestedEvent event) {
-        Set<Long> requestIds = event.getItems().stream().map(OrderItemData::getProductId)
-                .collect(Collectors.toCollection(HashSet::new));
-
-        List<Product> products = repository.findByIdInAndStatusIn(requestIds, List.of(ProductStatus.ACTIVE));
-        boolean allValid = products.size() == requestIds.size();
-        return ProductValidationResult.of(allValid, products);
-
     }
 
 }

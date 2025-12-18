@@ -38,7 +38,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public UserDTO getInfo(Long authId) {
+    public UserDTO getInfo(long authId) {
         return repository.findByIdForAuth(authId)
                 .map(mapper::toDTO)
                 .orElseThrow(() -> new GenericException(ErrorCode.USER_NOT_FOUND, authId));
@@ -63,7 +63,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional
     @Override
-    public void changePassword(ChangePasswordReq req, Long authId) {
+    public void changePassword(ChangePasswordReq req, long authId) {
         SystemUser user = systemUserRepository.findById(authId)
                 .orElseThrow(() -> new GenericException(ErrorCode.USER_NOT_FOUND, authId));
 

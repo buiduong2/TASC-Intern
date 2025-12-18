@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .formLogin(FormLoginConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/v1/internal/**").permitAll()
                         .requestMatchers("/v1/payments/*/ipn").permitAll()
                         .requestMatchers("/v1/payments/*/return").permitAll()
                         .requestMatchers("/v1/admin/**").hasAnyAuthority("STAFF", "ADMIN")

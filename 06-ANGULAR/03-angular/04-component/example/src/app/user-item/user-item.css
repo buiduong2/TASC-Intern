@@ -1,0 +1,13 @@
+li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+button {
+  background: none;
+  border: none;
+  color: red;
+  cursor: pointer;
+}

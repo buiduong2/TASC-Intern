@@ -1,0 +1,47 @@
+<section class="bg-gray-100 py-16">
+  @if (auth.profile(); as p) {
+    <div class="container mx-auto grid grid-cols-1 gap-8 px-4 md:grid-cols-3">
+      <!-- SIDEBAR -->
+      <div class="md:col-span-1">
+        <div class="rounded-xl bg-white p-6 shadow-md">
+          <!-- Avatar -->
+          <div class="flex flex-col items-center">
+            <img
+              src="https://res.cloudinary.com/dsm2g8fub/image/upload/v1742565615/f64ab753-dcab-49e6-9959-ebc5e88c6c9c.png"
+              alt="avatar"
+              class="mb-3 h-24 w-24 rounded-full object-cover"
+            />
+
+            <h2 class="text-xl font-bold text-blue-600">{{ p.fullName }}</h2>
+          </div>
+
+          <!-- Menu -->
+          <mat-nav-list class="mt-6">
+            <a mat-list-item class="rounded-lg" [class.bg-blue-50]="true" routerLink="account">
+              <mat-icon matListItemIcon>person</mat-icon>
+              <span class="font-medium">Cập nhật tài khoản</span>
+              <span matListItemMeta><mat-icon>chevron_right</mat-icon></span>
+            </a>
+
+            <a mat-list-item class="mt-2 rounded-lg" routerLink="address">
+              <mat-icon matListItemIcon>location_on</mat-icon>
+              <span class="font-medium">Cập nhật địa chỉ</span>
+              <span matListItemMeta><mat-icon>chevron_right</mat-icon></span>
+            </a>
+
+            <a mat-list-item class="mt-2 rounded-lg" routerLink="password">
+              <mat-icon matListItemIcon>key</mat-icon>
+              <span class="font-medium">Cập nhật mật khẩu</span>
+              <span matListItemMeta> <mat-icon>chevron_right</mat-icon></span>
+            </a>
+          </mat-nav-list>
+        </div>
+      </div>
+
+      <!-- MAIN PROFILE CARD -->
+      <div class="md:col-span-2">
+        <router-outlet />
+      </div>
+    </div>
+  }
+</section>

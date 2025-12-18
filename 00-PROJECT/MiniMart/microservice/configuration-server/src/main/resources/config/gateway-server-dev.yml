@@ -8,13 +8,12 @@ custom:
         key_set_uri: http://localhost:8081/oauth2/jwks
 
     client:
-        origins: http://localhost:5173/,http://127.0.0.1:5500/
-
+        origins: http://localhost:4200,http://127.0.0.1:5500/
 logging:
     level:
         org:
             springframework:
-                security: DEBUG
+                security: TRACE
 
 management:
     tracing:

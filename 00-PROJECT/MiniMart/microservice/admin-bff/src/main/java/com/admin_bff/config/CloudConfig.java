@@ -14,7 +14,7 @@ public class CloudConfig {
     private final String[] CUSTOM_HEADERS = { "x-user-id", "x-user-roles" };
 
     @Bean
-    public RequestInterceptor forwardCustomHeaderInterceptor() {
+    RequestInterceptor forwardCustomHeaderInterceptor() {
         return template -> {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
                     .getRequestAttributes();
@@ -35,8 +35,8 @@ public class CloudConfig {
     // @SuppressWarnings("unchecked")
     // @Bean
     // ThreadPoolBulkheadConfigCustomizer requestContextBulkheadCustomizer() {
-    //     return ThreadPoolBulkheadConfigCustomizer.of("default",
-    //             builder -> builder.contextPropagator(RequestHeaderContextPropagator.class));
+    // return ThreadPoolBulkheadConfigCustomizer.of("default",
+    // builder -> builder.contextPropagator(RequestHeaderContextPropagator.class));
     // }
 
 }

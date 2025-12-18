@@ -38,6 +38,18 @@ public class StockSagaManager {
             List<OrderReservationLog> logs,
             Allocation allocation) {
 
+        InventoryReservedConfirmedEvent confirmEvent = createInventoryReservedConfirmEvent(event, logs, allocation);
+
+        kafkaTemplate.send(
+                KafkaTopics.SUPPLY_INVENTORY_RESERVATION_EVENTS,
+                String.valueOf(event.getOrderId()),
+                confirmEvent);
+
+    }
+
+    public InventoryReservedConfirmedEvent createInventoryReservedConfirmEvent(
+            OrderStockReservationRequestedEvent event,
+            List<OrderReservationLog> logs, Allocation allocation) {
         Set<ReservedItemSnapshot> reservedItems = logs.stream()
                 .map(l -> new ReservedItemSnapshot(l.getProductId(), l.getQuantityReserved()))
                 .collect(Collectors.toSet());
@@ -47,16 +59,22 @@ public class StockSagaManager {
                 event.getUserId(),
                 reservedItems,
                 allocation.getId());
-
-        kafkaTemplate.send(
-                KafkaTopics.SUPPLY_INVENTORY_RESERVATION_EVENTS,
-                String.valueOf(event.getOrderId()),
-                confirmEvent);
-
+        return confirmEvent;
     }
 
     public void publishInventoryReservedFailedEvent(OrderStockReservationRequestedEvent event, String reason) {
 
+        InventoryReservationFailedEvent failedEvent = createInventoryReservedFailedEvent(event, reason);
+
+        kafkaTemplate.send(
+                KafkaTopics.SUPPLY_INVENTORY_RESERVATION_EVENTS,
+                String.valueOf(event.getOrderId()),
+                failedEvent);
+
+    }
+
+    public InventoryReservationFailedEvent createInventoryReservedFailedEvent(
+            OrderStockReservationRequestedEvent event, String reason) {
         Set<FailedItemInfo> failedItems = new HashSet<>();
 
         List<Stock> stocks = stockRepository.findByProductIdIn(
@@ -85,11 +103,7 @@ public class StockSagaManager {
                 reason,
                 failedItems);
 
-        kafkaTemplate.send(
-                KafkaTopics.SUPPLY_INVENTORY_RESERVATION_EVENTS,
-                String.valueOf(event.getOrderId()),
-                failedEvent);
-
+        return failedEvent;
     }
 
     /**

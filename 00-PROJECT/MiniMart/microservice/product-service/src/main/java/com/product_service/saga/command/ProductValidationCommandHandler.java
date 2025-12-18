@@ -8,7 +8,7 @@ import com.common_kafka.config.KafkaTopics;
 import com.common_kafka.event.sales.order.OrderProductValidationRequestedEvent;
 import com.product_service.dto.res.ProductValidationResult;
 import com.product_service.saga.ProductSagaManager;
-import com.product_service.service.ProductService;
+import com.product_service.service.ProductCoreService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ProductValidationCommandHandler {
 
-    private final ProductService service;
+    private final ProductCoreService coreService;
 
     private final ProductSagaManager sagaManager;
 
@@ -31,21 +31,24 @@ public class ProductValidationCommandHandler {
                 orderId);
 
         try {
-        ProductValidationResult result = service.processOrderCreationRequested(event);
+            ProductValidationResult result = coreService.processOrderCreationRequested(event);
 
-        if (result.isAllValid()) {
-            sagaManager.publishProductValidationPassedEvent(event, result.getValidProducts());
-            log.info("📤 [{}][ProductValidationPassedEvent][PUBLISHED][ID={}] All products valid", SAGA, orderId);
-        } else {
-            sagaManager.publishProductValidationFailedEvent(event, result.getValidProducts());
-            log.warn("🔴📤 [{}][ProductValidationFailedEvent][PUBLISHED][ID={}] Invalid products detected", SAGA, orderId);
+            if (result.isAllValid()) {
+                sagaManager.publishProductValidationPassedEvent(event, result.getValidProducts());
+                log.info("📤 [{}][ProductValidationPassedEvent][PUBLISHED][ID={}] All products valid", SAGA, orderId);
+            } else {
+                sagaManager.publishProductValidationFailedEvent(event, result.getValidProducts());
+                log.warn("🔴📤 [{}][ProductValidationFailedEvent][PUBLISHED][ID={}] Invalid products detected", SAGA,
+                        orderId);
+            }
+
+        } catch (Exception e) {
+            sagaManager.publishProductValidationFailedEvent(event);
+            log.error("❌ [{}][OrderProductValidationRequestedEvent][ERROR][ID={}] {}", SAGA, orderId, e.getMessage(),
+                    e);
+            log.warn("🔴📤 [{}][ProductValidationFailedEvent][PUBLISHED][ID={}] Exception occurred during validation",
+                    SAGA, orderId);
         }
-
-    } catch (Exception e) {
-        sagaManager.publishProductValidationFailedEvent(event);
-        log.error("❌ [{}][OrderProductValidationRequestedEvent][ERROR][ID={}] {}", SAGA, orderId, e.getMessage(), e);
-        log.warn("🔴📤 [{}][ProductValidationFailedEvent][PUBLISHED][ID={}] Exception occurred during validation", SAGA, orderId);
-    }
     }
 
 }

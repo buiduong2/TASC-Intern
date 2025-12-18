@@ -1,17 +1,16 @@
 import { Component, computed, Input, OnInit } from '@angular/core';
-import { ProductSummaryDTO } from '../../pages/product-list-page/product-list-page';
-import { StarIconsComponent } from '../star-icons/star-icons';
 import { RouterLink } from '@angular/router';
+import { ProductSummary } from '../../services/product.service';
 import { BagIconComponent } from '../bag-icon/bag-icon';
+import { StarIconsComponent } from '../star-icons/star-icons';
 
 @Component({
   selector: 'app-product-card',
   templateUrl: './product-card.html',
-  styleUrls: ['./product-card.css'],
   imports: [StarIconsComponent, RouterLink, BagIconComponent],
 })
 export class ProductCardComponent implements OnInit {
-  @Input({ required: true }) product!: ProductSummaryDTO;
+  @Input({ required: true }) product!: ProductSummary;
 
   isOnSale = computed(() => {
     return this.product.salePrice !== null && this.product.salePrice < this.product.compareAtPrice;

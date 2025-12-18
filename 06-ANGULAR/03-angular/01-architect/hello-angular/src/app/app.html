@@ -1,0 +1,44 @@
+<!-- {{}} -->
+<h1>Xin chào {{ title }}!</h1>
+<p>Đây là ứng dụng Angular đầu tiên của tôi 🎉</p>
+
+<!-- V-bind -->
+<img [src]="imageUrl" style="width: 30px; height: 30px;" alt="Logo" />
+<!-- V-on -->
+<button (click)="sayHello()">Bấm vào tôi</button>
+
+<!-- V-model -->
+<input [(ngModel)]="name" placeholder="Nhập tên của bạn" />
+<p>Xin chào, {{ name }}!</p>
+
+<!-- v-if -->
+
+<button (click)="toggleMessage()">Ẩn/Hiện</button>
+
+@if (showMessage) {
+<p>👋 Xin chào, đây là Angular Directive!</p>
+}
+
+<!-- V-for -->
+<ul>
+
+    @for(user of users ;track user) {
+    <li>{{ user }}</li>
+    }
+</ul>
+
+<!-- V-bind:class -->
+
+<button (click)="toggle()">Đổi trạng thái</button>
+<p [ngClass]="{'active': isActive, 'inactive': !isActive}">
+    Trạng thái {{ isActive ? 'Hoạt động' : 'Không hoạt động' }}
+</p>
+
+<!-- ngstyle -->
+
+<p [ngStyle]="{'font-size.px': fontSize}">
+    Cỡ chữ: {{fontSize}}
+</p>
+
+<button (click)="fontSize = fontSize +2">+ </button>
+<button (click)="fontSize = fontSize -2">+ </button>

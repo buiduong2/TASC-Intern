@@ -24,7 +24,39 @@
     </nav>
 
     <div class="flex justify-end">
-      <a matButton="filled" routerLink="/login">Login</a>
+      @if (!auth.isAuthenticated()) {
+        <div><a matButton="filled" routerLink="/login">Login</a></div>
+      } @else {
+        <div class="flex cursor-pointer items-center space-x-3" [matMenuTriggerFor]="menu">
+          <div class="h-10 w-10 overflow-hidden rounded-full border-2 border-[#b17741]">
+            <img
+              src="https://res.cloudinary.com/dsm2g8fub/image/upload/v1742565615/f64ab753-dcab-49e6-9959-ebc5e88c6c9c.png"
+              alt="Duong123z"
+              class="h-full w-full object-cover"
+            />
+          </div>
+          <span class="font-medium text-gray-700">{{ auth.profile()?.fullName }}</span>
+        </div>
+
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item routerLink="/cart">
+            <mat-icon>shopping_cart</mat-icon>
+            <span>Giỏ hàng</span>
+          </button>
+          <button mat-menu-item routerLink="/history">
+            <mat-icon>history</mat-icon>
+            <span>Lịch sử giỏ hàng</span>
+          </button>
+          <button mat-menu-item routerLink="/account">
+            <mat-icon>account_circle</mat-icon>
+            <span>Cập nhật tài khoản</span>
+          </button>
+          <button mat-menu-item (click)="auth.logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Đăng xuất</span>
+          </button>
+        </mat-menu>
+      }
     </div>
   </div>
 </header>

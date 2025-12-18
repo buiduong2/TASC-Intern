@@ -1,0 +1,17 @@
+<h1>Danh sách sinh viên</h1>
+
+@if (users.length === 0) {
+<p>Không có sinh viên nào 😅</p>
+} @else {
+<ul>
+    @for (u of users; track u.id) {
+    <app-user-item [user]="u" (deleteUser)="deleteUser($event)">
+    </app-user-item>
+    }
+</ul>
+}
+
+<hr />
+
+<input [(ngModel)]="inputText" placeholder="Nhập tên sinh viên mới" (keyup.enter)="addUser()" />
+<button (click)="addUser()">Thêm user mới</button>

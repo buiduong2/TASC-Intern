@@ -9,7 +9,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.cors.CorsConfigurationSource;
 
 import com.authentication_service.security.CustomAuthenticationProvider;
 import com.authentication_service.security.CustomJwtAuthenticationConverter;
@@ -30,8 +29,6 @@ public class SecurityConfig {
     final UserDetailServiceImpl userDetailsService;
 
     final Validator validator;
-
-    final CorsConfigurationSource configurationSource;
 
     @Bean
     PasswordEncoder passwordEncoder() {
@@ -58,8 +55,7 @@ public class SecurityConfig {
                 .requestMatchers("/v1/admin/users/**").hasAuthority("ADMIN")
                 .requestMatchers(resourceUrls).permitAll()
                 .anyRequest().authenticated())
-                .cors(c -> c.configurationSource(configurationSource))
-                .csrf(c -> c.ignoringRequestMatchers("/api/**"))
+                .csrf(c -> c.ignoringRequestMatchers("/v1/**"))
                 .formLogin(c -> c.loginPage("/login")
                         .failureUrl("/login?error"))
                 .oauth2Login(c -> c.successHandler(federatedIdentityAuthenticationSuccessHandler)

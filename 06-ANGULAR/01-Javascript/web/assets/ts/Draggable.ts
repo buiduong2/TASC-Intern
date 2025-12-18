@@ -79,6 +79,9 @@ export function Draggable(selector: Selector) {
 			if (moving) {
 				return
 			}
+
+            
+
 			const cursor = getCursorY(e)
 			if (cursor === 0 && e.clientY === 0) return // bỏ frame rỗng của drag
 

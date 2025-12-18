@@ -1,0 +1,32 @@
+<div class="mt-6 flex items-center justify-center gap-1">
+  <!-- Previous -->
+  <button
+    class="rounded border bg-white px-3 py-1 text-gray-600 hover:bg-gray-100 disabled:opacity-40"
+    [disabled]="pageNumber <= 0"
+    (click)="change(pageNumber - 1)"
+  >
+    «
+  </button>
+
+  <!-- Page buttons -->
+  @for (p of pages; track p) {
+    <button
+      class="rounded border px-3 py-1 text-sm"
+      [class.bg-blue-600]="p === pageNumber"
+      [class.text-white]="p === pageNumber"
+      [class.bg-white]="p !== pageNumber"
+      (click)="change(p)"
+    >
+      {{ p + 1 }}
+    </button>
+  }
+
+  <!-- Next -->
+  <button
+    class="rounded border bg-white px-3 py-1 text-gray-600 hover:bg-gray-100 disabled:opacity-40"
+    [disabled]="pageNumber >= totalPages - 1"
+    (click)="change(pageNumber + 1)"
+  >
+    »
+  </button>
+</div>
