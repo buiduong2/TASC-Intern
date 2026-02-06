@@ -1,0 +1,168 @@
+<main>
+  <div class="container">
+    <table mat-table [dataSource]="products" class="mat-elevation-z8 product-table">
+      <ng-container matColumnDef="select">
+        <th mat-header-cell *matHeaderCellDef>
+          <mat-checkbox
+            (change)="$event ? toggleAllRows() : null"
+            [checked]="allSelected"
+            [indeterminate]="selection.hasValue() && !allSelected"
+          >
+          </mat-checkbox>
+
+        </th>
+        <td mat-cell *matCellDef="let row">
+          <mat-checkbox
+            (click)="$event.stopPropagation()"
+            (change)="$event ? selection.toggle(row.id) : null"
+            [checked]="selection.isSelected(row.id)"
+          >
+          </mat-checkbox>
+        </td>
+      </ng-container>
+
+      <!-- id Column -->
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef>
+          <div class="header-action" [matMenuTriggerFor]="colAction" (click)="openColMenu('id')">
+            <span class="header-text">ID.</span>
+
+            <app-sort-indicator
+              [sorted]="isSorted('id')"
+              [direction]="getSortDirection('id')"
+              [index]="getSortIndex('id')"
+            />
+
+            <mat-icon class="header-icon">expand_more</mat-icon>
+          </div>
+        </th>
+
+        <td mat-cell *matCellDef="let element">{{ element.id }}</td>
+      </ng-container>
+
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>
+          <div class="header-action" [matMenuTriggerFor]="colAction" (click)="openColMenu('name')">
+            <span class="header-text">Tên sản phẩm.</span>
+
+            <app-sort-indicator
+              [sorted]="isSorted('name')"
+              [direction]="getSortDirection('name')"
+              [index]="getSortIndex('name')"
+            />
+
+            <mat-icon class="header-icon">expand_more</mat-icon>
+          </div>
+        </th>
+
+        <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+      </ng-container>
+
+      <!-- price Column -->
+      <ng-container matColumnDef="price">
+        <th mat-header-cell *matHeaderCellDef>
+          <div class="header-action" [matMenuTriggerFor]="colAction" (click)="openColMenu('price')">
+            <span class="header-text">Giá.</span>
+
+            <app-sort-indicator
+              [sorted]="isSorted('price')"
+              [direction]="getSortDirection('price')"
+              [index]="getSortIndex('price')"
+            />
+
+            <mat-icon class="header-icon">expand_more</mat-icon>
+          </div>
+        </th>
+
+        <td mat-cell *matCellDef="let element">{{ element.price }}</td>
+      </ng-container>
+
+      <!-- status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>
+          <div
+            class="header-action"
+            [matMenuTriggerFor]="colAction"
+            (click)="openColMenu('status')"
+          >
+            <span class="header-text">Trạng thái.</span>
+
+            <app-sort-indicator
+              [sorted]="isSorted('status')"
+              [direction]="getSortDirection('status')"
+              [index]="getSortIndex('status')"
+            />
+
+            <mat-icon class="header-icon">expand_more</mat-icon>
+          </div>
+        </th>
+
+        <td mat-cell *matCellDef="let element">
+          <mat-chip [disabled]="element.status === 'INACTIVE'">{{
+            getStatusLabel(element.status)
+          }}</mat-chip>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="action">
+        <th mat-header-cell *matHeaderCellDef>Hành động</th>
+        <td mat-cell *matCellDef="let element">
+          <button mat-icon-button [matMenuTriggerFor]="rowAction" (click)="openRowMenu(element.id)">
+            <mat-icon>more_horiz</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+
+    <div class="product-table-footer">
+      <div class="product-table__selection-info">
+        Đã chọn {{ selection.selected.length }} trên {{ products.length }} hàng .
+      </div>
+
+      <div class="product-table__pagination">
+        <mat-paginator
+          [pageSizeOptions]="[5, 10, 20]"
+          showFirstLastButtons
+          aria-label="Select page of periodic elements"
+        >
+          hello
+        </mat-paginator>
+      </div>
+    </div>
+
+    <mat-menu #rowAction="matMenu" class="action-menu">
+      <ng-container *ngFor="let group of rowActionGroups; let i = index">
+        <button
+          mat-menu-item
+          *ngFor="let item of group.items"
+          [class.danger]="item.danger"
+          (click)="onRowAction(item.action, activeRowId)"
+        >
+          <mat-icon *ngIf="item.icon">{{ item.icon }}</mat-icon>
+          {{ item.label }}
+        </button>
+
+        <mat-divider *ngIf="i < rowActionGroups.length - 1"></mat-divider>
+      </ng-container>
+    </mat-menu>
+
+    <mat-menu #colAction="matMenu">
+      <ng-container *ngFor="let group of colActionGroups; let i = index">
+        <button
+          mat-menu-item
+          *ngFor="let item of group.items"
+          (click)="onHeaderAction(item.action, activeColId)"
+        >
+          <mat-icon *ngIf="item.icon">{{ item.icon }}</mat-icon>
+          {{ item.label }}
+        </button>
+
+        <mat-divider *ngIf="i < colActionGroups.length - 1"></mat-divider>
+      </ng-container>
+    </mat-menu>
+  </div>
+</main>
