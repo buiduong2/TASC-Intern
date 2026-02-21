@@ -20,7 +20,6 @@ export interface ConfirmDialogData {
   standalone: true,
   imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose, MatButtonModule],
   templateUrl: './confirm-dialog.html',
-  styleUrl: './confirm-dialog.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfirmDialog {
