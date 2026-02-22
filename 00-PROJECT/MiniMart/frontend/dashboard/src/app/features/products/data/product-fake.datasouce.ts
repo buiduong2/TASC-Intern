@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { ProductDataSource } from './product.datasource';
-import { Page, Pageable } from '../../models/common/page.model';
-import { ProductQuery } from '../../models/product/product-query.model';
+import { ProductDataSource } from '@products/data/product.datasource';
+import { Page, Pageable } from '../../../shared/models/page.model';
+import { ProductQuery } from '../models/product-query.model';
 import { Observable, of } from 'rxjs';
 
 @Injectable({

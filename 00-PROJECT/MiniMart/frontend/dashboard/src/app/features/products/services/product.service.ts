@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { ProductDataSource } from '../../data/product/product.datasource';
-import { ProductQuery } from '../../models/product/product-query.model';
-import { Pageable } from '../../models/common/page.model';
+import { ProductDataSource } from '../data/product.datasource';
+import { ProductQuery } from '@products/models/product-query.model';
+import { Pageable } from '@shared/models/page.model';
 
 @Injectable({
   providedIn: 'root',

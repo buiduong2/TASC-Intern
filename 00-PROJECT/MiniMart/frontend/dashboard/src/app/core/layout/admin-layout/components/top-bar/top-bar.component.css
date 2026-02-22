@@ -1,0 +1,9 @@
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+}
+
+.top-bar__left {
+  display: flex;
+  align-items: center;
+}

@@ -1,0 +1,8 @@
+<div>
+  @for (breadcrumb of breadcrumbs; track breadcrumb.path) {
+    <a [routerLink]="breadcrumb.path">{{ breadcrumb.label }}</a>
+    @if (!isLastBreadcrumb($index)) {
+      <span class="spacer"><mat-icon>chevron_right</mat-icon></span>
+    }
+  }
+</div>
