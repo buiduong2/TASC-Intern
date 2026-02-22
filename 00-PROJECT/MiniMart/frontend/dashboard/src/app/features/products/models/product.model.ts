@@ -5,3 +5,7 @@ interface Product {
   price: number;
   status: 'ACTIVE' | 'INACTIVE';
 }
+
+interface ProductDetail {
+
+}

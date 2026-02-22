@@ -203,4 +203,108 @@ app/
 ```
 
 - Trong Auth Component nên inject một AUthService riêng quản lý dữ liệu cho User
+
+### B1 Làm breadcrumb
+
+- `Nguyên tắc`
+  - Sinh breadcrumb dựa vào `ActivedRoute tree`
+  - Lấy metadata từ `route.data` (Khai báo bên trong file app.routes.ts)
+  - hoạt động hoàn toàn độc lập business domain
+  - Chỉ là UI + đọc Route state
+  - Bản thân Route config cũng phải thể hiện đúng cấu trúc điều hướng của hệ thống
+
+- `Kiến trúc Component`
+
+```
+core/
+  layout/
+    admin-layout/
+      topbar/
+        breadcrumb/
+          breadcrumb.component.ts
+          breadcrumb.service.ts
+```
+
+- `Các bước thực hiện`
+
+- `1️⃣ Route định nghĩa thêm breadcrumb metadata`
+```js
+{
+  path: 'products',
+  component: ProductListComponent,
+  data: { breadcrumb: 'Products' }
+},
+{
+  path: 'products/:id',
+  component: ProductDetailComponent,
+  data: { breadcrumb: 'Product Detail' }
+}
+```
+
+- Hoặc nâng cao hơn
+```js
+{
+  path: 'products/:id',
+  component: ProductDetailComponent,
+  data: {
+    breadcrumb: (data: any) => `Product #${data['id']}`
+  }
+}
+```
+
+- `Cách hoạt động`
+- Breadcrumb Componett
+  - lắng nghe `Router.events`
+  - Khi `NavigationEnd`
+  - Traverse `ActivatedRoute.root`
+  - Build ra mảng
+```js
+[
+  { label: 'Dashboard', url: '/dashboard' },
+  { label: 'Products', url: '/products' },
+  { label: 'Detail', url: '/products/12' }
+]
+```
+
+- `Resolver (loader)`
+
+- Ta có thẻ triển khai thêm resolver để có thể fetch trước khi Component bắt đầu lifecycle
+- Hay nó nằm ở router level nằm trong `router lifecycle.`
+- Ở trong các page detail ta sẽ sử dụng resolver còn table filter thì component
 - 
+
+- **`Thực hiện: `**
+- `1️⃣ Tạo thêm interface để thêm typesafe cho breadcrumb meatada`
+
+```js
+interface AppRoute extends Route {
+  data?: Route['data'] & {
+    breadcrumb?: string | ((data: any) => string);
+  };
+  children?: AppRoute[];
+}
+
+
+// Cập nhật thêm property cho data. Là bao gồm các property cũ và thêm breadcrumb
+// Children đệ quy tiếp tiếp nhận type mới
+```
+
+- breadcrumb có thể là string để in ra luôn
+- Hoặc là một Function để có thể thêm động dựa trên data
+- Insight
+  - breadcrumb là optional UI concern
+  - Không phải là core routing concernt
+  - Đừng biến optional concern thành hard requirement
+  - 
+
+- `2️⃣ Thêm các metadata + resolver`
+- Triển khai các Resolver để có thể tách logic gọi PRoduct liên quan đến Route 
+- resolver cho phép thêm fetch data trước khi vào trong Component. và bind dữ liệu vào Componetn thông qua `activatedRoute`
+- `3️⃣ Triển khai Breadcrumb Service`
+- triển khai cơ chế lắng nghe Route
+- Lắng nghe Route thay đổi
+- Khi `NavigtaionEnd`
+- Duyệt `ActivatedRoute.root`
+- Build breadcrumb array
+-  expose obserable/ signal cho Topbar
+-  

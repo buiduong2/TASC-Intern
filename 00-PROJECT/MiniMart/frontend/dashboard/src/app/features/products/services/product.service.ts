@@ -16,4 +16,8 @@ export class ProductService {
       sort: [],
     });
   }
+
+  findById(id: number | string) {
+    return this.datasource.findById(id);
+  }
 }

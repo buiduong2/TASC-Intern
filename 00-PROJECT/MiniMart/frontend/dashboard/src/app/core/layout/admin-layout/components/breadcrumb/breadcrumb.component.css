@@ -1,0 +1,33 @@
+div {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+a {
+  text-decoration: none;
+  color: #6b7280; /* gray-500 */
+  font-weight: 500;
+}
+
+a:hover {
+  color: #111827; /* gray-900 */
+}
+
+.spacer {
+  display: flex;
+  align-items: center;
+  margin: 0 6px;
+  color: #9ca3af; /* gray-400 */
+}
+
+mat-icon {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.active {
+  font-weight: 600;
+  color: #111827;
+}

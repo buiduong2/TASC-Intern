@@ -1,24 +1,21 @@
-import { Component, OnInit } from '@angular/core';
-import { BreadcrumbService } from '../../services/breadcrumb.service';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { Breadcrumb, BreadcrumbService } from '../../services/breadcrumb.service';
 import { RouterLink } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
+import { Observable } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'app-breadcrumb',
   templateUrl: './breadcrumb.component.html',
   styleUrls: ['./breadcrumb.component.css'],
-  imports: [RouterLink, MatIcon],
+  imports: [RouterLink, MatIcon, AsyncPipe],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BreadcrumbComponent implements OnInit {
-  constructor(readonly breadcrumbService: BreadcrumbService) {}
+export class BreadcrumbComponent {
+  readonly breadcrumbs$!: Observable<Breadcrumb[]>;
 
-  get breadcrumbs() {
-    return this.breadcrumbService.breadcrumbs;
+  constructor(private breadcrumbService: BreadcrumbService) {
+    this.breadcrumbs$ = this.breadcrumbService.breadcrumbs$;
   }
-
-  isLastBreadcrumb(index: number) {
-    return this.breadcrumbs.length - 1 === index;
-  }
-
-  ngOnInit() {}
 }

@@ -1,37 +1,91 @@
-import { Routes } from '@angular/router';
+import { Data, Route } from '@angular/router';
 import { AdminLayoutComponent } from './core/layout/admin-layout/admin-layout.component';
 import { AuthLayoutComponent } from './core/layout/auth-layout/auth-layout.component';
 import { ErrorLayoutComponent } from './core/layout/error-layout/error-layout.component';
 import { NotFound } from './features/not-found/not-found';
+import { productDetailResolver } from '@products/resolvers/product-detail.resolver';
+type BreadcrumbFn = (data: any) => string;
 
-export const routes: Routes = [
+interface AppRoute extends Route {
+  data?: Data & {
+    breadcrumb?: string | BreadcrumbFn;
+  };
+
+  children?: AppRoute[];
+}
+
+export const routes: AppRoute[] = [
   {
     path: '',
     component: AdminLayoutComponent,
     children: [
       {
         path: '',
-        redirectTo: 'dashobard',
+        redirectTo: 'dashboard',
         pathMatch: 'full',
       },
       {
-        path: 'dashobard',
+        path: 'dashboard',
         loadComponent: () => import('./features/overview/overview').then((m) => m.Overview),
+        data: {
+          breadcrumb: 'Bảng điều khiển',
+        },
       },
       {
         path: 'products',
-        loadComponent: () =>
-          import('./features/products/pages/product-list/product-list').then((m) => m.ProductList),
-      },
-      {
-        path: 'products/:id/edit',
-        loadComponent: () =>
-          import('./features/products/pages/product-edit/product-edit').then((m) => m.ProductEdit),
+        data: {
+          breadcrumb: 'Sản phẩm',
+        },
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/products/pages/product-list/product-list').then(
+                (m) => m.ProductList,
+              ),
+          },
+          {
+            path: ':id',
+            resolve: {
+              product: productDetailResolver,
+            },
+            children: [
+              {
+                path: 'edit',
+                loadComponent: () =>
+                  import('./features/products/pages/product-edit/product-edit').then(
+                    (m) => m.ProductEdit,
+                  ),
+                data: {
+                  breadcrumb: (data: any) => `Chỉnh sửa ${data.product.id}`,
+                },
+              },
+              {
+                path: 'detail',
+                loadComponent: () =>
+                  import('./features/products/pages/product-edit/product-edit').then(
+                    (m) => m.ProductEdit, // TODO: new Page Component
+                  ),
+                data: {
+                  breadcrumb: (data: any) => `Chi tiết ${data.product.id}`,
+                },
+              },
+            ],
+          },
+        ],
       },
       {
         path: 'categories',
-        loadComponent: () =>
-          import('./features/category-list/category-list').then((m) => m.CategoryList),
+        data: {
+          breadcrumb: 'Danh Mục',
+        },
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/category-list/category-list').then((m) => m.CategoryList),
+          },
+        ],
       },
       { path: '**', component: NotFound },
     ],

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ProductDataSource } from '@products/data/product.datasource';
 import { Page, Pageable } from '../../../shared/models/page.model';
 import { ProductQuery } from '../models/product-query.model';
-import { Observable, of } from 'rxjs';
+import { delay, Observable, of, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -810,6 +810,25 @@ export class ProductFakeDataSource implements ProductDataSource {
       status: 'ACTIVE',
     },
   ];
+
+  findById(id: number | string): Observable<Product> {
+    const product = this.rawData.find((p) => p.id == id);
+
+    if (!product) {
+      // → giống HttpClient emit error
+      return throwError(() => new Error('Product not found')).pipe(
+        delay(500), // → giả lập network latency
+      );
+    }
+
+    return of({
+      id: product.id,
+      name: product.name,
+      price: product.salePrice || product.originalPrice, // Ưu tiên giá sale
+      status: product.status as 'ACTIVE' | 'INACTIVE',
+      image: undefined,
+    }).pipe(delay(500)); // → giống HttpClient emit data
+  }
 
   findAll(query: ProductQuery, pageable: Pageable<Product>): Observable<Page<Product>> {
     // 1. Map dữ liệu thô sang Interface Product
