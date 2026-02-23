@@ -1,18 +1,11 @@
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnInit,
-  Output,
-  SimpleChanges,
-} from '@angular/core';
+import { Component, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { startWith } from 'rxjs';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { filter, startWith } from 'rxjs';
+import { AdminLayoutService } from '../../services/admin-layout.service';
 
 export const SIDEBAR_ITEMS: SideBarItem[] = [
   {
@@ -180,24 +173,43 @@ export const SIDEBAR_ITEMS: SideBarItem[] = [
 export class SideBarComponent implements OnInit, OnChanges {
   readonly sidebarItems = SIDEBAR_ITEMS;
   readonly openGroups = new Set<string>();
+  activeGroupId: string | null = null;
 
-  @Output() onToggleColapse = new EventEmitter<undefined>();
-  @Input() collapsed!: boolean;
+  constructor(
+    readonly router: Router,
+    readonly layoutService: AdminLayoutService,
+  ) {}
 
-  constructor(readonly router: Router) {}
+  get collapsed() {
+    return this.layoutService.isCollapse();
+  }
 
   ngOnInit() {
-    this.router.events.pipe(startWith(null)).subscribe(() => {
-      if (this.collapsed) {
-        return;
-      }
-      const url = this.router.url;
-      this.sidebarItems.forEach((item) => {
-        if (item.children?.some((child) => url.startsWith(child.route!))) {
-          this.openGroups.add(item.id);
-        }
+    this.router.events
+      .pipe(
+        filter((e) => e instanceof NavigationEnd),
+        startWith(null),
+      )
+      .subscribe(() => {
+        const url = this.router.url;
+
+        // update activeGroupId
+
+        this.sidebarItems.forEach((item) => {
+          if (item.route) {
+            if (url.startsWith(item.route)) {
+              this.activeGroupId = item.id;
+            }
+          } else {
+            if (item.children?.some((child) => url.startsWith(child.route!))) {
+              this.openGroups.add(item.id);
+              this.activeGroupId = item.id;
+            }
+          }
+        });
+
+        console.log(this.activeGroupId);
       });
-    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {

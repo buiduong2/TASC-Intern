@@ -226,14 +226,14 @@ export class ProductList implements AfterViewInit, OnInit {
 
   // Selection BEGIN
   get allSelected(): boolean {
-    return this.selection.selected.length === this.products.length;
+    return this.products.every((p) => this.selection.isSelected(p.id));
   }
 
   toggleAllRows() {
     if (this.allSelected) {
-      return this.selection.clear();
+      this.products.forEach((p) => this.selection.deselect(p.id));
     } else {
-      return this.selection.select(...this.products.map((p) => p.id));
+      this.products.forEach((p) => this.selection.select(p.id));
     }
   }
 

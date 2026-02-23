@@ -2,9 +2,9 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatToolbar } from '@angular/material/toolbar';
-import { AdminLayoutService } from '../../services/admin-layout.service';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { UserMenuComponent } from '../user-menu/user-menu.component';
+import { AdminLayoutService } from '../../services/admin-layout.service';
 
 @Component({
   selector: 'app-top-bar',
@@ -12,13 +12,6 @@ import { UserMenuComponent } from '../user-menu/user-menu.component';
   styleUrls: ['./top-bar.component.css'],
   imports: [MatToolbar, MatIconButton, MatIcon, UserMenuComponent, BreadcrumbComponent],
 })
-export class TopBarComponent implements OnInit {
-  @Output() onToggleColapse = new EventEmitter<undefined>();
-  @Input() collapsed!: boolean;
-
-  toggleColapse() {
-    this.onToggleColapse.emit();
-  }
-
-  ngOnInit() {}
+export class TopBarComponent {
+  constructor(readonly layoutSerice: AdminLayoutService) {}
 }

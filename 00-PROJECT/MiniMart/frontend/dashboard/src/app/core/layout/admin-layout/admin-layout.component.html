@@ -1,5 +1,5 @@
 <div class="layout">
-  <app-top-bar class="layout-top-bar" (onToggleColapse)="toggleCollapse()" />
+  <app-top-bar class="layout-top-bar" />
   <mat-sidenav-container class="layout-container">
     <mat-sidenav
       mode="side"
@@ -8,7 +8,7 @@
       class="layout-sidebar"
       [class.collapsed]="collapsed"
     >
-      <app-side-bar (onToggleColapse)="toggleCollapse()" [collapsed]="collapsed" />
+      <app-side-bar />
     </mat-sidenav>
     <mat-sidenav-content class="layout-content" [class.collapsed]="collapsed">
       <router-outlet></router-outlet>

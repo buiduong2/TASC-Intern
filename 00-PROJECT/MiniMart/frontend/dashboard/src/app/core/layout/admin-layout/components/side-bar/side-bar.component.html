@@ -16,6 +16,7 @@
         #origin="cdkOverlayOrigin"
         (mouseenter)="onHover(sidebar)"
         (mouseleave)="onLeave()"
+        [class.active]="sidebar.id === activeGroupId"
       >
         <!-- Button -->
         <button mat-list-item class="menu-group__btn" (click)="onGroupClick(sidebar)">
