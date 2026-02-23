@@ -4,9 +4,19 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class AdminLayoutService {
-  private isCollapsed: boolean;
+  private _isCollapsed: boolean;
 
   constructor() {
-    this.isCollapsed = false;
+    this._isCollapsed = false;
+  }
+
+  isCollapse() {
+    return this._isCollapsed;
+  }
+
+  toggleCollapse() {
+
+    this._isCollapsed = !this._isCollapsed;
+    console.log(this._isCollapsed)
   }
 }

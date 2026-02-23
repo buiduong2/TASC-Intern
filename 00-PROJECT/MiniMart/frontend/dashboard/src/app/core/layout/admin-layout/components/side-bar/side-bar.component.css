@@ -1,0 +1,64 @@
+.menu-group.active > .menu-group__btn {
+  background: rgba(0, 0, 0, 0.04);
+  font-weight: 500;
+}
+
+button.menu-group__btn {
+  text-align: left;
+  border: none;
+}
+
+button.menu-group__btn.act {
+  text-align: left;
+  border: none;
+}
+.menu-group__submenu {
+  padding-left: 24px;
+  margin-left: 24px;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+a.active {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+a.active .link-title {
+  font-weight: bold;
+}
+.menu-group__submenu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 180ms ease;
+}
+
+.menu-group__submenu.open {
+  max-height: 400px;
+}
+
+.submenu-float {
+  left: 100% !important;
+}
+
+.flyout-panel {
+  background: white;
+  min-width: 200px;
+  padding: 8px 0;
+  border-radius: 8px;
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.12),
+    0 3px 6px rgba(0, 0, 0, 0.08);
+}
+
+.flyout-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 120ms ease;
+}
+
+.flyout-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}

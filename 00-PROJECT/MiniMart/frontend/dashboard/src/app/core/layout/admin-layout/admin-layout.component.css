@@ -4,21 +4,38 @@
   flex-direction: column;
 }
 
-.layout-body {
+.layout-sidebar {
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
+
+.layout-sidebar.collapsed {
+  width: 64px;
+}
+
+.layout-top-bar {
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
+
+.layout-container {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-app-top-bar {
-
+.layout-content {
+  width: 100%;
+  height: 100%;
 }
 
-app-side-bar {
-  width: 240px;
+.layout-content.collapsed {
+  margin-left: 64px !important;
 }
 
+mat-sidenav {
+  background: #ffffff;
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+}
 
-.content {
-  flex: 1;
+mat-sidenav-content {
+  background: #f5f7fa;
 }

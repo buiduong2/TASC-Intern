@@ -16,7 +16,19 @@ body {
 .action-menu .mat-mdc-menu-item.danger mat-icon {
   color: #ef4444;
 }
+
+.sidebar {
+  padding-left: 16px;
+}
+
+.sidenar-container {
+  height: 100%;
+}
 .menu {
   padding: 10px;
   min-width: 280px;
+}
+
+.sidebar-flyout {
+  translate: 64px -64px !important;
 }
