@@ -87,6 +87,40 @@ export const routes: AppRoute[] = [
           },
         ],
       },
+
+      {
+        path: 'auth',
+        data: {
+          breadcrumb: 'Tài khoản',
+        },
+        children: [
+          {
+            path: '',
+            redirectTo: 'me',
+            pathMatch: 'full',
+          },
+          {
+            path: 'me',
+            loadComponent: () =>
+              import('./features/auth/auth-profile/auth-profile.component').then(
+                (m) => m.AuthProfileComponent,
+              ),
+            data: {
+              breadcrumb: 'Hồ sơ',
+            },
+          },
+          {
+            path: 'change-password',
+            loadComponent: () =>
+              import('./features/auth/auth-change-password/auth-change-password.component').then(
+                (m) => m.AuthChangePasswordComponent,
+              ),
+            data: {
+              breadcrumb: 'Đổi mật khẩu',
+            },
+          },
+        ],
+      },
       { path: '**', component: NotFound },
     ],
   },

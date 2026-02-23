@@ -1,0 +1,9 @@
+<div class="avatar" [style.background]="backgroundColor">
+  @if (src && !imageError) {
+    <img [src]="src!" [alt]="name ?? 'avatar'" (error)="onError()" />
+  } @else {
+    <span class="fallback">
+      {{ initial }}
+    </span>
+  }
+</div>

@@ -307,4 +307,7 @@ interface AppRoute extends Route {
 - Duyệt `ActivatedRoute.root`
 - Build breadcrumb array
 -  expose obserable/ signal cho Topbar
--  
+
+#### B2: Làm Topbar User-menu
+
+- 

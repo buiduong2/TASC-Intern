@@ -16,3 +16,7 @@ body {
 .action-menu .mat-mdc-menu-item.danger mat-icon {
   color: #ef4444;
 }
+.menu {
+  padding: 10px;
+  min-width: 280px;
+}
