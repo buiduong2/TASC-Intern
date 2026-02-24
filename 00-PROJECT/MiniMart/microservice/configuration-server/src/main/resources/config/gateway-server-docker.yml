@@ -1,0 +1,27 @@
+# config/gateway-server-docker.yml
+
+eureka:
+    client:
+        service-url:
+            defaultZone: http://eureka-server:8070/eureka/
+
+custom:
+    auth:
+        key_set_uri: ${AUTH_SERVER_URI}/oauth2/jwks
+
+    client:
+        origins: ${CUSTOM_CORS_CLIENT_ORIGINS}
+logging:
+    level:
+        org:
+            springframework:
+                security: TRACE
+
+management:
+    endpoints:
+        web:
+            exposure:
+                include: health,info
+
+    tracing:
+        enabled: false

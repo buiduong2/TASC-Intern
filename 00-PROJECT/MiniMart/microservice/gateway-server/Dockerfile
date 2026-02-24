@@ -1,7 +1,6 @@
 FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
 
-
 COPY pom.xml .
 
 COPY common/pom.xml common/
@@ -18,14 +17,14 @@ COPY common-kafka/pom.xml common-kafka/
 
 RUN mvn -B -ntp dependency:go-offline
 
-COPY eureka-server/src eureka-server/src
+COPY gateway-server/src gateway-server/src
 
-RUN mvn clean package -pl eureka-server -am -DskipTests
+RUN mvn clean package -pl gateway-server -am -DskipTests
 
 FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /app
 
-COPY --from=build /app/eureka-server/target/*.jar app.jar
+COPY --from=build /app/gateway-server/target/*.jar app.jar
 
-EXPOSE 8070
+EXPOSE 8082
 ENTRYPOINT ["java","-jar","app.jar"]

@@ -1,6 +1,7 @@
+# gateway-server.yml
 server:
     port: 8082
-
+    forward-headers-strategy: framework
 eureka:
     instance:
         preferIpAddress: true
@@ -22,13 +23,16 @@ spring:
                         - id: auth-mvc
                           uri: lb://authentication-service
                           predicates:
-                              - Path=/login,/oauth2/authorize/**,/oauth2/token/**,/profile
-                          
+                              - Path=/login,/oauth2/**,/profile
+                          filters:
+                            - PreserveHostHeader
 
                         - id: auth-api
                           uri: lb://authentication-service
                           predicates:
                               - Path=/v1/auth/**
+                          filters:
+                            - PreserveHostHeader
 
                         - id: profile-service
                           uri: lb://profile-service

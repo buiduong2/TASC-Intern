@@ -1,4 +1,4 @@
-# bootstrap-stage.yml (docker)
+# config/eureka-server-docker.yml (docker)
 server:
     port: 8070
 

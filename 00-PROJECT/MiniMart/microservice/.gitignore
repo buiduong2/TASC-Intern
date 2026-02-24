@@ -2,3 +2,5 @@ docker/.env
 .vscode
 
 /*/target
+
+docker/compose/docker/.env

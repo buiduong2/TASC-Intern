@@ -1,22 +1,30 @@
-FROM openjdk:17-slim as build
+FROM maven:3.9.6-eclipse-temurin-17 AS build
+WORKDIR /app
 
-LABEL maintainer="Bui Duc Duong"
+COPY pom.xml .
 
-ARG JAR_FILE=target/configuration-server-0.0.1-SNAPSHOT.jar
+COPY common/pom.xml common/
+COPY eureka-server/pom.xml eureka-server/
+COPY configuration-server/pom.xml configuration-server/
+COPY gateway-server/pom.xml gateway-server/
+COPY authentication-service/pom.xml authentication-service/
+COPY product-service/pom.xml product-service/
+COPY profile-service/pom.xml profile-service/
+COPY inventory-service/pom.xml inventory-service/
+COPY order-service/pom.xml order-service/
+COPY admin-bff/pom.xml admin-bff/
+COPY common-kafka/pom.xml common-kafka/
 
-COPY ${JAR_FILE} app.jar
+RUN mvn -B -ntp dependency:go-offline
 
-RUN mkdir -p target/dependency && (cd target/dependency; jar -xf /app.jar)
+COPY configuration-server/src configuration-server/src
 
-FROM openjdk:17-slim
+RUN mvn clean package -pl configuration-server -am -DskipTests
 
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+FROM eclipse-temurin:17-jdk-alpine
+WORKDIR /app
 
-VOLUME /tmp
+COPY --from=build /app/configuration-server/target/*.jar app.jar
 
-ARG DEPENDENCY=/target/dependency
-COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
-COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
-COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
-
-ENTRYPOINT ["java","-cp","app:app/lib/*","com.configuration_server.ConfigurationServerApplication"]
+EXPOSE 8071
+ENTRYPOINT ["java","-jar","app.jar"]
