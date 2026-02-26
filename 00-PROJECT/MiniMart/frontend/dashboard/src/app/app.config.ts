@@ -6,8 +6,8 @@ import {
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
-import { ProductDataSource } from './data/product/product.datasource';
-import { ProductFakeDataSource } from './data/product/product-fake.datasouce';
+import { ProductDataSource } from './features/products/data/product.datasource';
+import { ProductFakeDataSource } from './features/products/data/product-fake.datasouce';
 
 export const appConfig: ApplicationConfig = {
   providers: [

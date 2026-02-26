@@ -1,9 +1,10 @@
+# config/authentication-service.yml
 server:
     port: 8081
-
+    forward-headers-strategy: framework
 eureka:
     instance:
-        preferIpAddress: false
+        preferIpAddress: true
     client:
         registerWithEureka: true
         fetchRegistry: true

@@ -1,20 +1,31 @@
-FROM openjdk:17-slim as build
+FROM maven:3.9.6-eclipse-temurin-17 AS build
+WORKDIR /app
 
-LABEL maintainer="Bui Duc Duong"
 
-ARG JAR_FILE=target/eureka-server-0.0.1-SNAPSHOT.jar
+COPY pom.xml .
 
-COPY ${JAR_FILE} app.jar
+COPY common/pom.xml common/
+COPY eureka-server/pom.xml eureka-server/
+COPY configuration-server/pom.xml configuration-server/
+COPY gateway-server/pom.xml gateway-server/
+COPY authentication-service/pom.xml authentication-service/
+COPY product-service/pom.xml product-service/
+COPY profile-service/pom.xml profile-service/
+COPY inventory-service/pom.xml inventory-service/
+COPY order-service/pom.xml order-service/
+COPY admin-bff/pom.xml admin-bff/
+COPY common-kafka/pom.xml common-kafka/
 
-RUN mkdir -p target/dependency && (cd target/dependency; jar -xf /app.jar)
+RUN mvn -B -ntp dependency:go-offline
 
-FROM openjdk:17-slim
+COPY eureka-server/src eureka-server/src
 
-VOLUME /tmp
+RUN mvn clean package -pl eureka-server -am -DskipTests
 
-ARG DEPENDENCY=/target/dependency
-COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
-COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
-COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
+FROM eclipse-temurin:17-jdk-alpine
+WORKDIR /app
 
-ENTRYPOINT ["java","-cp","app:app/lib/*","com.eureka_server.EurekaServerApplication"]
+COPY --from=build /app/eureka-server/target/*.jar app.jar
+
+EXPOSE 8070
+ENTRYPOINT ["java","-jar","app.jar"]

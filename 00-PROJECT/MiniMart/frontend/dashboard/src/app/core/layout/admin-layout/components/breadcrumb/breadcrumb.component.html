@@ -1,0 +1,16 @@
+<div>
+  @for (breadcrumb of breadcrumbs$ | async; track breadcrumb.path; let last = $last) {
+    @if (!last) {
+      <a [routerLink]="breadcrumb.path">
+        {{ breadcrumb.label }}
+      </a>
+      <span class="spacer">
+        <mat-icon>chevron_right</mat-icon>
+      </span>
+    } @else {
+      <span class="active">
+        {{ breadcrumb.label }}
+      </span>
+    }
+  }
+</div>

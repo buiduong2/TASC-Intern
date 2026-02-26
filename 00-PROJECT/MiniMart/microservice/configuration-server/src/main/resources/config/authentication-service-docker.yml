@@ -1,0 +1,63 @@
+# config/authentication-service-docker.yml (docker)
+eureka:
+    client:
+        service-url:
+            defaultZone: http://eureka-server:8070/eureka/
+
+spring:
+    sql:
+        init:
+            mode: always
+            schema-locations: classpath:schema.sql
+            data-locations: classpath:data.sql
+    datasource:
+        url: jdbc:postgresql://${DATASOURCE_HOST}/minimart-auth?createDatabaseIfNotExist=true
+        username: ${DATASOURCE_USERNAME}
+        password: ${DATASOURCE_PASSWORD}
+
+    jpa:
+        defer-datasource-initialization: true
+        show-sql: true
+        properties:
+            hibernate:
+                format_sql: true
+                highlight_sql: true
+        hibernate:
+            ddl-auto: update
+
+    security:
+        oauth2:
+            authorizationserver:
+              issuer: ${AUTH_SERVER_ISS}
+            client:
+                registration:
+                    github:
+                        client-id: ${GITHUB_CLIENT_ID}
+                        client-secret: ${GITHUB_CLIENT_SECRET}
+                    google:
+                        client-id: ${GOOGLE_CLIENT_ID}
+                        client-secret: ${GOOGLE_CLIENT_SECRET}
+
+custom:
+    client:
+        origins: ${CUSTOM_CORS_CLIENT_ORIGINS}
+
+    security:
+        oauth2:
+            client:
+                registered:
+                    dashboard:
+                        client-id: ${DASHBOARD_CLIENT_ID}
+                        client-secret: ${DASHBOARD_CLIENT_SECRET}
+                        redirect-uri: ${DASHBOARD_REDIRECT_URI}
+                        post-logout-redirect-uri: ${DASHBOARD_POST_LOGOUT_REDIRECT_URI}
+                        scope: ${DASHBOARD_SCOPE}
+
+management:
+    endpoints:
+        web:
+            exposure:
+                include: health,info
+
+    tracing:
+        enabled: false

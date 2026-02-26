@@ -1,0 +1,76 @@
+<mat-nav-list>
+  @for (sidebar of sidebarItems; track sidebar.id) {
+    @if (!sidebar.children) {
+      <!-- Leaf -->
+      <a mat-list-item [routerLink]="sidebar.route" routerLinkActive="active">
+        <mat-icon matListItemIcon>{{ sidebar.icon }}</mat-icon>
+        <span matListItemTitle class="menu-label">
+          {{ sidebar.label }}
+        </span>
+      </a>
+    } @else {
+      <!-- Overlay Origin -->
+      <div
+        class="menu-group"
+        cdkOverlayOrigin
+        #origin="cdkOverlayOrigin"
+        (mouseenter)="onHover(sidebar)"
+        (mouseleave)="onLeave()"
+        [class.active]="sidebar.id === activeGroupId"
+      >
+        <!-- Button -->
+        <button mat-list-item class="menu-group__btn" (click)="onGroupClick(sidebar)">
+          <mat-icon matListItemIcon>{{ sidebar.icon }}</mat-icon>
+
+          <span matListItemTitle class="menu-label">
+            {{ sidebar.label }}
+          </span>
+
+          @if (!collapsed) {
+            <span matListItemMeta>
+              <mat-icon [class.rotate]="isOpen(sidebar.id)"> expand_more </mat-icon>
+            </span>
+          }
+        </button>
+
+        @if (!collapsed) {
+          <div class="menu-group__submenu" [class.open]="isOpen(sidebar.id)">
+            @for (child of sidebar.children; track child.id) {
+              <a mat-list-item [routerLink]="child.route" routerLinkActive="active">
+                <mat-icon matListItemIcon>
+                  {{ child.icon }}
+                </mat-icon>
+
+                <span matListItemTitle>
+                  {{ child.label }}
+                </span>
+              </a>
+            }
+          </div>
+        }
+
+        <!-- FLOATING OVERLAY (collapsed mode) -->
+        <ng-template
+          cdkConnectedOverlay
+          [cdkConnectedOverlayOrigin]="origin"
+          [cdkConnectedOverlayOpen]="collapsed && hoverId === sidebar.id"
+          [cdkConnectedOverlayPositions]="positions"
+          [cdkConnectedOverlayHasBackdrop]="false"
+        >
+          <mat-nav-list
+            class="flyout-panel"
+            (mouseenter)="onHover(sidebar)"
+            (mouseleave)="onLeave()"
+          >
+            @for (child of sidebar.children; track child.id) {
+              <a mat-list-item class="flyout-item" [routerLink]="child.route">
+                <mat-icon>{{ child.icon }}</mat-icon>
+                <span>{{ child.label }}</span>
+              </a>
+            }
+          </mat-nav-list>
+        </ng-template>
+      </div>
+    }
+  }
+</mat-nav-list>

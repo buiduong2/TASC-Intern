@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes: 
+      - postgres_data:/var/lib/postgresql/data
+      - ../../init-db:/docker-entrypoint-initdb.d
+    networks: 
+      - minimart-net
+
+  config-server:
+    build: 
+      context: ../../../
+      dockerfile: configuration-server/Dockerfile
+    container_name: config-server
+    ports: 
+      - "8071:8071"
+    env_file:
+      - path: ./.env
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_CONFIG_PROFILES_ACTIVE}
+
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8071/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - minimart-net
+        
+  eureka-server: 
+    build:
+      context: ../../../
+      dockerfile: eureka-server/Dockerfile
+    container_name: eureka-server
+    ports:
+      - "8070:8070"
+    env_file:
+      - path: ./.env
+    depends_on:
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8070/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - minimart-net
+
+  gateway-server: 
+    build:
+      context: ../../../
+      dockerfile: gateway-server/Dockerfile
+    container_name: gateway-server
+    env_file:
+      - path: ./.env
+    ports:
+      - "8082:8082"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    networks:
+      - minimart-net
+
+  authentication-service: 
+    build:
+      context: ../../../
+      dockerfile: authentication-service/Dockerfile
+    container_name: authentication-service
+    env_file:
+      - path: ./.env
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_started
+      config-server:
+        condition: service_healthy
+    networks:
+      - minimart-net
+
+networks: 
+  minimart-net:
+    driver: bridge
+
+volumes:
+  postgres_data:

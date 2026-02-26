@@ -1,3 +1,4 @@
+# config/authentication-service-dev.yml (docker)
 eureka:
     client:
         service-url:

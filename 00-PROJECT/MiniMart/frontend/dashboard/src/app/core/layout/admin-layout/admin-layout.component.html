@@ -1,0 +1,17 @@
+<div class="layout">
+  <app-top-bar class="layout-top-bar" />
+  <mat-sidenav-container class="layout-container">
+    <mat-sidenav
+      mode="side"
+      [disableClose]="true"
+      opened="true"
+      class="layout-sidebar"
+      [class.collapsed]="collapsed"
+    >
+      <app-side-bar />
+    </mat-sidenav>
+    <mat-sidenav-content class="layout-content" [class.collapsed]="collapsed">
+      <router-outlet></router-outlet>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>
