@@ -347,11 +347,3 @@ Mình có thể:
 * Thiết kế data contract từ Admin-BFF
 
 ---
-
-Bạn muốn bắt đầu từ phần nào trước?
-
-* 1️⃣ Thiết kế kiến trúc Angular chi tiết
-* 2️⃣ Thiết kế Dashboard Overview
-* 3️⃣ Thiết kế Product module
-* 4️⃣ Thiết kế Saga Monitor (xịn nhất)
-

@@ -11,14 +11,15 @@ import { MatPaginator, MatPaginatorIntl } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { appendSort, parseSortParams, removeSort } from '../../services/product-sort.util';
-import { ProductService } from '../../services/product.service';
-import { Page, Pageable, SortConfig } from '../../../../shared/models/page.model';
-import { ProductQuery } from '../../models/product-query.model';
-import { SortIndicator } from '../../../../shared/ui/sort-indicator/sort-indicator';
+import { SortIndicator } from '@shared/ui/sort-indicator/sort-indicator';
 import { NgFor, NgIf } from '@angular/common';
-import { CustomPaginatorIntl } from '../../../../shared/ui/paginator/custom-paginator-intl.service';
-import { MenuGroup } from '../../../../shared/models/table.model';
-import { ConfirmDialog } from '../../../../shared/ui/dialog/confirm-dialog/confirm-dialog';
+import { CustomPaginatorIntl } from '@shared/ui/paginator/custom-paginator-intl.service';
+import { MenuGroup } from '@shared/models/table.model';
+import { Page, Pageable, SortConfig } from '@shared/models/page.model';
+import { ProductQuery } from '@products/models/product-query.model';
+import { ProductService } from '@products/services/product.service';
+import { ConfirmDialog } from '@shared/ui/dialog/confirm-dialog/confirm-dialog';
+
 
 const statusConfig: Record<Product['status'], { label: string; color: 'primary' | 'warn' }> = {
   ACTIVE: {

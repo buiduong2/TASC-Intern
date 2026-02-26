@@ -102,7 +102,7 @@ export const routes: AppRoute[] = [
           {
             path: 'me',
             loadComponent: () =>
-              import('./features/auth/auth-profile/auth-profile.component').then(
+              import('./features/auth/pages/auth-profile/auth-profile.component').then(
                 (m) => m.AuthProfileComponent,
               ),
             data: {
@@ -112,7 +112,7 @@ export const routes: AppRoute[] = [
           {
             path: 'change-password',
             loadComponent: () =>
-              import('./features/auth/auth-change-password/auth-change-password.component').then(
+              import('./features/auth/pages/auth-change-password/auth-change-password.component').then(
                 (m) => m.AuthChangePasswordComponent,
               ),
             data: {
