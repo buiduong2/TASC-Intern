@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window title="Hello ZK"
+        border="normal"
+        width="400px"
+        apply="org.zkoss.bind.BindComposer"
+        viewModel="@id('vm') @init('com.helloworld.viewmodel.HelloVM')">
+
+    <vlayout spacing="10px">
+
+        <label value="@load(vm.message)" />
+
+        <textbox value="@bind(vm.message)" width="250px"/>
+
+        <button label="Change message"
+                onClick="@command('changeMessage')" />
+
+    </vlayout>
+
+</window>
