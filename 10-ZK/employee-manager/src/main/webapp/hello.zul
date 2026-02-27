@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window title="Hello ZK"
+    border="normal"
+    width="400px"
+    apply="org.zkoss.bind.BindComposer"
+>
+
+    <vlayout spacing="10px">
+
+        <label>Hello world</label>
+
+        <textbox value="Hello" width="250px" />
+
+        <button label="Change message" />
+
+    </vlayout>
+
+</window>
