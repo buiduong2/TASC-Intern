@@ -1,0 +1,24 @@
+
+<zk>
+    <style>
+     .banner {
+    background-color:#102d35;
+    color: white;
+    padding: 5px 10px;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+}
+    </style>
+    <borderlayout hflex="1" vflex="1"><!-- HEADER -->
+        <north vflex="min" border="none">
+            <include src="/banner.zul"/>
+        </north>
+        <west width="260px" border="none" title="Menu" collapsible="true">
+            <include src="/sidebar.zul"/>
+        </west>
+        <center autoscroll="true">
+            <include src="${param.content}"/>
+        </center>
+    </borderlayout>
+</zk>

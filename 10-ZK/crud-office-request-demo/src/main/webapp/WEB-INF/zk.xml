@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zk>
+    <library-property>
+        <name>org.zkoss.web.preferred.locale</name>
+        <value>en_US</value>
+    </library-property>
+    <library-property>
+        <name>org.zkoss.util.label.web.location</name>
+        <value>/WEB-INF/labels.properties</value>
+    </library-property>
+</zk>

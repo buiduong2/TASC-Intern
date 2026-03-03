@@ -1,0 +1,25 @@
+<zk>
+    <style></style>
+    <window viewModel="@id(&apos;vm&apos;) @init(&apos;com.office_request_demo.vm.DashboardVM&apos;)">
+        <caption sclass="fn-caption" label="Dashboard"/>
+        <listbox id="box" model="@load(vm.overview.metrics)">
+            <listhead sizable="true">
+                <listheader label="Type" sort="auto(status)"/>
+                <listheader label="Total" sort="auto(count)"/>
+                <listheader label="%" sort="auto(formattedRate)"/>
+            </listhead>
+            <template name="model">
+                <listitem>
+                    <listcell label="@load(each.status)"/>
+                    <listcell label="@load(each.count)"/>
+                    <listcell label="@load(each.formattedRate)"/>
+                </listitem>
+            </template>
+            <listfoot>
+                <listfooter label="Total"/>
+                <listfooter label="@load(vm.overview.totalRequests)"/>
+                <listfooter label="100.0%"/>
+            </listfoot>
+        </listbox>
+    </window>
+</zk>

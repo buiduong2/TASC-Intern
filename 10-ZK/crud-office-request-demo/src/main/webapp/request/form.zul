@@ -1,0 +1,58 @@
+<zk>
+    <window viewModel="@id(&apos;vm&apos;) @init(&apos;com.office_request_demo.vm.RequestFormVM&apos;)">
+        <caption sclass="fn-caption" label="@load(vm.editMode ? &apos;Update Request&apos; : &apos;Create Request&apos;)"/>
+        <vlayout spacing="15px">
+            <grid>
+                <columns>
+                    <column width="20%"/>
+                    <column width="80%"/>
+                </columns>
+                <rows><!-- TITLE -->
+                    <row>
+                        <label value="Title:"/>
+                        <cell>
+                            <textbox id="titleBox" width="100%" placeholder="Leave ..." value="@bind(vm.form.title) 
+                                            "/>
+                        </cell>
+                    </row><!-- STATUS -->
+                    <row visible="@load(vm.editMode)">
+                        <label value="Status:"/>
+                        <cell>
+                            <combobox width="100%" model="@load(vm.selectStatuses)" selectedItem="@bind(vm.selectedStatus)">
+                                <template name="model">
+                                    <comboitem label="@load(each.label)" value="@load(each.value)"/>
+                                </template>
+                            </combobox>
+                        </cell>
+                    </row><!-- START DATE -->
+                    <row>
+                        <label value="Start Date:"/>
+                        <cell>
+                            <datebox id="startDateBox" width="100%" format="yyyy-MM-dd" value="@bind(vm.form.startDate) 
+                                            "/>
+                        </cell>
+                    </row><!-- END DATE -->
+                    <row>
+                        <label value="End Date:"/>
+                        <cell>
+                            <datebox id="endDateBox" width="100%" format="yyyy-MM-dd" value="@bind(vm.form.endDate) 
+                                            "/>
+                        </cell>
+                    </row><!-- REASON -->
+                    <row>
+                        <label value="Reason:"/>
+                        <cell>
+                            <textbox id="reasonBox" width="100%" multiline="true" rows="4" value="@bind(vm.form.reason) 
+                                            "/>
+                        </cell>
+                    </row>
+                </rows>
+            </grid>
+            <hlayout spacing="10px">
+                <button label="Save" onClick="@command(&apos;save&apos;)"/>
+                <button label="Save &amp; Close" onClick="@command(&apos;saveAndClose&apos;)"/>
+                <button label="Cancel" onClick="@command(&apos;cancel&apos;)"/>
+            </hlayout>
+        </vlayout>
+    </window>
+</zk>
