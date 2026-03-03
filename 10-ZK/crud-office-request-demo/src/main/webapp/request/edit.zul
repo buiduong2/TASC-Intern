@@ -1,0 +1,4 @@
+<zk>
+<?link rel="stylesheet" type="text/css" href="/css/style.css"?>
+    <include src="/layout/layout.zul?content=/request/form.zul"/>
+</zk>

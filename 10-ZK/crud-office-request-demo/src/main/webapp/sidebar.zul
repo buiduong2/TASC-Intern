@@ -1,0 +1,7 @@
+<listbox model="@load(vm.menus)" sclass="sidebar-list" viewModel="@id(&apos;vm&apos;) @init(&apos;com.office_request_demo.vm.SidebarVM&apos;)">
+    <template name="model">
+        <listitem onClick="@command(&apos;navigate&apos;, item=each)">
+            <listcell label="@load(each.label)" iconSclass="@load(each.icon)"/>
+        </listitem>
+    </template>
+</listbox>

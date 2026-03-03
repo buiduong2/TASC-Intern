@@ -1,0 +1,64 @@
+<zk>
+    <style>
+.search-box {
+    max-width: 1000px;
+    width: 100%;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+.btn-danger:hover {
+    background-color: #bb2d3b;
+}
+
+.column-sortable {
+    cursor: pointer;
+}
+
+.z-listheader-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.z-listheader-sorticon {
+    order: 2;           /* đưa icon ra sau text */
+    margin-left: 4px;
+}
+</style>
+    <window viewModel="@id(&apos;vm&apos;) @init(&apos;com.office_request_demo.vm.RequestListVM&apos;)">
+        <caption sclass="fn-caption" label="Request List"/>
+        <vlayout>
+            <hlayout>
+                <button label="Create New " iconSclass="z-icon-plus" onClick="@command(&apos;createItem&apos;)"/>
+            </hlayout>
+            <listbox model="@load(vm.page.content)">
+                <listhead sizable="true">
+                    <listheader sclass="column-sortable" label="Title" width="30%"/>
+                    <listheader sclass="column-sortable" label="Start Date" width="15%"/>
+                    <listheader sclass="column-sortable" label="End Date" width="15%"/>
+                    <listheader sclass="column-sortable" label="Status" width="15%"/>
+                    <listheader sclass="column-sortable" label="Created By" width="15%"/>
+                    <listheader label="Actions" width="15%"/>
+                </listhead>
+                <template name="model">
+                    <listitem>
+                        <listcell label="@load(each.title)"/>
+                        <listcell label="@load(each.startDate)"/>
+                        <listcell label="@load(each.endDate)"/>
+                        <listcell label="@load(each.status)"/>
+                        <listcell label="@load(each.createdBy)"/>
+                        <listcell>
+                            <hlayout spacing="5px">
+                                <button iconSclass="z-icon-edit" style="font-size: 10px;" onClick="@command(&apos;editItem&apos;,event=each)"/>
+                                <button sclass="btn-danger" iconSclass="z-icon-trash" style="font-size: 10px;" onClick="@command(&apos;deleteItem&apos;,event=each)"/>
+                            </hlayout>
+                        </listcell>
+                    </listitem>
+                </template>
+            </listbox>
+        </vlayout>
+    </window>
+</zk>
