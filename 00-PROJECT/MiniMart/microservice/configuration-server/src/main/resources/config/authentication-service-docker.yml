@@ -23,7 +23,7 @@ spring:
                 format_sql: true
                 highlight_sql: true
         hibernate:
-            ddl-auto: update
+            ddl-auto: ${AUTH_DDL_AUTO:update}
 
     security:
         oauth2:
