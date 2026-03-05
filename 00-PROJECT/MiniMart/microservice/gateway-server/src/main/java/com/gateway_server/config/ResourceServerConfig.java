@@ -28,23 +28,17 @@ public class ResourceServerConfig {
     @Bean
     @Order(1)
     public SecurityWebFilterChain publicEndpoints(ServerHttpSecurity http) {
-        // SỬ DỤNG ServerWebExchangeMatchers.matchers() để gom nhóm TẤT CẢ các matcher
-        ServerWebExchangeMatcher publicMatchers = ServerWebExchangeMatchers.matchers(
-                ServerWebExchangeMatchers.pathMatchers(
-                        "v1/categories/**",
-                        "v1/products/**",
-                        "/css/**", "/js/**", "/images/**", "/favicon.ico",
-                        "/oauth2/authorize/**",
-                        "/oauth2/token/**",
-                        "/login", // Form login (GET và POST)
-                        "/v1/auth/**" // Auth APIs
-                ),
-                ServerWebExchangeMatchers.pathMatchers("/v1/payments/*/ipn"),
-                ServerWebExchangeMatchers.pathMatchers("/v1/payments/*/return"));
+        ServerWebExchangeMatcher publicMatchers = ServerWebExchangeMatchers.pathMatchers(
+                "/",
+                "/login/**", "/logout/**", "/profile/**", "/error/**",
+                "/oauth2/**", "/.well-known/**",
+                "/v1/auth/**", "/v1/categories/**", "/v1/products/**",
+                "/css/**", "/js/**", "/images/**", "/favicon.ico",
+                "/v1/payments/*/ipn", "/v1/payments/*/return");
 
         return http
-                // Truyền MỘT đối số composite matcher
                 .securityMatcher(publicMatchers)
+                .cors(cors -> cors.configurationSource(configurationSource))
                 .authorizeExchange(ex -> ex.anyExchange().permitAll())
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
@@ -55,6 +49,7 @@ public class ResourceServerConfig {
     @Order(2)
     public SecurityWebFilterChain securedEndpoints(ServerHttpSecurity http) {
         http
+                .cors(cors -> cors.configurationSource(configurationSource))
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwkSetUri(keySetUri)))
                 .authorizeExchange(auth -> auth.anyExchange().authenticated())

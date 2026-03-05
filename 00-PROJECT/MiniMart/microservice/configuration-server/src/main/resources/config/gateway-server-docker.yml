@@ -11,11 +11,6 @@ custom:
 
     client:
         origins: ${CUSTOM_CORS_CLIENT_ORIGINS}
-logging:
-    level:
-        org:
-            springframework:
-                security: TRACE
 
 management:
     endpoints:

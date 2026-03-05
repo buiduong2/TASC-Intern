@@ -48,7 +48,7 @@ public class SecurityConfig {
         String[] resourceUrls = new String[] { "/img/**", "/css/**", "/js/**" };
 
         http.authorizeHttpRequests((authorize) -> authorize
-                .requestMatchers("/login").permitAll()
+                .requestMatchers("/login", "/login/**", "/error", "/error/**").permitAll()
                 .requestMatchers("/v1/auth/me").authenticated()
                 .requestMatchers("/v1/auth/change-password").authenticated()
                 .requestMatchers("/v1/auth/register").permitAll()

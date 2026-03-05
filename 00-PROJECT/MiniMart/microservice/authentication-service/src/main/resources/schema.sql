@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS oauth2_authorization CASCADE;
+
 CREATE TABLE oauth2_authorization (
     id varchar(100) NOT NULL,
     registered_client_id varchar(100) NOT NULL,
